@@ -37,6 +37,14 @@
                 <li class="nav-item">
                     <a class="btn btn-primary ms-2 px-3" href="#chat">Tham gia Chat</a>
                 </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-primary ms-2 px-3"
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#loginModal">
+                        Đăng nhập
+                    </button>
+                </li>
             </ul>
         </div>
     </div>
@@ -137,7 +145,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="col-lg-4 col-md-6">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body text-center p-4">
@@ -591,7 +598,54 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true" aria-labelledby="loginTitle">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h6 class="modal-title fw-semibold" id="loginTitle">
+                    <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
 
+            <form id="loginForm" class="needs-validation" novalidate>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="loginUsername" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="loginUsername" placeholder="username" required>
+                        <div class="invalid-feedback">Vui lòng nhập username hợp lệ.</div>
+                    </div>
+                    <div class="mb-2">
+                        <label for="loginPassword" class="form-label">Mật khẩu</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="••••••••" minlength="6" required>
+                        <div class="invalid-feedback">Mật khẩu tối thiểu 6 ký tự.</div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe">
+                            <label class="form-check-label" for="rememberMe">Ghi nhớ</label>
+                        </div>
+                        <a href="#" class="small text-decoration-none">Quên mật khẩu?</a>
+                    </div>
+
+                    <!-- Alert hiển thị lỗi/thành công (ẩn mặc định) -->
+                    <div id="loginAlert" class="alert alert-danger py-2 d-none" role="alert">
+                        Thông tin đăng nhập chưa đúng.
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" id="loginSpinner" role="status" aria-hidden="true"></span>
+                        Đăng nhập
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
     // Smooth scrolling for navigation links
@@ -627,6 +681,51 @@
             chatButton.classList.remove('animate__pulse');
         }, 1000);
     }, 5000);
+</script>
+<script>
+    // Bootstrap validation
+    (function () {
+        const form = document.getElementById('loginForm');
+        const spinner = document.getElementById('loginSpinner');
+        const alertBox = document.getElementById('loginAlert');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            alertBox.classList.add('d-none');
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            // Demo "đang xử lý"
+            spinner.classList.remove('d-none');
+
+            // Giả lập gọi API đăng nhập (thay bằng fetch() thật của bạn)
+            setTimeout(() => {
+                spinner.classList.add('d-none');
+
+                const username = document.getElementById('loginUsername').value;
+                const pass = document.getElementById('loginPassword').value;
+
+                // Demo logic: email phải có "@", pass >= 6
+                if (username.includes('@') && pass.length >= 6) {
+                    // Đóng modal khi thành công
+                    const modalEl = document.getElementById('loginModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    modal.hide();
+
+                    // TODO: cập nhật UI: tên người dùng, đổi nút Đăng nhập -> Tài khoản...
+                    // Ví dụ đơn giản:
+                    // document.querySelector('#navbarNav .btn-outline-primary').textContent = 'Tài khoản';
+                } else {
+                    alertBox.textContent = 'Thông tin đăng nhập chưa đúng.';
+                    alertBox.classList.remove('d-none');
+                }
+            }, 800);
+        }, false);
+    })();
 </script>
 </body>
 </html>

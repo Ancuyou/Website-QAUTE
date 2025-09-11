@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top" th:fragment="navbar">
+    <div class="container">
+        <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/}">
+            <i class="fas fa-graduation-cap me-2"></i>QAUTE
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#home">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#consultants">Tư vấn viên</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#community">Cộng đồng</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#about">Về chúng tôi</a></li>
+                <li class="nav-item"><a class="nav-link fw-semibold" href="#contact">Liên hệ</a></li>
+                <li class="nav-item"><a class="btn btn-primary ms-2 px-3" href="#chat">Tham gia Chat</a></li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-primary ms-2 px-3" type="button" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Đăng nhập
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div style="height:72px"></div>
+</body>
+</html>
