@@ -1,0 +1,23 @@
+<!-- templates/fragments/footer.html -->
+<footer th:fragment="footer" class="bg-dark text-white py-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <p class="mb-0">&copy; 2025 QAUTE - Tư vấn Sinh viên Online. All rights reserved.</p>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="social-links">
+                    <a href="#" class="text-light me-3 fs-5"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="text-light me-3 fs-5"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="text-light me-3 fs-5"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="text-light fs-5"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts: để ở footer fragment nếu bạn muốn load js cuối trang -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/lottie-web@latest/build/player/lottie.min.js"></script>
+    <script th:src="@{/js/script.js}" src="/js/script.js"></script>
+</footer>
