@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /qaute
+
+spring:
+  application:
+    name: QAUTE
+  thymeleaf:
+    cache=false:
+  datasource:
+    url: "jdbc:mysql://localhost:3306/qaute"
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+jwt:
+  signerKey: "Ol4TrKY5pNZf+zUjfsgMcjA+7ZphkCRs61AFHtDW/Aq/bmz9QASBYYM/mzAg7dZ5"
+  valid-duration: 60 #in seconds
+  refresh-duration: 300 #in seconds
