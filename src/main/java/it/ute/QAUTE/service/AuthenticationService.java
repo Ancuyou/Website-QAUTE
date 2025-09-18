@@ -100,5 +100,18 @@ public class AuthenticationService {
 
         return signedJWT;
     }
+//    public void logout(String token) throws ParseException, JOSEException {
+//        try {
+//            var signToken = verifyToken(token);
+//
+//            String jit = signToken.getJWTClaimsSet().getJWTID();
+//            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+//
+//            InvalidatedToken invalidatedToken =
+//                    InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
+//        } catch (AppException exception) {
+//            log.info("Token already expired");
+//        }
+//    }
 }
 
