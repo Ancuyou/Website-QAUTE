@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +33,7 @@ public class CustomJwtDecoder implements JwtDecoder {
         try {
             var response = authenticationService.verifyToken(token);
 
-            //if (response) throw new JwtException("Token invalid");
+            if (response == null) throw new JwtException("Token invalid");
         } catch (JOSEException | ParseException e) {
             throw new JwtException(e.getMessage());
         }

@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/login"};
+    private final String[] PUBLIC_ENDPOINT = {"/login", "/auth/logout"};
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
@@ -50,7 +50,7 @@ public class SecurityConfig {
     public BearerTokenResolver bearerTokenResolver() {
         return request -> {
             String path = request.getServletPath();
-            if (path.equals("/login")) {
+            if (path.equals("/login") || path.equals("/logout")) {
                 return null;
             }
 

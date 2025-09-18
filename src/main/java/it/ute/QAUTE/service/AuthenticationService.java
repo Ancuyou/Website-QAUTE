@@ -97,20 +97,19 @@ public class AuthenticationService {
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expityTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expityTime.after(new Date())))
-            throw new AppException(ErrorCode.INVALID_TOKEN);
-        if ( invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
             throw new AppException(ErrorCode.TOKEN_REVOKED);
         }
         // sau viet them code refesh token o day
 
         return signedJWT;
     }
-    public void logout(String token){
+    public void logout(String token) throws ParseException, JOSEException{
         try {
             var signToken = verifyToken(token);
 
@@ -118,12 +117,11 @@ public class AuthenticationService {
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
             InvalidatedToken invalidatedToken =
-                    InvalidatedToken.builder().invalidatedTokenId(jit)
-                                        .expiryTime(expiryTime)
-                                        .build();
+                    InvalidatedToken.builder().invalidatedTokenId(jit).expiryTime(expiryTime).build();
+
             invalidatedTokenRepository.save(invalidatedToken);
-        } catch (ParseException | JOSEException e) {
-            throw new AppException(ErrorCode.INVALID_TOKEN);
+        } catch (AppException exception) {
+            log.info("Token already expired");
         }
     }
 }

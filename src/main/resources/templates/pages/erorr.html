@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${errorCode != null ? 'Lỗi ' + errorCode + ' - QAUTE' : 'Lỗi - QAUTE'}">Lỗi - QAUTE</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --secondary-blue: #0b5ed7;
+            --light-blue: #3b82f6;
+            --accent-warning: #ffc107;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .error-container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .error-card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+            overflow: hidden;
+        }
+
+        .error-header {
+            background: var(--primary-blue);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .error-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, rgba(255,255,255,0.1) 50%, transparent 51%);
+            background-size: 30px 30px;
+            animation: shimmer 4s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            color: var(--accent-warning);
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .error-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 2;
+        }
+
+        .error-body {
+            padding: 2.5rem 2rem 2rem;
+        }
+
+        .error-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--danger-color), #e63946);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        .error-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #212529;
+            margin-bottom: 1rem;
+        }
+
+        .error-description {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .error-code {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.375rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .error-meta {
+            background: #f8f9fa;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e9ecef;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .meta-row:last-child {
+            border-bottom: none;
+        }
+
+        .meta-label {
+            font-weight: 600;
+            color: #495057;
+            display: flex;
+            align-items: center;
+        }
+
+        .meta-label i {
+            margin-right: 0.5rem;
+            color: var(--primary-blue);
+        }
+
+        .meta-value {
+            color: #6c757d;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            background: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary-custom:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(13, 110, 253, 0.3);
+        }
+
+        .btn-secondary-custom {
+            background: white;
+            border: 2px solid #dee2e6;
+            color: #495057;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary-custom:hover {
+            color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            background: #f8f9fa;
+        }
+
+        .error-trace {
+            background: #1a1a1a;
+            color: #f8f8f2;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin-top: 1.5rem;
+            border: 1px solid #333;
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float-shape 12s infinite linear;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        .shape:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            left: 50%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float-shape {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .help-section {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .help-title {
+            color: #1565c0;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .help-title i {
+            margin-right: 0.5rem;
+        }
+
+        .help-text {
+            color: #1976d2;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .error-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .error-body {
+                padding: 1.5rem 1rem;
+            }
+
+            .error-title {
+                font-size: 1.5rem;
+            }
+
+            .error-icon {
+                font-size: 3rem;
+            }
+
+            .error-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary-custom,
+            .btn-secondary-custom {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .meta-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .meta-value {
+                width: 100%;
+                word-break: break-all;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-header">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="brand-name">
+                <i class="fas fa-graduation-cap me-2"></i>QAUTE
+            </div>
+            <div class="error-subtitle">
+                Tư vấn Sinh viên Online
+            </div>
+        </div>
+
+        <div class="error-body">
+            <span class="error-badge" th:text="${errorCode != null ? 'LỖI ' + errorCode : 'LỖI HỆ THỐNG'}">LỖI HỆ THỐNG</span>
+
+            <h1 class="error-title" th:text="${message != null ? message : 'Đã xảy ra lỗi không mong muốn'}">
+                Đã xảy ra lỗi không mong muốn
+            </h1>
+
+            <p class="error-description">
+                Xin lỗi, chúng tôi gặp một chút trục trặc kỹ thuật.
+                Mã lỗi: <span class="error-code" th:text="${errorCode != null ? errorCode : 'UNKNOWN'}">UNKNOWN</span>
+            </p>
+
+            <div class="error-meta">
+                <di

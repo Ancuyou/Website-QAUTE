@@ -1,5 +1,6 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.service.AuthenticationService;
 import jakarta.servlet.http.Cookie;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.text.ParseException;
 
 @Slf4j
 @Controller
@@ -39,7 +42,7 @@ public class AuthenticationController {
                 // create token to save cookie
                 ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
                         .httpOnly(true)
-                        .secure(true)
+                        .secure(false)
                         .sameSite("Lax")
                         .path("/")
                         .maxAge(java.time.Duration.ofMinutes(60))
@@ -60,16 +63,25 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request) {
+    @GetMapping("/auth/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
                 if ("ACCESS_TOKEN".equals(c.getName())) {
+                    log.info("Logout: " + c.getValue());
                     authenticationService.logout(c.getValue());
-                    break;
                 }
             }
         }
+        ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+
         return "redirect:/login";
     }
 }
