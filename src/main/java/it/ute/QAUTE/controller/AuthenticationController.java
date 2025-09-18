@@ -2,8 +2,13 @@ package it.ute.QAUTE.controller;
 
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.service.AuthenticationService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,21 +31,20 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public String authLogin(@ModelAttribute("user") User user,
-                            jakarta.servlet.http.HttpServletResponse response,
+                            HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
             var auth = authenticationService.authentication(user);
-            if(auth.isAuthenticated()) {
+            if (auth.isAuthenticated()) {
                 // create token to save cookie
-                org.springframework.http.ResponseCookie cookie =
-                        org.springframework.http.ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
-                                .httpOnly(true)
-                                .secure(true)
-                                .sameSite("Lax")
-                                .path("/")
-                                .maxAge(java.time.Duration.ofMinutes(60))
-                                .build();
-                response.addHeader(org.springframework.http.HttpHeaders.SET_COOKIE, cookie.toString());
+                ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
+                        .httpOnly(true)
+                        .secure(true)
+                        .sameSite("Lax")
+                        .path("/")
+                        .maxAge(java.time.Duration.ofMinutes(60))
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
                 return "redirect:/home";
             } else {
@@ -54,5 +58,18 @@ public class AuthenticationController {
             log.info(e.getMessage());
             return "redirect:/login";
         }
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
+                if ("ACCESS_TOKEN".equals(c.getName())) {
+                    authenticationService.logout(c.getValue());
+                    break;
+                }
+            }
+        }
+        return "redirect:/login";
     }
 }
