@@ -1,5 +1,6 @@
 package it.ute.QAUTE.configuration;
 
+import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/login", "/auth/logout"};
+    private final String[] PUBLIC_ENDPOINT = {"/auth/login", "/auth/logout"};
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
@@ -35,11 +36,11 @@ public class SecurityConfig {
                 );
         httpSecurity
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .bearerTokenResolver(bearerTokenResolver())
                         .jwt(jwt -> jwt
                                 .decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())
                         )
+                        .bearerTokenResolver(bearerTokenResolver())
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 );
 
@@ -49,24 +50,24 @@ public class SecurityConfig {
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         return request -> {
-            String path = request.getServletPath();
-            if (path.equals("/login") || path.equals("/logout")) {
+            String uri = request.getRequestURI();
+            if (uri.startsWith(request.getContextPath() + "/auth")
+                    || uri.startsWith("/auth")) {
                 return null;
             }
 
-            String auth = request.getHeader("Authorization");
-            if (auth != null && auth.startsWith("Bearer ")) return auth.substring(7);
-
-            var cookies = request.getCookies();
+            Cookie[] cookies = request.getCookies();
             if (cookies != null) {
-                for (var c : cookies) {
-                    if ("ACCESS_TOKEN".equals(c.getName())) return c.getValue();
+                for (Cookie c : cookies) {
+                    if ("ACCESS_TOKEN".equals(c.getName())) {
+                        String v = c.getValue();
+                        if (v != null && !v.isBlank()) return v;
+                    }
                 }
             }
-            return null;
+            return null; // không có token -> anonymous
         };
     }
-
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         var gac = new JwtGrantedAuthoritiesConverter();

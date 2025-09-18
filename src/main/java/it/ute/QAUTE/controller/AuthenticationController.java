@@ -1,6 +1,7 @@
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.service.AuthenticationService;
 import jakarta.servlet.http.Cookie;
@@ -26,20 +27,43 @@ public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    @GetMapping("/login")
-    public String loginForm(Model model) {
+    @GetMapping("/auth/login")
+    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
+        final String COOKIE_PATH = "/";
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("ACCESS_TOKEN".equals(c.getName())) {
+                    String token = c.getValue();
+                    if (token != null && !token.isBlank()) {
+                        try {
+                            SignedJWT jwt = authenticationService.verifyToken(token);
+                            if (jwt != null) return "redirect:/home";
+                        } catch (Exception ex) {
+                            // token hỏng -> xóa cookie, KHÔNG throw AppException ở đây
+                            ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
+                                    .httpOnly(true).secure(false).sameSite("Lax")
+                                    .path(COOKIE_PATH).maxAge(0).build();
+                            response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                        }
+                    }
+                }
+            }
+        }
+
         model.addAttribute("user", new User());
         return "pages/login";
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public String authLogin(@ModelAttribute("user") User user,
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
             var auth = authenticationService.authentication(user);
             if (auth.isAuthenticated()) {
-                // create token to save cookie
+                // set cookie với path "/"
                 ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
                         .httpOnly(true)
                         .secure(false)
@@ -53,35 +77,33 @@ public class AuthenticationController {
             } else {
                 redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
                 redirectAttributes.addFlashAttribute("user", user);
-                return "redirect:/login";
+                return "redirect:/auth/login";
             }
         } catch (Exception e) {
+            log.warn("Login error: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi trong quá trình đăng nhập");
             redirectAttributes.addFlashAttribute("user", user);
-            log.info(e.getMessage());
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
     }
 
     @GetMapping("/auth/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        final String COOKIE_PATH = "/";
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
                 if ("ACCESS_TOKEN".equals(c.getName())) {
-                    log.info("Logout: " + c.getValue());
-                    authenticationService.logout(c.getValue());
+                    String token = c.getValue();
+                    try {
+                        if (token != null && !token.isBlank()) authenticationService.logout(token);
+                    } catch (Exception ignored) {}
                 }
             }
         }
         ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
+                .httpOnly(true).secure(false).sameSite("Lax").path(COOKIE_PATH).maxAge(0).build();
         response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
-
-        return "redirect:/login";
+        return "redirect:/auth/login";
     }
+
 }

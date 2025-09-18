@@ -73,7 +73,7 @@
                         </div>
 
                         <!-- Login Form -->
-                        <form th:action="@{/login}" method="post" th:object="${user}">
+                        <form th:action="@{/auth/login}" method="post" th:object="${user}">
                             <!-- Error Alert -->
                             <div th:if="${error}" class="alert alert-danger d-flex align-items-center mb-3" role="alert">
                                 <i class="fas fa-exclamation-triangle me-2"></i>

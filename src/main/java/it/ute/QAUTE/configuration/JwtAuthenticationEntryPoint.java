@@ -9,18 +9,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import java.io.IOException;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-
-    private final ObjectMapper mapper = new ObjectMapper();
-
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
                          AuthenticationException ex) throws IOException {
-
-        String uri = request.getRequestURI();
-        String accept = request.getHeader("Accept");
-        String ajax = request.getHeader("X-Requested-With");
-
+        // code them cai giao dien thong bao error ROLE
         response.sendRedirect("/login?unauthenticated");
     }
 }
