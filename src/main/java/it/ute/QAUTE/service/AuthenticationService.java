@@ -41,9 +41,14 @@ public class AuthenticationService {
     @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
-
-
-
+    public boolean check(String text,String hasedText){
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        return passwordEncoder.matches(text,hasedText);
+    }
+    public String hashed(String text){
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        return passwordEncoder.encode(text);
+    }
     public AuthenticationResponse authentication(User user) {
         User userRep = userReponsitory.findByUsername(user.getUsername());
         if (userRep == null) {

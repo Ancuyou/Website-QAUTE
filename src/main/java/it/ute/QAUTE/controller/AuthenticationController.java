@@ -10,10 +10,13 @@ import it.ute.QAUTE.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Map;
 
 @Slf4j
@@ -35,7 +39,6 @@ public class AuthenticationController {
     private UserService userService;
     @Autowired
     private EmailService emailService;
-    private String otp;
     @GetMapping("/auth/login")
     public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
         final String COOKIE_PATH = "/";
@@ -114,64 +117,76 @@ public class AuthenticationController {
         response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
         return "redirect:/auth/login";
     }
+
     @GetMapping("/auth/forgotPassword")
     public String forgotPasswordForm(Model model){
         model.addAttribute("showEmailForm", true);
-        model.addAttribute("showOtpForm", false);
-        model.addAttribute("showResetForm", false);
         return  "pages/forgotPassword";
     }
+
     @PostMapping("/auth/forgotPassword")
-    public String forgotPassword(@RequestParam("email") String email,Model model){
+    public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){
         System.out.println(email);
         if(email!=null && email.endsWith("@student.hcmute.edu.vn") ){
-            /*if (userReponsitory.existsByEmail(email)) {
+            if (userService.existsByEmail(email)) {
+                String otp=emailService.sendEmailOTP(email);
+                System.out.println(otp);
+                session.setAttribute("otp", authenticationService.hashed(otp));
+                session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
                 model.addAttribute("email", email);
                 model.addAttribute("showOtpForm", true);
             }else {
                 model.addAttribute("error", "Email không khớp với tài khoản nào vui lòng nhập lại");
-                model.addAttribute("showResetForm", false);
-            }*/
-            model.addAttribute("email", email);
-            model.addAttribute("showEmailForm", false);
-            model.addAttribute("showOtpForm", true);
-            model.addAttribute("showResetForm", false);
-            otp=emailService.sendEmailOTP(email);
+                model.addAttribute("showEmailForm", true);
+            }
         }else {
             model.addAttribute("error", "Email không hợp lệ vui lòng nhập lại");
-            model.addAttribute("showResetForm", false);
             model.addAttribute("showEmailForm", true);
-            model.addAttribute("showOtpForm", false);
         }
         return "pages/forgotPassword";
     }
+
     @PostMapping("/auth/verifyOtp")
-    public String verifyOTP(@RequestParam Map<String, String> params,Model model){
+    public String verifyOTP(@RequestParam Map<String, String> params, Model model, HttpSession session){
         String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
-        if(inputOTP!=null && inputOTP.equals(otp)){
-            model.addAttribute("showEmailForm", false);
-            model.addAttribute("showOtpForm", false);
+        Integer failCount=(Integer) session.getAttribute("failCount");
+        String hashedOtp= session.getAttribute("otp").toString();
+        Long otpExpiry = (Long) session.getAttribute("otpExpiry");
+        if (failCount==null) failCount=0;
+        if (otpExpiry==null||otpExpiry<System.currentTimeMillis() ) {
+            model.addAttribute("error", "OTP đã hết hạn");
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("email", params.get("email"));
+        }else if (!authenticationService.check(inputOTP,hashedOtp)){
+            failCount++;
+            session.setAttribute("failCount", failCount);
+            if (failCount>=3) {
+                System.out.println(params.get("Tài khoản tạm thời bị khóa"));
+                return "redirect:/auth/login";
+            }
+            model.addAttribute("error", "OTP không đúng ");
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("email", params.get("email"));
+        } else {
+            session.removeAttribute("failCount");
             model.addAttribute("showResetForm", true);
             model.addAttribute("email", params.get("email"));
-        }else {
-            model.addAttribute("error", "OTP không đúng hoặc đã hết hạn");
-            model.addAttribute("showOtpForm", true);
-            model.addAttribute("showResetForm", false);
-            model.addAttribute("showEmailForm", false);
-            model.addAttribute("email", params.get("email"));
         }
         return "pages/forgotPassword";
     }
+
     @PostMapping("/auth/resetPassword")
     public String resetPassword(@RequestParam Map<String, String> params,Model model){
         String newPassword = params.get("newPassword");
         String confirmPassword = params.get("confirmPassword");
+        String email = params.get("email");
         if (newPassword.equals(confirmPassword)) {
-            System.out.println("cập nhật mật khẩu mới");
+            User user=userService.findUserByEmail(email);
+            user.setPassword(authenticationService.hashed(newPassword));
+            userService.saveUser(user);
+            System.out.println("đổi mật khẩu thành công");
             return "redirect:/auth/login";
         }else {
-            model.addAttribute("showEmailForm", false);
-            model.addAttribute("showOtpForm", false);
             model.addAttribute("showResetForm", true);
             model.addAttribute("email", params.get("email"));
             return "pages/forgotPassword";
