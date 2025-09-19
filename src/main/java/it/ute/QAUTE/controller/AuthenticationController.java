@@ -3,7 +3,10 @@ package it.ute.QAUTE.controller;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.repository.UserReponsitory;
 import it.ute.QAUTE.service.AuthenticationService;
+import it.ute.QAUTE.service.EmailService;
+import it.ute.QAUTE.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,9 +19,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
+import java.util.Map;
 
 @Slf4j
 @Controller
@@ -26,7 +31,11 @@ public class AuthenticationController {
 
     @Autowired
     private AuthenticationService authenticationService;
-
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private EmailService emailService;
+    private String otp;
     @GetMapping("/auth/login")
     public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
         final String COOKIE_PATH = "/";
@@ -105,5 +114,67 @@ public class AuthenticationController {
         response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
         return "redirect:/auth/login";
     }
-
+    @GetMapping("/auth/forgotPassword")
+    public String forgotPasswordForm(Model model){
+        model.addAttribute("showEmailForm", true);
+        model.addAttribute("showOtpForm", false);
+        model.addAttribute("showResetForm", false);
+        return  "pages/forgotPassword";
+    }
+    @PostMapping("/auth/forgotPassword")
+    public String forgotPassword(@RequestParam("email") String email,Model model){
+        System.out.println(email);
+        if(email!=null && email.endsWith("@student.hcmute.edu.vn") ){
+            /*if (userReponsitory.existsByEmail(email)) {
+                model.addAttribute("email", email);
+                model.addAttribute("showOtpForm", true);
+            }else {
+                model.addAttribute("error", "Email không khớp với tài khoản nào vui lòng nhập lại");
+                model.addAttribute("showResetForm", false);
+            }*/
+            model.addAttribute("email", email);
+            model.addAttribute("showEmailForm", false);
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("showResetForm", false);
+            otp=emailService.sendEmailOTP(email);
+        }else {
+            model.addAttribute("error", "Email không hợp lệ vui lòng nhập lại");
+            model.addAttribute("showResetForm", false);
+            model.addAttribute("showEmailForm", true);
+            model.addAttribute("showOtpForm", false);
+        }
+        return "pages/forgotPassword";
+    }
+    @PostMapping("/auth/verifyOtp")
+    public String verifyOTP(@RequestParam Map<String, String> params,Model model){
+        String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
+        if(inputOTP!=null && inputOTP.equals(otp)){
+            model.addAttribute("showEmailForm", false);
+            model.addAttribute("showOtpForm", false);
+            model.addAttribute("showResetForm", true);
+            model.addAttribute("email", params.get("email"));
+        }else {
+            model.addAttribute("error", "OTP không đúng hoặc đã hết hạn");
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("showResetForm", false);
+            model.addAttribute("showEmailForm", false);
+            model.addAttribute("email", params.get("email"));
+        }
+        return "pages/forgotPassword";
+    }
+    @PostMapping("/auth/resetPassword")
+    public String resetPassword(@RequestParam Map<String, String> params,Model model){
+        String newPassword = params.get("newPassword");
+        String confirmPassword = params.get("confirmPassword");
+        if (newPassword.equals(confirmPassword)) {
+            System.out.println("cập nhật mật khẩu mới");
+            return "redirect:/auth/login";
+        }else {
+            model.addAttribute("showEmailForm", false);
+            model.addAttribute("showOtpForm", false);
+            model.addAttribute("showResetForm", true);
+            model.addAttribute("email", params.get("email"));
+            return "pages/forgotPassword";
+        }
+    }
 }
