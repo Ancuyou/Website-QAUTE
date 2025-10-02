@@ -11,7 +11,7 @@
 	<groupId>it.ute</groupId>
 	<artifactId>QAUTE</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>rar</packaging>
 	<name>QAUTE</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
@@ -84,11 +84,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-oauth2-client</artifactId>
 		</dependency>
-		<!-- Spring Security Web -->
-		<dependency>
+		<!--<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+		</dependency>-->
 	</dependencies>
 
 	<build>

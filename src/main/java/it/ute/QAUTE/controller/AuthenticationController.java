@@ -1,6 +1,7 @@
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jwt.SignedJWT;
+import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.service.AccountService;
@@ -52,7 +53,20 @@ public class AuthenticationController {
                     if (token != null && !token.isBlank()) {
                         try {
                             SignedJWT jwt = authenticationService.verifyToken(token);
-                            if (jwt != null) return "redirect:/home";
+                            var role = customJwtDecoder.decode(token).getClaims().get("scope");
+                            if (jwt != null){
+                                switch (role.toString()) {
+                                    case "ROLE_User" -> {
+                                        return "redirect:/user/home";
+                                    }
+                                    case "ROLE_Consultant" -> {
+                                        return "redirect:/consultant/home";
+                                    }
+                                    default -> {
+                                        return "redirect:/auth/login";
+                                    }
+                                }
+                            }
                         } catch (Exception ex) {
                             ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
                                     .httpOnly(true).secure(false).sameSite("Lax")
@@ -97,6 +111,8 @@ public class AuthenticationController {
         return "pages/register";
     }
     // Post
+    @Autowired
+    private CustomJwtDecoder customJwtDecoder;
     @PostMapping("/auth/login")
     public String authLogin(@ModelAttribute("account") Account account,
                             HttpServletResponse response,
@@ -104,7 +120,6 @@ public class AuthenticationController {
         try {
             var auth = authenticationService.authentication(account);
             if (auth.isAuthenticated()) {
-                // set cookie với path "/"
                 ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
                         .httpOnly(true)
                         .secure(false)
@@ -113,7 +128,20 @@ public class AuthenticationController {
                         .maxAge(Duration.ofHours(1))
                         .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-                return "redirect:/home";
+
+                switch (account.getRole()) {
+                    case User -> {
+                        return "redirect:/user/home";
+                    }
+                    case Consultant -> {
+                        return "redirect:/consultant/home";
+                    }
+                    default -> {
+                        redirectAttributes.addFlashAttribute("error", "Người dùng không có quyền truy cập vào trang web");
+                        redirectAttributes.addFlashAttribute("account", account);
+                        return "redirect:/auth/login";
+                    }
+                }
             } else {
                 redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
                 redirectAttributes.addFlashAttribute("account", account);

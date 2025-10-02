@@ -30,18 +30,10 @@ public class SecurityConfig {
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers("/home").permitAll()
-                        .requestMatchers("/auth/**").permitAll()  // ← Đã có rồi, OK
-                        .requestMatchers("/oauth2/**").permitAll()  // ← THÊM DÒNG NÀY
-                        .requestMatchers("/login/oauth2/**").permitAll()  // ← VÀ DÒNG NÀY
+                        .requestMatchers(PUBLIC_ENDPOINT).permitAll()
+                        .requestMatchers("/user/home").hasAuthority("ROLE_User")
+                        .requestMatchers("/consultant/home").hasAuthority("ROLE_Consultant")
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/auth/login")
-                        .defaultSuccessUrl("/home", true)
-                        .failureUrl("/auth/login?error=true")
                 );
 
         httpSecurity
