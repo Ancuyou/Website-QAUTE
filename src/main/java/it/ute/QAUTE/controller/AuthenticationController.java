@@ -77,7 +77,6 @@ public class AuthenticationController {
                 }
             }
         }
-        // khúc này tạo phân quyền
         model.addAttribute("account", new Account());
         return "pages/login";
     }
@@ -153,6 +152,17 @@ public class AuthenticationController {
             redirectAttributes.addFlashAttribute("account", account);
             return "redirect:/auth/login";
         }
+    }
+    @GetMapping("/app-error")
+    public String errorPage(@RequestParam(value = "errorCode", required = false) String errorCode,
+                            @RequestParam(value = "message", required = false) String message,
+                            Model model,
+                            HttpServletResponse response) {
+        model.addAttribute("errorCode", errorCode != null ? errorCode : "500");
+        model.addAttribute("errorTitle", errorCode != null ? errorCode.replace("_", " ") : "Internal Server Error");
+        model.addAttribute("errorMessage", message != null ? message : "Đã xảy ra lỗi không xác định");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        return "pages/error";
     }
     @PostMapping("/auth/forgotPassword")
     public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){

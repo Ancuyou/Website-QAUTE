@@ -74,7 +74,7 @@ public class AuthenticationService {
         stringJoiner.add("ROLE_" + account.getRole().name());
         return stringJoiner.toString();
     }
-    private String generateToken(Account account){
+    public String generateToken(Account account){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(account.getUsername())
