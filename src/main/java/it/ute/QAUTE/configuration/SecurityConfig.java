@@ -21,6 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINT = {"/auth/login", "/auth/logout"};
+
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
@@ -31,10 +32,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINT).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers("/home").hasRole("ADMIN")
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/home").permitAll()
+                        .requestMatchers("/auth/**").permitAll()  // ← Đã có rồi, OK
+                        .requestMatchers("/oauth2/**").permitAll()  // ← THÊM DÒNG NÀY
+                        .requestMatchers("/login/oauth2/**").permitAll()  // ← VÀ DÒNG NÀY
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/auth/login")
+                        .defaultSuccessUrl("/home", true)
+                        .failureUrl("/auth/login?error=true")
                 );
+
         httpSecurity
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
@@ -45,18 +54,15 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 );
 
-
         return httpSecurity.build();
     }
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         return request -> {
             String uri = request.getRequestURI();
-            if (uri.startsWith(request.getContextPath() + "/auth")
-                    || uri.startsWith("/auth")) {
+            if (uri.startsWith(request.getContextPath() + "/auth") || uri.startsWith("/auth")) {
                 return null;
             }
-
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 for (Cookie c : cookies) {
@@ -66,7 +72,7 @@ public class SecurityConfig {
                     }
                 }
             }
-            return null; // không có token -> anonymous
+            return null;
         };
     }
     @Bean
@@ -79,7 +85,6 @@ public class SecurityConfig {
         jac.setJwtGrantedAuthoritiesConverter(gac);
         return jac;
     }
-
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

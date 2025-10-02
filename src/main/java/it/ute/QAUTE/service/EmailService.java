@@ -34,10 +34,17 @@ public class EmailService {
 
         mailSender.send(message);
     }
-    public String sendEmailOTP(String toEmail){
+    public String sendForgetPasswordEmail(String toEmail){
         String otp = createOTP();
-        String body="Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 5 phút.";
+        String body="Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
         String subject="Lấy lại mật khẩu";
+        context.getBean(EmailService.class).sendEmail(toEmail, subject, body);
+        return otp;
+    }
+    public String sendRegisterEmail(String toEmail){
+        String otp = createOTP();
+        String body="Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
+        String subject="Đăng ký tài khoản";
         context.getBean(EmailService.class).sendEmail(toEmail, subject, body);
         return otp;
     }

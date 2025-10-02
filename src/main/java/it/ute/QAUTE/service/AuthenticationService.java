@@ -8,10 +8,10 @@ import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
+import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.InvalidatedToken;
-import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
-import it.ute.QAUTE.repository.UserReponsitory;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     @Autowired
-    UserReponsitory userReponsitory;
+    private AccountRepository accountRepository;
     @Autowired
     InvalidatedTokenRepository invalidatedTokenRepository;
     @NonFinal
@@ -49,41 +49,41 @@ public class AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.encode(text);
     }
-    public AuthenticationResponse authentication(User user) {
-        User userRep = userReponsitory.findByUsername(user.getUsername());
-        if (userRep == null) {
+    public AuthenticationResponse authentication(Account account) {
+        Account accountRep = accountRepository.findByUsername(account.getUsername());
+        if (accountRep == null) {
             return AuthenticationResponse.builder()
                     .authenticated(false)
                     .build();
         } else {
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            boolean authenticated = passwordEncoder.matches(user.getPassword(),
-                    userRep.getPassword());
+            boolean authenticated = passwordEncoder.matches(account.getPassword(),
+                    accountRep.getPassword());
             if (authenticated)
                 return AuthenticationResponse.builder()
                         .authenticated(true)
-                        .token(generateToken(userRep))
+                        .token(generateToken(accountRep))
                         .build();
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
                 .build();
     }
-    private String builtScope(User user){
+    private String builtScope(Account account){
         StringJoiner stringJoiner = new StringJoiner(" ");
-        stringJoiner.add("ROLE_" + user.getRole().getRoleName());
+        stringJoiner.add("ROLE_" + account.getRole().name());
         return stringJoiner.toString();
     }
-    private String generateToken(User user){
+    private String generateToken(Account account){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(account.getUsername())
                 .issuer("qaute.com")
                 .issueTime(new Date())                .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", builtScope(user))
+                .claim("scope", builtScope(account))
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
 

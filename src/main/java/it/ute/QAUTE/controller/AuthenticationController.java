@@ -2,21 +2,20 @@ package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
-import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.repository.UserReponsitory;
+import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Profiles;
+import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AuthenticationService;
 import it.ute.QAUTE.service.EmailService;
-import it.ute.QAUTE.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,19 +25,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
+import java.util.Random;
 
 @Slf4j
 @Controller
+@NoArgsConstructor
 public class AuthenticationController {
 
     @Autowired
     private AuthenticationService authenticationService;
     @Autowired
-    private UserService userService;
+    private AccountService accountService;
     @Autowired
     private EmailService emailService;
+    //Post
     @GetMapping("/auth/login")
     public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
         final String COOKIE_PATH = "/";
@@ -53,7 +56,6 @@ public class AuthenticationController {
                             SignedJWT jwt = authenticationService.verifyToken(token);
                             if (jwt != null) return "redirect:/home";
                         } catch (Exception ex) {
-                            // token hỏng -> xóa cookie, KHÔNG throw AppException ở đây
                             ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
                                     .httpOnly(true).secure(false).sameSite("Lax")
                                     .path(COOKIE_PATH).maxAge(0).build();
@@ -64,39 +66,8 @@ public class AuthenticationController {
             }
         }
 
-        model.addAttribute("user", new User());
+        model.addAttribute("account", new Account());
         return "pages/login";
-    }
-
-    @PostMapping("/auth/login")
-    public String authLogin(@ModelAttribute("user") User user,
-                            HttpServletResponse response,
-                            RedirectAttributes redirectAttributes) {
-        try {
-            var auth = authenticationService.authentication(user);
-            if (auth.isAuthenticated()) {
-                // set cookie với path "/"
-                ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
-                        .httpOnly(true)
-                        .secure(false)
-                        .sameSite("Lax")
-                        .path("/")
-                        .maxAge(java.time.Duration.ofMinutes(60))
-                        .build();
-                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-                return "redirect:/home";
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
-                redirectAttributes.addFlashAttribute("user", user);
-                return "redirect:/auth/login";
-            }
-        } catch (Exception e) {
-            log.warn("Login error: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi trong quá trình đăng nhập");
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/auth/login";
-        }
     }
 
     @GetMapping("/auth/logout")
@@ -123,14 +94,46 @@ public class AuthenticationController {
         model.addAttribute("showEmailForm", true);
         return  "pages/forgotPassword";
     }
-
+    @GetMapping("/auth/register")
+    public String registerForm() {
+        return "pages/register";
+    }
+    // Post
+    @PostMapping("/auth/login")
+    public String authLogin(@ModelAttribute("account") Account account,
+                            HttpServletResponse response,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            var auth = authenticationService.authentication(account);
+            if (auth.isAuthenticated()) {
+                // set cookie với path "/"
+                ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
+                        .httpOnly(true)
+                        .secure(false)
+                        .sameSite("Lax")
+                        .path("/")
+                        .maxAge(Duration.ofHours(1))
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+                return "redirect:/home";
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
+                redirectAttributes.addFlashAttribute("account", account);
+                return "redirect:/auth/login";
+            }
+        } catch (Exception e) {
+            log.warn("Login error: {}", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi trong quá trình đăng nhập");
+            redirectAttributes.addFlashAttribute("account", account);
+            return "redirect:/auth/login";
+        }
+    }
     @PostMapping("/auth/forgotPassword")
     public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){
         System.out.println(email);
         if(email!=null && email.endsWith("@student.hcmute.edu.vn") ){
-            if (userService.existsByEmail(email)) {
-                String otp=emailService.sendEmailOTP(email);
-                System.out.println(otp);
+            if (accountService.existsByEmail(email)) {
+                String otp=emailService.sendForgetPasswordEmail(email);
                 session.setAttribute("otp", authenticationService.hashed(otp));
                 session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
                 model.addAttribute("email", email);
@@ -168,6 +171,8 @@ public class AuthenticationController {
             model.addAttribute("showOtpForm", true);
             model.addAttribute("email", params.get("email"));
         } else {
+            session.removeAttribute("otp");
+            session.removeAttribute("otpExpiry");
             session.removeAttribute("failCount");
             model.addAttribute("showResetForm", true);
             model.addAttribute("email", params.get("email"));
@@ -181,9 +186,9 @@ public class AuthenticationController {
         String confirmPassword = params.get("confirmPassword");
         String email = params.get("email");
         if (newPassword.equals(confirmPassword)) {
-            User user=userService.findUserByEmail(email);
-            user.setPassword(authenticationService.hashed(newPassword));
-            userService.saveUser(user);
+            Account account=accountService.findUserByEmail(email);
+            account.setPassword(authenticationService.hashed(newPassword));
+            accountService.saveAccount(account);
             System.out.println("đổi mật khẩu thành công");
             return "redirect:/auth/login";
         }else {
@@ -191,5 +196,53 @@ public class AuthenticationController {
             model.addAttribute("email", params.get("email"));
             return "pages/forgotPassword";
         }
+    }
+    @PostMapping("/auth/register")
+    public String register(@RequestParam Map<String, String> params,Model model,HttpSession session){
+        String username=params.get("username");
+        String email=params.get("email");
+        String password=params.get("password");
+        if (accountService.existsByUsername(username) || accountService.existsByEmail(email)) {
+            model.addAttribute("error", "Tài khoản đã tồn tại");
+            return "pages/register";
+        }
+        String otp=emailService.sendRegisterEmail(email);
+        System.out.println(otp);
+        session.setAttribute("otp", authenticationService.hashed(otp));
+        session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
+        model.addAttribute("showOtpForm", true);
+        model.addAttribute("email", email);
+        model.addAttribute("username", username);
+        model.addAttribute("password", password);
+        return "pages/register";
+    }
+    @PostMapping("/auth/verifyRegisterOtp")
+    public String verifyRegisterOtp(@RequestParam Map<String, String> params, Model model, HttpSession session){
+        String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
+        String hashedOtp= session.getAttribute("otp").toString();
+        if (authenticationService.check(inputOTP,hashedOtp)){
+            session.removeAttribute("otp");
+            session.removeAttribute("otpExpiry");
+            String username=params.get("username");
+            String email=params.get("email");
+            String password=params.get("password");
+            Account account=new Account();
+            account.setUsername(username);
+            account.setEmail(email);
+            account.setPassword(authenticationService.hashed(password));
+            account.setRole(Account.Role.User);
+            account.setCreatedDate(new Date());
+            Profiles profiles=new Profiles();
+            profiles.setFullName("user"+(1000 + new Random().nextInt(9000)));
+            account.setProfile(profiles);
+            accountService.saveAccount(account);
+            System.out.println("đăng ký thành công rồi");
+        }
+        return "redirect:/auth/login";
+    }
+    @GetMapping("/auth/google")
+    public String loginGoogle(){
+        System.out.println("chạy gg");
+        return "redirect:/oauth2/authorization/google";
     }
 }

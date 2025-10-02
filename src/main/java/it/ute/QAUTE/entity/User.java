@@ -2,6 +2,8 @@ package it.ute.QAUTE.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.context.annotation.Profile;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,30 +15,17 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String userId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "UserID")
+    private int userID;
 
-    @Column(nullable = false, unique = true, length = 30)
-    private String username;
+    @OneToOne
+    @JoinColumn(name = "ProfileID", referencedColumnName = "ProfileID")
+    private Profiles profile;
 
-    @Column(nullable = false, length = 100)
-    private String password;
+    @Column(name = "StudentCode", length = 20)
+    private String studentCode;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String email;
-
-    @Column(length = 15)
-    private String phone;
-
-    private String fullName;
-
-    private String avatar;
-
-    @ManyToOne
-    @JoinColumn(name = "roleId", nullable = false)
-    private Role role;
-
-    private String studentId;
-
-    private LocalDateTime createdDate;
+    @Column(name = "RoleName", nullable = false, length = 50)
+    private String roleName;
 }

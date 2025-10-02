@@ -1,8 +1,8 @@
 package it.ute.QAUTE.configuration;
 
-import it.ute.QAUTE.entity.Role;
-import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.repository.RoleReponsitory;
+import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Profiles;
+import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.UserReponsitory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,24 +23,21 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
     @Bean
-    ApplicationRunner applicationRunner(UserReponsitory userRepository, RoleReponsitory roleReponsitory){
+    ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
-            if(userRepository.findByUsername("admin") == null){
-                Role role = roleReponsitory.findByRoleName("ADMIN")
-                        .orElseGet(() -> roleReponsitory.save(
-                                Role.builder()
-                                        .roleName("ADMIN")
-                                        .description("This is role ADMIN")
-                                        .build()
-                        ));
-                User user = User.builder()
-                        .username("admin")
-                        .password(passwordEncoder.encode("admin"))
-                        .email("admin@gmail.com")
-                        .role(role)
-                        .build();
-                userRepository.save(user);
-                log.warn("Admin user has been created with default password: admin, please change it");
+            if(accountRepository.findByUsername("admin") == null){
+                Profiles profile = new Profiles();
+                profile.setFullName("Administrator");
+                profile.setPhone("0000000000");
+                profile.setAvatar(null);
+                Account account = new Account();
+                account.setUsername("admin");
+                account.setPassword(passwordEncoder.encode("admin"));
+                account.setEmail("admin@gmail.com");
+                account.setRole(Account.Role.Admin);
+                account.setProfile(profile);
+                accountRepository.save(account);
+                log.warn("✅ Admin account created: username=admin, password=admin. Please change it!");
             }
         };
     }
