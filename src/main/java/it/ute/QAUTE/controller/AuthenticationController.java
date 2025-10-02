@@ -1,6 +1,5 @@
 package it.ute.QAUTE.controller;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
@@ -24,7 +23,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.text.ParseException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
@@ -65,7 +63,7 @@ public class AuthenticationController {
                 }
             }
         }
-
+        // khúc này tạo phân quyền
         model.addAttribute("account", new Account());
         return "pages/login";
     }

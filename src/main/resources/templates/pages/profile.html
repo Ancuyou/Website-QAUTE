@@ -1,10 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/head :: head('QAUTE - Hồ sơ cá nhân')}"></th:block>
 <body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container">
+        <a class="navbar-brand text-primary fw-bold fs-3" href="/">
+            <i class="fas fa-graduation-cap me-2"></i>QAUTE
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/#consultants">Tư vấn viên</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/#community">Cộng đồng</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <img th:src="${account.profile.avatar != null ? account.profile.avatar : 'https://via.placeholder.com/32'}"
+                             class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+                        <span class="fw-semibold" th:text="${account.profile.fullName}">Người dùng</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item active" href="/profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
+                        <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                        <li><a class="dropdown-item" href="/history"><i class="fas fa-history me-2"></i>Lịch sử tư vấn</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
+<!-- Profile Section -->
+<section class="py-5" style="margin-top: 80px; min-height: 100vh; background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body text-center p-4">
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:src="${account.profile.avatar != null ? account.profile.avatar : 'https://via.placeholder.com/120'}"
+                                 class="rounded-circle border border-3 border-primary" alt="Avatar" width="120" height="120" id="avatarPreview">
+                            <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle shadow"
+                                    style="width: 35px; height: 35px;" onclick="document.getElementById('avatarInput').click()" type="button">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                        </div>
+                        <h5 class="mb-1" th:text="${account.profile.fullName}">Tên người dùng</h5>
+                        <p class="text-muted small mb-2" th:text="${account.profile.roleName != null ? account.profile.roleName : 'Chưa cập nhật vai trò'}">Vai trò</p>
+                        <span class="badge bg-primary">User</span>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Hoạt động của bạn</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div>
+                                <i class="fas fa-question-circle text-primary fa-lg me-2"></i>
+                                <span>Câu hỏi</span>
+                            </div>
+                            <strong class="text-primary">12</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div>
+                                <i class="fas fa-comment text-success fa-lg me-2"></i>
+                                <span>Phản hồi</span>
+                            </div>
+                            <strong class="text-success">28</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-user-tie text-info fa-lg me-2"></i>
+                                <span>Tư vấn viên</span>
+                            </div>
+                            <strong class="text-info">5</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white py-3 border-bottom">
+                        <h4 class="mb-0"><i class="fas fa-user-edit me-2 text-primary"></i>Chỉnh sửa hồ sơ cá nhân</h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Success/Error Messages -->
+                        <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span th:text="${message}">Cập nhật thành công!</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <span th:text="${error}">Có lỗi xảy ra!</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data" th:object="${account}">
+                            <!-- Avatar Upload (Hidden) -->
+                            <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
+
+                            <!-- Basic Information -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-info-circle me-2 text-primary"></i>Thông tin cơ bản
+                                </h5>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fullName" class="form-label fw-semibold">
+                                            Họ và tên <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="fullName"
+                                               th:field="*{profile.fullName}"
+                                               placeholder="Nhập họ tên đầy đủ" required>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="roleName" class="form-label fw-semibold">
+                                            Vai trò của bạn <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="roleName" th:field="*{profile.roleName}" required>
+                                            <option value="">-- Chọn vai trò của bạn --</option>
+                                            <option value="Sinh viên">Sinh viên</option>
+                                            <option value="Cựu sinh viên">Cựu sinh viên</option>
+                                            <option value="Phụ huynh">Phụ huynh</option>
+                                            <option value="Giáo viên">Giáo viên</option>
+                                            <option value="Người tìm việc">Người tìm việc</option>
+                                            <option value="Khác">Khác</option>
+                                        </select>
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Giúp chúng tôi phục vụ bạn tốt hơn
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label fw-semibold">Số điện thoại</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="phone"
+                                                   th:field="*{profile.phone}"
+                                                   placeholder="0123456789"
+                                                   pattern="[0-9]{10,11}">
+                                        </div>
+                                        <div class="form-text">Số điện thoại 10-11 chữ số</div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label fw-semibold">
+                                            Email <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control bg-light" id="email"
+                                                   th:field="*{email}" required readonly>
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            <i class="fas fa-lock me-1"></i>Email không thể thay đổi
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Account Information -->
+                            <div class="mb-4">
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <i class="fas fa-key me-2 text-primary"></i>Thông tin tài khoản
+                                </h5>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label fw-semibold">Tên đăng nhập</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control bg-light" id="username"
+                                                   th:value="${account.username}" readonly>
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            <i class="fas fa-lock me-1"></i>Tên đăng nhập không thể thay đổi
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="createdDate" class="form-label fw-semibold">Ngày tham gia</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                            <input type="text" class="form-control bg-light" id="createdDate"
+                                                   th:value="${#dates.format(account.createdDate, 'dd/MM/yyyy HH:mm')}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="alert alert-info mb-0">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    <strong>Bảo mật tài khoản:</strong>
+                                    Muốn thay đổi mật khẩu? <a href="/settings/change-password" class="alert-link fw-semibold">Đổi mật khẩu tại đây</a>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="border-top pt-4 mt-4">
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary px-4">
+                                        <i class="fas fa-save me-2"></i>Lưu thay đổi
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary px-4">
+                                        <i class="fas fa-undo me-2"></i>Đặt lại
+                                    </button>
+                                    <a href="/" class="btn btn-outline-danger px-4 ms-auto">
+                                        <i class="fas fa-times me-2"></i>Hủy
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Additional Info Card -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Mẹo hữu ích</h6>
+                        <ul class="mb-0">
+                            <li class="mb-2">Cập nhật đầy đủ thông tin giúp tư vấn viên hiểu bạn tốt hơn</li>
+                            <li class="mb-2">Chọn đúng vai trò để nhận được tư vấn phù hợp nhất</li>
+                            <li class="mb-2">Thêm số điện thoại để nhận thông báo quan trọng</li>
+                            <li>Thay đổi avatar để cá nhân hóa tài khoản của bạn</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+
+<!-- Include footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

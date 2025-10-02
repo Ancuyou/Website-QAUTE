@@ -474,12 +474,50 @@
                                 <button class="btn btn-sm btn-outline-primary me-2">
                                     <i class="fas fa-thumbs-up me-1"></i>15
                                 </button>
-                                <button class="btn btn-sm btn-outline-secondary me-2">
+                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleComments('comments1')">
                                     <i class="fas fa-comment me-1"></i>8
                                 </button>
                                 <button class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-share me-1"></i>Chia sẻ
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div id="comments1" class="mt-3 comment-section" style="display: none;">
+                            <hr>
+                            <h6 class="mb-3">Câu trả lời từ Consultant</h6>
+
+                            <div class="d-flex mb-3">
+                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
+                                <div class="flex-grow-1">
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong class="me-2">Consultant - Lê Minh Tuấn</strong>
+                                            <span class="badge bg-warning text-dark">Chuyên gia IT</span>
+                                        </div>
+                                        <p class="mb-0">
+                                            Chào bạn! Mình có 5 năm kinh nghiệm trong ngành. Machine Learning sẽ phù hợp nếu bạn thích toán và nghiên cứu, lương cao nhưng đòi hỏi học tập liên tục. Web Development thì cơ hội việc làm nhiều hơn và dễ tìm việc hơn. Bạn nên cân nhắc sở thích và mục tiêu dài hạn nhé!
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">1 giờ trước</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex mb-3">
+                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
+                                <div class="flex-grow-1">
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong class="me-2">Consultant - Nguyễn Thu Hà</strong>
+                                            <span class="badge bg-info">Senior Developer</span>
+                                        </div>
+                                        <p class="mb-0">
+                                            Thêm ý kiến: Bạn có thể thử làm vài project nhỏ ở cả 2 mảng để xem mình hợp với cái nào hơn. Mình từng chọn ML nhưng sau chuyển sang Web vì thấy phù hợp hơn 😊
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">30 phút trước</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -510,12 +548,50 @@
                                 <button class="btn btn-sm btn-outline-primary me-2">
                                     <i class="fas fa-thumbs-up me-1"></i>32
                                 </button>
-                                <button class="btn btn-sm btn-outline-secondary me-2">
+                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleComments('comments2')">
                                     <i class="fas fa-comment me-1"></i>12
                                 </button>
                                 <button class="btn btn-sm btn-outline-info">
                                     <i class="fas fa-share me-1"></i>Chia sẻ
                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- Comments Section -->
+                        <div id="comments2" class="mt-3 comment-section" style="display: none;">
+                            <hr>
+                            <h6 class="mb-3">Câu trả lời từ Consultant</h6>
+
+                            <div class="d-flex mb-3">
+                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
+                                <div class="flex-grow-1">
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong class="me-2">Consultant - Trần Đức Anh</strong>
+                                            <span class="badge bg-success">HR Manager</span>
+                                        </div>
+                                        <p class="mb-0">
+                                            Kinh nghiệm rất hay! Mình bổ sung thêm: Nhớ chuẩn bị kỹ về tình huống xử lý conflict và câu hỏi về điểm mạnh/yếu. Công ty đa quốc gia thường rất quan tâm soft skills và cultural fit đó!
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">2 giờ trước</small>
+                                </div>
+                            </div>
+
+                            <div class="d-flex mb-3">
+                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
+                                <div class="flex-grow-1">
+                                    <div class="bg-light p-3 rounded">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong class="me-2">Consultant - Phạm Mai Linh</strong>
+                                            <span class="badge bg-warning text-dark">Career Coach</span>
+                                        </div>
+                                        <p class="mb-0">
+                                            Đồng ý! Và nhớ chuẩn bị câu hỏi để hỏi ngược lại nhà tuyển dụng nha. Điều đó cho thấy bạn quan tâm và nghiêm túc với vị trí 👍
+                                        </p>
+                                    </div>
+                                    <small class="text-muted">1 giờ trước</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -895,6 +971,16 @@
         </div>
     </div>
 </div>
+<script>
+    function toggleComments(commentId) {
+        const commentSection = document.getElementById(commentId);
+        if (commentSection.style.display === 'none') {
+            commentSection.style.display = 'block';
+        } else {
+            commentSection.style.display = 'none';
+        }
+    }
+</script>
 <!-- Include footer fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
