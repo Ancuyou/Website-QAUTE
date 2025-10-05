@@ -38,8 +38,6 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
     @Autowired
     private AccountService accountService;
-    @Autowired
-    private EmailService emailService;
     //Post
     @GetMapping("/auth/login")
     public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
@@ -49,12 +47,16 @@ public class AuthenticationController {
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if ("ACCESS_TOKEN".equals(c.getName())) {
+                    System.out.println("có token");
                     String token = c.getValue();
                     if (token != null && !token.isBlank()) {
+                        System.out.println("chạy test token");
                         try {
+                            System.out.println("chạy test token1");
                             SignedJWT jwt = authenticationService.verifyToken(token);
                             var role = customJwtDecoder.decode(token).getClaims().get("scope");
                             if (jwt != null){
+                                System.out.println(role.toString());
                                 switch (role.toString()) {
                                     case "ROLE_User" -> {
                                         return "redirect:/user/home";
@@ -124,11 +126,10 @@ public class AuthenticationController {
                         .secure(false)
                         .sameSite("Lax")
                         .path("/")
-                        .maxAge(Duration.ofHours(1))
+                        .maxAge(Duration.ofMinutes(1))
                         .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-                switch (account.getRole()) {
+                switch (auth.getRole()) {
                     case User -> {
                         return "redirect:/user/home";
                     }
@@ -168,9 +169,9 @@ public class AuthenticationController {
     public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){
         System.out.println(email);
         if(email!=null && email.endsWith("@student.hcmute.edu.vn") ){
-            if (accountService.existsByEmail(email)) {
-                String otp=emailService.sendForgetPasswordEmail(email);
-                session.setAttribute("otp", authenticationService.hashed(otp));
+            String otp=authenticationService.forgetPassword(email);
+            if (otp!=null) {
+                session.setAttribute("otp", otp);
                 session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
                 model.addAttribute("email", email);
                 model.addAttribute("showOtpForm", true);
@@ -222,9 +223,7 @@ public class AuthenticationController {
         String confirmPassword = params.get("confirmPassword");
         String email = params.get("email");
         if (newPassword.equals(confirmPassword)) {
-            Account account=accountService.findUserByEmail(email);
-            account.setPassword(authenticationService.hashed(newPassword));
-            accountService.saveAccount(account);
+            accountService.changePassword(email, newPassword);
             System.out.println("đổi mật khẩu thành công");
             return "redirect:/auth/login";
         }else {
@@ -238,12 +237,11 @@ public class AuthenticationController {
         String username=params.get("username");
         String email=params.get("email");
         String password=params.get("password");
-        if (accountService.existsByUsername(username) || accountService.existsByEmail(email)) {
+        String otp=authenticationService.register(username,email);
+        if (otp==null) {
             model.addAttribute("error", "Tài khoản đã tồn tại");
             return "pages/register";
         }
-        String otp=emailService.sendRegisterEmail(email);
-        System.out.println(otp);
         session.setAttribute("otp", authenticationService.hashed(otp));
         session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
         model.addAttribute("showOtpForm", true);
@@ -262,16 +260,7 @@ public class AuthenticationController {
             String username=params.get("username");
             String email=params.get("email");
             String password=params.get("password");
-            Account account=new Account();
-            account.setUsername(username);
-            account.setEmail(email);
-            account.setPassword(authenticationService.hashed(password));
-            account.setRole(Account.Role.User);
-            account.setCreatedDate(new Date());
-            Profiles profiles=new Profiles();
-            profiles.setFullName("user"+(1000 + new Random().nextInt(9000)));
-            account.setProfile(profiles);
-            accountService.saveAccount(account);
+            accountService.createAccount(username,email,password);
             System.out.println("đăng ký thành công rồi");
         }
         return "redirect:/auth/login";

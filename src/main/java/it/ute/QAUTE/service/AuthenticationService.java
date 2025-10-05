@@ -12,6 +12,7 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.InvalidatedToken;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
+import jakarta.servlet.http.HttpSession;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,13 +35,18 @@ public class AuthenticationService {
     private AccountRepository accountRepository;
     @Autowired
     InvalidatedTokenRepository invalidatedTokenRepository;
+    @Autowired
+    private EmailService emailService;
     @NonFinal
-    @Value("${jwt.signerKey}")
+    @Value("${jwt.signerKey_access}")
     protected String SIGNER_KEY;
-
+    @Value("${jwt.signerKey_refresh}")
+    protected String SIGNER_REFRESH_REFRESH;
     @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
+    @Value("${jwt.refresh-duration}")
+    protected long REFRESH_DURATION;
     public boolean check(String text,String hasedText){
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.matches(text,hasedText);
@@ -56,13 +62,13 @@ public class AuthenticationService {
                     .authenticated(false)
                     .build();
         } else {
-            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-            boolean authenticated = passwordEncoder.matches(account.getPassword(),
+            boolean authenticated = check(account.getPassword(),
                     accountRep.getPassword());
             if (authenticated)
                 return AuthenticationResponse.builder()
                         .authenticated(true)
                         .token(generateToken(accountRep))
+                        .role(accountRep.getRole())
                         .build();
         }
         return AuthenticationResponse.builder()
@@ -127,6 +133,24 @@ public class AuthenticationService {
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (AppException exception) {
             log.info("Token already expired");
+        }
+    }
+    public String forgetPassword(String email) {
+        if (accountRepository.existsByEmail(email)) {
+            String otp= emailService.sendForgetPasswordEmail(email);
+            System.out.println(otp);
+            return hashed(otp);
+        }else {
+            return null;
+        }
+    }
+    public String register(String username,String email){
+        if (accountRepository.existsByUsername(username) || accountRepository.existsByEmail(email)){
+            return null;
+        }else {
+            String otp= emailService.sendRegisterEmail(email);
+            System.out.println(otp);
+            return hashed(otp);
         }
     }
 }

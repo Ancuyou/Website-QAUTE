@@ -9,9 +9,9 @@ spring:
   thymeleaf:
     cache: false
   datasource:
-    url: jdbc:mysql://localhost:3306/qaute
+    url: jdbc:mysql://localhost:3306/StudentConsultingSystem
     username: root
-    password: root
+    password: Quangle2005@
   jpa:
     hibernate:
       ddl-auto: update
@@ -51,6 +51,7 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 jwt:
-  signerKey: "Ol4TrKY5pNZf+zUjfsgMcjA+7ZphkCRs61AFHtDW/Aq/bmz9QASBYYM/mzAg7dZ5"
-  valid-duration: 60 #in seconds
+  signerKey_access: "Ol4TrKY5pNZf+zUjfsgMcjA+7ZphkCRs61AFHtDW/Aq/bmz9QASBYYM/mzAg7dZ5"
+  signerKey_refresh: "MjAyNTEwMDUxNDU5MjE3MjZXaW5keWN5bnM2VEFrVFl2NXF5cUFQRmVobXlWT0hCVTd6dlNxZ0k5bUNQOUE="
+  valid-duration: 30 #in seconds
   refresh-duration: 300 #in seconds

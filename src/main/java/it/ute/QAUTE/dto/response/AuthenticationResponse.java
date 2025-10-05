@@ -2,6 +2,7 @@ package it.ute.QAUTE.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import it.ute.QAUTE.entity.Account;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,4 +16,5 @@ import lombok.experimental.FieldDefaults;
 public class AuthenticationResponse {
     String token;
     boolean authenticated;
+    Account.Role role;
 }
