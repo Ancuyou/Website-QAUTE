@@ -44,7 +44,7 @@ public class AuthenticationController {
     private AccountService accountService;
     //Post
     @GetMapping("/auth/login")
-    public String loginForm(@ModelAttribute("account") Account account,   // giữ prefill nếu có
+    public String loginForm(@ModelAttribute("account") Account account,
                             Model model,
                             HttpServletRequest request,
                             HttpServletResponse response) {
@@ -98,7 +98,7 @@ public class AuthenticationController {
                             response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
                         }
                     }
-                    break; // đã xử lý refresh
+                    break;
                 }
             }
         }
@@ -106,16 +106,6 @@ public class AuthenticationController {
         if (account == null) account = new Account();
         if (!model.containsAttribute("account")) model.addAttribute("account", account);
         return "pages/login";
-    }
-
-
-    private String extractRole(String token) {
-        try {
-            var claims = customJwtDecoder.decode(token).getClaims();
-            Object scope = claims.get("scope");
-            if (scope != null) return scope.toString();
-        } catch (Exception ignored) {}
-        return null;
     }
 
     @GetMapping("/auth/logout")
@@ -129,7 +119,6 @@ public class AuthenticationController {
                 } catch (Exception ignore) {
                 }
             }
-            // Xóa toàn bộ session
             session.invalidate();
         }
         SecurityContextHolder.clearContext();
@@ -169,7 +158,7 @@ public class AuthenticationController {
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
-            var auth = authenticationService.authentication(account, "DANGNGOCNHAN"); // device name demo
+            var auth = authenticationService.authentication(account, "DANGNGOCNHAN", false); // device name demo
 
             System.out.println("Token: " + auth.getToken());
 

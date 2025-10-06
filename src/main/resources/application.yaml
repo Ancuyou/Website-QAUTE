@@ -53,7 +53,7 @@ spring:
 jwt:
   signerKey_access: "Ol4TrKY5pNZf+zUjfsgMcjA+7ZphkCRs61AFHtDW/Aq/bmz9QASBYYM/mzAg7dZ5"
   valid-duration: 30 #in seconds
-  refresh-duration: 864000 #in seconds : 10 day
+  refresh-duration: 60 #in seconds : 10 day
 openweather:
   #apikey: ${OPENWEATHER_API_KEY} #8b62d623ee124b44cb88d85bade58e38
   apikey: 8b62d623ee124b44cb88d85bade58e38

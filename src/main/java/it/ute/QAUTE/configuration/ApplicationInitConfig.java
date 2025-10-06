@@ -7,10 +7,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 
@@ -19,7 +19,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class ApplicationInitConfig {
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
@@ -36,7 +37,7 @@ public class ApplicationInitConfig {
                 account.setRole(Account.Role.Admin);
                 account.setProfile(profile);
                 accountRepository.save(account);
-                log.warn("✅ Admin account created: username=admin, password=admin. Please change it!");
+                log.warn("Admin account created: username=admin, password=admin. Please change it!");
             }
             // tạo consultant
             if(accountRepository.findByUsername("consultant") == null){
@@ -51,9 +52,8 @@ public class ApplicationInitConfig {
                 account.setRole(Account.Role.Consultant);
                 account.setProfile(profile);
                 accountRepository.save(account);
-                log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
+                log.warn("Consultant account created: username=consultant, password=consultant. Please change it!");
             }
-
         };
     }
 }

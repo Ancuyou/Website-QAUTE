@@ -1,9 +1,11 @@
 package it.ute.QAUTE.configuration;
 
+import it.ute.QAUTE.Exception.AppException;
+import it.ute.QAUTE.Exception.ErrorCode;
+import it.ute.QAUTE.dto.response.AuthenticationResponse;
 import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AuthenticationService;
-import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,15 +30,17 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import java.text.ParseException;
+import java.time.Duration;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/auth/login", "/auth/logout"};
+    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**"};
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
-    @Autowired private AccountService accountService;
     @Autowired private AuthenticationService authenticationService;
 
     @Bean
@@ -106,10 +110,9 @@ public class SecurityConfig {
         return jac;
     }
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
-    // ====== PHẦN BỔ SUNG CHO GOOGLE OAUTH2 ======
 
     @Bean
     public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
@@ -123,18 +126,29 @@ public class SecurityConfig {
             OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
             OAuth2User oauthUser = oauthToken.getPrincipal();
 
-            String email    = (String) oauthUser.getAttributes().get("email");
+            String email = (String) oauthUser.getAttributes().get("email");
 
             log.info("email: " + email);
+            AuthenticationResponse auth = null;
+            try {
+                auth = authenticationService.authentication(Account.builder().email(email).build(), "DANGNGOCNHAN", true);
+            } catch (ParseException e) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+            if (auth != null) {
+                HttpSession session = request.getSession(true);
+                session.setAttribute("ACCESS_TOKEN", auth.getToken());
 
-            Account account = accountService.findUserByEmail(email);
-            if (account != null) {
+                ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", auth.getRefreshtoken())
+                        .httpOnly(true)
+                        .secure(false)
+                        .sameSite("Lax")
+                        .path("/")
+                        .maxAge(Duration.ofDays(7))
+                        .build();
+                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-                String jwt = authenticationService.generateToken(account, null, false);
-
-                request.getSession(true).setAttribute("ACCESS_TOKEN", jwt);
-
-                response.sendRedirect(request.getContextPath() + resolveRedirectByRole(account.getRole().toString()));
+                response.sendRedirect(request.getContextPath() + resolveRedirectByRole("ROLE_" + auth.getRole().toString()));
             }
             else {
                 response.sendRedirect(request.getContextPath() + "/auth/login");  // fix lai tra ve loi tai khoan nay khong ton tai trong db
@@ -145,16 +159,15 @@ public class SecurityConfig {
     @Bean
     public AuthenticationFailureHandler oauth2FailureHandler() {
         return (request, response, ex) -> {
-            log.info("that bai 1");
             response.sendRedirect("/auth/login");  // su ly cai message error
         };
     }
 
     private String resolveRedirectByRole(String role) {
         switch (role) {
-            case "User":
+            case "ROLE_User":
                 return "/user/home";
-            case "Consultant":
+            case "ROLE_Consultant":
                 return "/consultant/home";
             default:
                 return "/auth/login";

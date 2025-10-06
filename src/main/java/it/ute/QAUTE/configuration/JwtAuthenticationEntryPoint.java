@@ -1,6 +1,5 @@
 package it.ute.QAUTE.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import it.ute.QAUTE.Exception.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

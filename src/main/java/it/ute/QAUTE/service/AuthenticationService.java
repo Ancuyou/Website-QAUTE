@@ -22,6 +22,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,8 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
     private AccountRepository accountRepository;
     @Autowired
     InvalidatedTokenRepository invalidatedTokenRepository;
@@ -58,44 +61,55 @@ public class AuthenticationService {
     @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
+    @NonFinal
     @Value("${jwt.refresh-duration}")
     protected long REFRESH_DURATION;
+    @NonFinal
     @Value("${openweather.apikey}")
-    protected String ApiKey;
-
-    @Value("${openweather.units:metric}")
-    protected String Units;
+    protected String APIKEY;
 
     public boolean check(String text,String hasedText){
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.matches(text,hasedText);
     }
 
     public String hashed(String text){
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.encode(text);
     }
 
-    public AuthenticationResponse authentication(Account account, String name_device) throws ParseException {
-        Account accountRep = accountRepository.findByUsername(account.getUsername());
-        if (accountRep == null) {
-            return AuthenticationResponse.builder()
-                    .authenticated(false)
-                    .build();
-        } else {
-            boolean authenticated = check(account.getPassword(),
-                    accountRep.getPassword());
-            if (authenticated){
-                RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
-                log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
+    public AuthenticationResponse authentication(Account account, String name_device, boolean isGoogle) throws ParseException {
+        Account accountRep;
+        boolean authenticated;
+        if(!isGoogle){
+            accountRep = accountRepository.findByUsername(account.getUsername());
+            if (accountRep == null) {
                 return AuthenticationResponse.builder()
-                        .authenticated(true)
-                        .token(generateToken(accountRep, null, false))
-                        .RefreshID(refreshToken.getRefreshID())
-                        .Refreshtoken(refreshToken.getRefreshtoken())
-                        .role(accountRep.getRole())
+                        .authenticated(false)
                         .build();
+            } else {
+                authenticated = check(account.getPassword(),
+                        accountRep.getPassword());
             }
+        } else{
+            accountRep = accountRepository.findByEmail(account.getEmail());
+            if (accountRep == null) {
+                return AuthenticationResponse.builder()
+                        .authenticated(false)
+                        .build();
+            } else {
+                authenticated = true;
+            }
+
+        }
+        if (authenticated){
+            RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
+            log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
+            return AuthenticationResponse.builder()
+                    .authenticated(true)
+                    .token(generateToken(accountRep, null, false))
+                    .RefreshID(refreshToken.getRefreshID())
+                    .Refreshtoken(refreshToken.getRefreshtoken())
+                    .role(accountRep.getRole())
+                    .build();
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
@@ -137,7 +151,7 @@ public class AuthenticationService {
             return jwsObject.serialize();
         } catch (JOSEException e){
             log.error("Cannot create token", e);
-            throw new RuntimeException(e);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 
@@ -166,7 +180,6 @@ public class AuthenticationService {
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
             throw new AppException(ErrorCode.TOKEN_REVOKED);
         }
-
         return signedJWT;
     }
 
@@ -247,7 +260,7 @@ public class AuthenticationService {
             String city = "Ho Chi Minh City";
             String cityParam = URLEncoder.encode(city, StandardCharsets.UTF_8);
             String url = "https://api.openweathermap.org/data/2.5/weather?q="
-                    + cityParam + "&appid=" + ApiKey + "&units=metric";
+                    + cityParam + "&appid=" + APIKEY + "&units=metric";
 
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
@@ -268,11 +281,8 @@ public class AuthenticationService {
 
             StringBuilder sb = new StringBuilder();
             for (byte b : digest) sb.append(String.format("%02x", b));
-            log.info("thanh cong");
             return sb.toString();
-
         } catch (Exception e) {
-            log.info("fall");
             return fallbackSecureRandom128();
         }
     }
