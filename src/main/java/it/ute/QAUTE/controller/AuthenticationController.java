@@ -170,6 +170,9 @@ public class AuthenticationController {
                             RedirectAttributes redirectAttributes) {
         try {
             var auth = authenticationService.authentication(account, "DANGNGOCNHAN"); // device name demo
+
+            System.out.println("Token: " + auth.getToken());
+
             if (auth.isAuthenticated()) {
 
                 HttpSession session = request.getSession(true);

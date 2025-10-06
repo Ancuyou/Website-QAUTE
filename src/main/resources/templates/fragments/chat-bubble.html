@@ -1,0 +1,120 @@
+<!-- Đoạn chat-bubble.html - Fragment có thể được bao gồm trong các trang web -->
+<!-- Chat bubble fragment -->
+<div th:fragment="chat-bubble">
+<!-- Chat Launcher Button -->
+<button id="chat-launcher" class="chat-launcher">
+    <i class="bi bi-chat-dots-fill"></i>
+</button>
+
+<!-- Chat List Bubble -->
+<div id="chat-list-bubble" class="chat-list-bubble d-none">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Chat</h5>
+            <div class="header-actions">
+                <i id="minimize-chat-list" class="bi bi-dash"></i>
+                <i id="close-chat-list" class="bi bi-x"></i>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="list-group">
+                <!-- Lặp qua danh sách tư vấn viên -->
+                <a href="#" class="list-group-item list-group-item-action chat-contact" data-consultant="1">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/36" class="rounded-circle me-2" alt="Consultant 1" width="36" height="36">
+                        <div>
+                            <h6 class="mb-0">Nguyễn Văn A</h6>
+                            <small class="text-muted">Tư vấn viên Công nghệ thông tin</small>
+                            <span class="status-indicator status-online"></span>
+                        </div>
+                    </div>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action chat-contact" data-consultant="2">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/36" class="rounded-circle me-2" alt="Consultant 2" width="36" height="36">
+                        <div>
+                            <h6 class="mb-0">Trần Thị B</h6>
+                            <small class="text-muted">Tư vấn viên Kinh tế</small>
+                            <span class="status-indicator status-away"></span>
+                        </div>
+                    </div>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action chat-contact" data-consultant="3">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/36" class="rounded-circle me-2" alt="Consultant 3" width="36" height="36">
+                        <div>
+                            <h6 class="mb-0">Lê Văn C</h6>
+                            <small class="text-muted">Tư vấn viên Điện - Điện tử</small>
+                            <span class="status-indicator status-offline"></span>
+                        </div>
+                    </div>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action chat-contact" data-consultant="4">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/36" class="rounded-circle me-2" alt="Consultant 4" width="36" height="36">
+                        <div>
+                            <h6 class="mb-0">Phạm Thị D</h6>
+                            <small class="text-muted">Tư vấn viên Xây dựng</small>
+                            <span class="status-indicator status-online"></span>
+                        </div>
+                    </div>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action chat-contact" data-consultant="5">
+                    <div class="d-flex align-items-center">
+                        <img src="https://via.placeholder.com/36" class="rounded-circle me-2" alt="Consultant 5" width="36" height="36">
+                        <div>
+                            <h6 class="mb-0">Hoàng Văn E</h6>
+                            <small class="text-muted">Tư vấn viên Công nghệ Sinh học</small>
+                            <span class="status-indicator status-online"></span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Bubble -->
+<div id="chat-bubble" class="chat-bubble d-none">
+    <div class="card">
+        <div class="card-header">
+            <img src="https://via.placeholder.com/32" class="rounded-circle" alt="Consultant" width="32" height="32">
+            <h6 class="mb-0" id="chat-bubble-name">Nguyễn Văn A</h6>
+            <div class="header-actions">
+                <i id="minimize-chat" class="bi bi-dash"></i>
+                <i id="close-chat" class="bi bi-x"></i>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="chat-messages" class="chat-messages">
+                <!-- Tin nhắn mẫu từ tư vấn viên -->
+                <div class="d-flex mb-3">
+                    <img src="https://via.placeholder.com/32" class="rounded-circle align-self-end me-2" alt="Consultant" width="32" height="32">
+                    <div class="bg-white rounded py-2 px-3 mr-3 shadow-sm">
+                        <p class="mb-0">Xin chào, mình có thể giúp gì cho bạn?</p>
+                        <small class="text-muted mt-1 d-block">10:00</small>
+                    </div>
+                </div>
+
+                <!-- Trạng thái đang nhập -->
+                <div class="d-flex mb-3 typing-indicator">
+                    <img src="https://via.placeholder.com/32" class="rounded-circle align-self-end me-2" alt="Consultant" width="32" height="32">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Nhập tin nhắn...">
+                <button class="btn btn-primary" type="button">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</div> <!-- End of chat-bubble fragment -->

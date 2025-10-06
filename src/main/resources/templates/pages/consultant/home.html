@@ -1,277 +1,18 @@
-<!--&lt;!&ndash; home.html &ndash;&gt;-->
-<!--<!DOCTYPE html>-->
-<!--<html lang="vi" xmlns:th="http://www.thymeleaf.org">-->
-<!--<th:block th:replace="~{fragments/head :: head}">-->
-<!--    <title>QAUTE - Trang chủ</title>-->
-<!--</th:block>-->
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <!-- include head fragment, truyền title -->
-<th:block th:replace="~{fragments/head :: head('QAUTE - Trang chủ')}"></th:block>
-<style>
-    .chat-widget {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1050;
-    }
-
-    .chat-button {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
-
-    .chat-button:hover {
-        transform: scale(1.1);
-    }
-
-    .chat-box {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        right: 90px;
-        width: 360px;
-        height: 500px;
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-        overflow: hidden;
-        flex-direction: column;
-    }
-
-    .chat-box.active {
-        display: flex;
-    }
-
-    .chat-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .chat-list {
-        flex: 1;
-        overflow-y: auto;
-        background: #f8f9fa;
-    }
-
-    .chat-item {
-        display: flex;
-        align-items: center;
-        padding: 12px 16px;
-        background: white;
-        border-bottom: 1px solid #e9ecef;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .chat-item:hover {
-        background: #f8f9fa;
-    }
-
-    .chat-item.unread {
-        background: #e3f2fd;
-    }
-
-    .chat-avatar {
-        position: relative;
-        margin-right: 12px;
-    }
-
-    .online-dot {
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        width: 12px;
-        height: 12px;
-        background: #28a745;
-        border: 2px solid white;
-        border-radius: 50%;
-    }
-
-    .chat-info {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .chat-name {
-        font-weight: 600;
-        font-size: 14px;
-        margin-bottom: 2px;
-    }
-
-    .chat-preview {
-        font-size: 13px;
-        color: #6c757d;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .chat-meta {
-        text-align: right;
-        font-size: 12px;
-        color: #6c757d;
-    }
-
-    .unread-badge {
-        background: #667eea;
-        color: white;
-        border-radius: 10px;
-        padding: 2px 8px;
-        font-size: 11px;
-        font-weight: 600;
-        margin-top: 4px;
-        display: inline-block;
-    }
-
-    .chat-search {
-        padding: 12px;
-        background: white;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .chat-search input {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 20px;
-        font-size: 14px;
-    }
-
-    .chat-search input:focus {
-        outline: none;
-        border-color: #667eea;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .card {
-        transition: transform 0.2s;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-    }
-    .badge {
-        font-weight: 500;
-    }
-    .comment-section {
-        animation: slideDown 0.3s ease-out;
-    }
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
+<th:block th:replace="~{fragments/head :: head('QAUTE - Trang Tư vấn viên')}"></th:block>
 <body>
+<!-- Navigation - Using consultant-navbar fragment -->
+<th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
 
-<!-- Navigation -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
-    <div class="container">
-        <a class="navbar-brand text-primary fw-bold fs-3" href="#">
-            <i class="fas fa-graduation-cap me-2"></i>QAUTE
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#home">Trang chủ</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#consultants">Tư vấn viên</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#community">Cộng đồng</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#history">Lịch sử</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#about">Về chúng tôi</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="#contact">Liên hệ</a>
-                </li>
-            </ul>
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                        <span class="fw-semibold">Nguyễn Văn A</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="#profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                        <li><a class="dropdown-item" href="#settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-                        <li><a class="dropdown-item" href="#history"><i class="fas fa-history me-2"></i>Lịch sử tư vấn</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
+<!-- Main Content -->
+<main style="padding-top: 70px;">
+    <!-- Dashboard Content -->
+    <div class="container-fluid">
+        <th:block th:replace="~{fragments/consultant/consultant-dashboard :: consultant-dashboard}"></th:block>
     </div>
-</nav>
-
-<!-- Hero Section -->
-<section id="home" class="bg-primary text-white" style="padding-top: 100px; padding-bottom: 80px;">
-    <div class="container">
-        <div class="row align-items-center min-vh-75">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    Chào mừng trở lại, <span class="text-warning">Nguyễn Văn A!</span><br>
-                    Sẵn sàng đặt câu hỏi?
-                </h1>
-                <p class="lead mb-4">
-                    Bạn đã tham gia QAUTE được 3 tháng với 12 câu hỏi đã được tư vấn.
-                    Hãy tiếp tục đặt câu hỏi và kết nối với cộng đồng sinh viên năng động!
-                </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="#ask-question" class="btn btn-warning btn-lg px-4">
-                        <i class="fas fa-question-circle me-2"></i>Đặt câu hỏi ngay
-                    </a>
-                    <a href="#community" class="btn btn-outline-light btn-lg px-4">
-                        <i class="fas fa-users me-2"></i>Xem cộng đồng
-                    </a>
-                </div>
-                <!-- Quick Stats -->
-                <div class="row mt-4">
-                    <div class="col-4">
-                        <div class="text-center">
-                            <div class="h4 text-warning mb-1">12</div>
-                            <small class="opacity-75">Câu hỏi đã hỏi</small>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="text-center">
-                            <div class="h4 text-warning mb-1">28</div>
-                            <small class="opacity-75">Phản hồi nhận được</small>
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="text-center">
-                            <div class="h4 text-warning mb-1">5</div>
-                            <small class="opacity-75">Tư vấn viên đã chat</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+</main>
             <!-- Hero Section (phần icon chat) -->
             <div class="col-lg-6 text-center">
                 <div class="mt-5 mt-lg-0">
@@ -326,7 +67,6 @@
     </div>
 </section>
 
-<!-- Stats Section -->
 <section class="bg-white py-5">
     <div class="container">
         <div class="row text-center">
@@ -479,6 +219,7 @@
         </div>
     </div>
 </section>
+<!-- Community Section -->
 <section id="community" class="bg-white py-5">
     <div class="container">
         <div class="text-center mb-5">
@@ -797,121 +538,113 @@
     </div>
 </section>
 
-<div class="chat-widget">
-    <!-- Chat Button -->
-    <button class="chat-button" onclick="toggleChatBox()">
-        <i class="fas fa-comments fa-lg text-white"></i>
+<!-- Floating Ask Question Button -->
+<div class="position-fixed bottom-0 end-0 m-4">
+    <button class="btn btn-warning rounded-circle shadow-lg" style="width: 60px; height: 60px;" data-bs-toggle="modal" data-bs-target="#askQuestionModal">
+        <i class="fas fa-question-circle fa-lg"></i>
     </button>
+</div>
 
-    <!-- Chat Box -->
-    <div class="chat-box" id="chatBox">
-        <!-- Header -->
-        <div class="chat-header">
-            <h6 class="mb-0"><i class="fas fa-comments me-2"></i>Tin nhắn</h6>
-            <button class="btn btn-sm text-white" onclick="toggleChatBox()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
+<!-- Ask Question Modal -->
+<div class="modal fade" id="askQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title text-dark">
+                    <i class="fas fa-question-circle me-2"></i>Đặt câu hỏi mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="questionTitle" class="form-label">Tiêu đề câu hỏi</label>
+                        <input type="text" class="form-control" id="questionTitle" placeholder="Tóm tắt câu hỏi của bạn...">
+                    </div>
+                    <div class="mb-3">
+                        <label for="questionContent" class="form-label">Nội dung chi tiết</label>
+                        <textarea class="form-control" id="questionContent" rows="5" placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải..."></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="questionCategory" class="form-label">Chủ đề</label>
+                            <select class="form-select" id="questionCategory">
+                                <option value="">Chọn chủ đề</option>
+                                <option value="academic">Học tập</option>
+                                <option value="career">Nghề nghiệp</option>
+                                <option value="psychology">Tâm lý</option>
+                                <option value="study-abroad">Du học</option>
+                                <option value="internship">Thực tập</option>
+                                <option value="skills">Kỹ năng</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="questionUrgency" class="form-label">Mức độ khẩn cấp</label>
+                            <select class="form-select" id="questionUrgency">
+                                <option value="low">Không khẩn cấp</option>
+                                <option value="medium">Khẩn cấp vừa</option>
+                                <option value="high">Rất khẩn cấp</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="anonymousQuestion">
+                            <label class="form-check-label" for="anonymousQuestion">
+                                Đặt câu hỏi ẩn danh
+                            </label>
+                        </div>
+                    </div>
+                </form>
 
-        <!-- Search -->
-        <div class="chat-search">
-            <input type="text" placeholder="Tìm kiếm cuộc trò chuyện...">
-        </div>
-
-        <!-- Chat List -->
-        <div class="chat-list">
-            <!-- Chat Item 1 - Unread -->
-            <div class="chat-item unread" onclick="openChat(1)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                    <span class="online-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Nguyễn Văn An</div>
-                    <div class="chat-preview">Em cần tư vấn về chọn chuyên ngành ạ...</div>
-                </div>
-                <div class="chat-meta">
-                    <div>5 phút</div>
-                    <span class="unread-badge">2</span>
+                <!-- Suggested Consultants -->
+                <div class="mt-4">
+                    <h6 class="fw-bold">Tư vấn viên phù hợp:</h6>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Consultant">
+                                        <div>
+                                            <div class="fw-semibold small">TS. Nguyễn Thị Lan</div>
+                                            <small class="text-muted">Chuyên gia Tâm lý</small>
+                                            <div class="text-success small">
+                                                <i class="fas fa-circle me-1"></i>Online
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Consultant">
+                                        <div>
+                                            <div class="fw-semibold small">ThS. Trần Văn Minh</div>
+                                            <small class="text-muted">Chuyên gia Nghề nghiệp</small>
+                                            <div class="text-success small">
+                                                <i class="fas fa-circle me-1"></i>Online
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <!-- Chat Item 2 -->
-            <div class="chat-item" onclick="openChat(2)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                    <span class="online-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Trần Thị Bình</div>
-                    <div class="chat-preview">Cảm ơn thầy đã tư vấn ạ!</div>
-                </div>
-                <div class="chat-meta">
-                    <div>30 phút</div>
-                </div>
-            </div>
-
-            <!-- Chat Item 3 - Unread -->
-            <div class="chat-item unread" onclick="openChat(3)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Lê Hoàng Minh</div>
-                    <div class="chat-preview">Anh ơi, em muốn hỏi về CV...</div>
-                </div>
-                <div class="chat-meta">
-                    <div>1 giờ</div>
-                    <span class="unread-badge">1</span>
-                </div>
-            </div>
-
-            <!-- Chat Item 4 -->
-            <div class="chat-item" onclick="openChat(4)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Phạm Thu Hà</div>
-                    <div class="chat-preview">Vâng ạ, em hiểu rồi</div>
-                </div>
-                <div class="chat-meta">
-                    <div>2 giờ</div>
-                </div>
-            </div>
-
-            <!-- Chat Item 5 -->
-            <div class="chat-item" onclick="openChat(5)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                    <span class="online-dot"></span>
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Đỗ Văn Cường</div>
-                    <div class="chat-preview">Thầy có thể tư vấn giúp em không ạ?</div>
-                </div>
-                <div class="chat-meta">
-                    <div>Hôm qua</div>
-                </div>
-            </div>
-
-            <!-- More chat items... -->
-            <div class="chat-item" onclick="openChat(6)">
-                <div class="chat-avatar">
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="User" width="40" height="40">
-                </div>
-                <div class="chat-info">
-                    <div class="chat-name">Hoàng Thị Dung</div>
-                    <div class="chat-preview">Em cảm ơn thầy nhiều lắm ạ</div>
-                </div>
-                <div class="chat-meta">
-                    <div>2 ngày</div>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning">
+                    <i class="fas fa-paper-plane me-2"></i>Gửi câu hỏi
+                </button>
             </div>
         </div>
     </div>
 </div>
-
 
 <!-- Chat Modal -->
 <div class="modal fade" id="chatModal" tabindex="-1">
@@ -971,36 +704,9 @@
         </div>
     </div>
 </div>
-<script>
-    function toggleComments(commentId) {
-        const commentSection = document.getElementById(commentId);
-        if (commentSection.style.display === 'none') {
-            commentSection.style.display = 'block';
-        } else {
-            commentSection.style.display = 'none';
-        }
-    }
-    function toggleChatBox() {
-        const chatBox = document.getElementById('chatBox');
-        chatBox.classList.toggle('active');
-    }
+<!-- Include chat bubble fragment -->
+<div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
 
-    function openChat(userId) {
-        // Chuyển hướng đến trang chat chi tiết
-        window.location.href = '/chat/' + userId;
-        // Hoặc mở modal chat nếu bạn muốn
-    }
-
-    // Đóng chat box khi click bên ngoài
-    document.addEventListener('click', function(event) {
-        const chatWidget = document.querySelector('.chat-widget');
-        const chatBox = document.getElementById('chatBox');
-
-        if (!chatWidget.contains(event.target) && chatBox.classList.contains('active')) {
-            chatBox.classList.remove('active');
-        }
-    });
-</script>
 <!-- Include footer fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>

@@ -33,7 +33,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/app-error", "/oauth2/**"};
+    private final String[] PUBLIC_ENDPOINT = {"/auth/login", "/auth/logout"};
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AccountService accountService;
@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                         .requestMatchers("/user/home").hasAuthority("ROLE_User")
-                        .requestMatchers("/consultant/home").hasAuthority("ROLE_Consultant")
+                        .requestMatchers("/consultant/**").hasAuthority("ROLE_Consultant")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
