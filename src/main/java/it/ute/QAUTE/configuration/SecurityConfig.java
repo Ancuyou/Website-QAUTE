@@ -75,16 +75,21 @@ public class SecurityConfig {
             String uri = request.getRequestURI();
             if (uri.startsWith(request.getContextPath() + "/auth")
                     || uri.startsWith(request.getContextPath() + "/oauth2")
-                    || uri.startsWith(request.getContextPath() + "auth/google/callback")) {
+                    || uri.startsWith(request.getContextPath() + "/auth/google/callback")) {
                 return null;
             }
-            Cookie[] cookies = request.getCookies();
+            var session = request.getSession(false);
+            if (session != null) {
+                Object token = session.getAttribute("ACCESS_TOKEN");
+                if (token instanceof String s && !s.isBlank()) {
+                    return s;
+                }
+            }
+            var cookies = request.getCookies();
             if (cookies != null) {
-                for (Cookie c : cookies) {
-                    if ("ACCESS_TOKEN".equals(c.getName())) {
-                        String v = c.getValue();
-                        if (v != null && !v.isBlank()) return v;
-                    }
+                for (var c : cookies) {
+                    if ("REFRESH_TOKEN".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank())
+                        return c.getValue();
                 }
             }
             return null;
@@ -119,21 +124,15 @@ public class SecurityConfig {
             OAuth2User oauthUser = oauthToken.getPrincipal();
 
             String email    = (String) oauthUser.getAttributes().get("email");
+
             log.info("email: " + email);
 
             Account account = accountService.findUserByEmail(email);
             if (account != null) {
 
-                String jwt = authenticationService.generateToken(account);
+                String jwt = authenticationService.generateToken(account, null, false);
 
-                ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", jwt)
-                        .httpOnly(true)
-                        .secure(false)
-                        .sameSite("Lax")
-                        .path("/")
-                        .maxAge(java.time.Duration.ofHours(1))  // scale time nay
-                        .build();
-                response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+                request.getSession(true).setAttribute("ACCESS_TOKEN", jwt);
 
                 response.sendRedirect(request.getContextPath() + resolveRedirectByRole(account.getRole().toString()));
             }

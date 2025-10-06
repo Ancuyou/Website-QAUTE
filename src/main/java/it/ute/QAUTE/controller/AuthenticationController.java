@@ -1,5 +1,6 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.entity.Account;
@@ -16,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.text.ParseException;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
@@ -40,63 +44,108 @@ public class AuthenticationController {
     private AccountService accountService;
     //Post
     @GetMapping("/auth/login")
-    public String loginForm(Model model, HttpServletRequest request, HttpServletResponse response) {
+    public String loginForm(@ModelAttribute("account") Account account,   // giữ prefill nếu có
+                            Model model,
+                            HttpServletRequest request,
+                            HttpServletResponse response) {
         final String COOKIE_PATH = "/";
-        Cookie[] cookies = request.getCookies();
 
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            Object at = session.getAttribute("ACCESS_TOKEN");
+            if (at instanceof String access && !access.isBlank()) {
+                try {
+                    var jwt = authenticationService.verifyToken(access, false); // access
+                    String role = (String) customJwtDecoder.decode(access).getClaims().get("scope");
+                    if (jwt != null && role != null) {
+                        return "redirect:" + resolveRedirectByRole(role);
+                    }
+                } catch (Exception ex) {
+                    session.removeAttribute("ACCESS_TOKEN");
+                    session.invalidate();
+                }
+            }
+        }
+
+        Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
-                if ("ACCESS_TOKEN".equals(c.getName())) {
-                    System.out.println("có token");
-                    String token = c.getValue();
-                    if (token != null && !token.isBlank()) {
-                        System.out.println("chạy test token");
+                if ("REFRESH_TOKEN".equals(c.getName())) {
+                    String refresh = c.getValue();
+                    if (refresh != null && !refresh.isBlank()) {
                         try {
-                            System.out.println("chạy test token1");
-                            SignedJWT jwt = authenticationService.verifyToken(token);
-                            var role = customJwtDecoder.decode(token).getClaims().get("scope");
-                            if (jwt != null){
-                                System.out.println(role.toString());
-                                switch (role.toString()) {
-                                    case "ROLE_User" -> {
-                                        return "redirect:/user/home";
-                                    }
-                                    case "ROLE_Consultant" -> {
-                                        return "redirect:/consultant/home";
-                                    }
-                                    default -> {
-                                        return "redirect:/auth/login";
-                                    }
+                            var rjwt = authenticationService.verifyToken(refresh, true); // refresh
+                            String username = rjwt.getJWTClaimsSet().getSubject();
+                            Account acc = accountService.findUserByUsername(username);
+                            if (acc != null) {
+                                String newAccess = authenticationService.generateToken(acc, null, false);
+                                request.getSession(true).setAttribute("ACCESS_TOKEN", newAccess);
+
+                                String role = (String) customJwtDecoder.decode(newAccess).getClaims().get("scope");
+                                if (role != null) {
+                                    return "redirect:" + resolveRedirectByRole(role);
                                 }
+                            } else {
+                                ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                                        .httpOnly(true).secure(false).sameSite("Lax")
+                                        .path(COOKIE_PATH).maxAge(0).build();
+                                response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
                             }
                         } catch (Exception ex) {
-                            ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
+                            ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
                                     .httpOnly(true).secure(false).sameSite("Lax")
                                     .path(COOKIE_PATH).maxAge(0).build();
                             response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
                         }
                     }
+                    break; // đã xử lý refresh
                 }
             }
         }
-        model.addAttribute("account", new Account());
+
+        if (account == null) account = new Account();
+        if (!model.containsAttribute("account")) model.addAttribute("account", account);
         return "pages/login";
+    }
+
+
+    private String extractRole(String token) {
+        try {
+            var claims = customJwtDecoder.decode(token).getClaims();
+            Object scope = claims.get("scope");
+            if (scope != null) return scope.toString();
+        } catch (Exception ignored) {}
+        return null;
     }
 
     @GetMapping("/auth/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
+        var session = request.getSession(false);
+        if (session != null) {
+            Object tk = session.getAttribute("ACCESS_TOKEN");
+            if (tk instanceof String token && !token.isBlank()) {
+                try {
+                    authenticationService.logout(token, null);
+                } catch (Exception ignore) {
+                }
+            }
+            // Xóa toàn bộ session
+            session.invalidate();
+        }
+        SecurityContextHolder.clearContext();
+
         final String COOKIE_PATH = "/";
         if (request.getCookies() != null) {
             for (Cookie c : request.getCookies()) {
-                if ("ACCESS_TOKEN".equals(c.getName())) {
+                if ("REFRESH_TOKEN".equals(c.getName())) {
                     String token = c.getValue();
                     try {
-                        if (token != null && !token.isBlank()) authenticationService.logout(token);
+                        if (token != null && !token.isBlank()) authenticationService.logout(null, token);
                     } catch (Exception ignored) {}
                 }
             }
         }
-        ResponseCookie delete = ResponseCookie.from("ACCESS_TOKEN", "")
+        ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN", "")
                 .httpOnly(true).secure(false).sameSite("Lax").path(COOKIE_PATH).maxAge(0).build();
         response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
         return "redirect:/auth/login";
@@ -116,37 +165,30 @@ public class AuthenticationController {
     private CustomJwtDecoder customJwtDecoder;
     @PostMapping("/auth/login")
     public String authLogin(@ModelAttribute("account") Account account,
+                            HttpServletRequest request,
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
-            var auth = authenticationService.authentication(account);
+            var auth = authenticationService.authentication(account, "DANGNGOCNHAN"); // device name demo
             if (auth.isAuthenticated()) {
-                ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
+
+                HttpSession session = request.getSession(true);
+                session.setAttribute("ACCESS_TOKEN", auth.getToken());
+
+                ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", auth.getRefreshtoken())
                         .httpOnly(true)
                         .secure(false)
                         .sameSite("Lax")
                         .path("/")
-                        .maxAge(Duration.ofMinutes(1))
+                        .maxAge(Duration.ofDays(7))
                         .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-                switch (auth.getRole()) {
-                    case User -> {
-                        return "redirect:/user/home";
-                    }
-                    case Consultant -> {
-                        return "redirect:/consultant/home";
-                    }
-                    default -> {
-                        redirectAttributes.addFlashAttribute("error", "Người dùng không có quyền truy cập vào trang web");
-                        redirectAttributes.addFlashAttribute("account", account);
-                        return "redirect:/auth/login";
-                    }
-                }
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
-                redirectAttributes.addFlashAttribute("account", account);
-                return "redirect:/auth/login";
+
+                return "redirect:" + resolveRedirectByRole("ROLE_" + auth.getRole());
             }
+            redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
+            redirectAttributes.addFlashAttribute("account", account);
+            return "redirect:/auth/login";
         } catch (Exception e) {
             log.warn("Login error: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi trong quá trình đăng nhập");
@@ -154,6 +196,7 @@ public class AuthenticationController {
             return "redirect:/auth/login";
         }
     }
+
     @GetMapping("/app-error")
     public String errorPage(@RequestParam(value = "errorCode", required = false) String errorCode,
                             @RequestParam(value = "message", required = false) String message,
@@ -269,5 +312,18 @@ public class AuthenticationController {
     public String loginGoogle(){
         System.out.println("chạy gg");
         return "redirect:/oauth2/authorization/google";
+    }
+
+    private String resolveRedirectByRole(String role) {
+        switch (role) {
+            case "ROLE_User":
+                return "/user/home";
+            case "ROLE_Consultant":
+                return "/consultant/home";
+            case "ROLE_Admin":
+                return "/admin/home";
+            default:
+                return "/auth/login";
+        }
     }
 }

@@ -1,5 +1,7 @@
 package it.ute.QAUTE.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -8,10 +10,13 @@ import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
+import it.ute.QAUTE.dto.response.RefreshTokenResponse;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.InvalidatedToken;
+import it.ute.QAUTE.entity.RefreshToken;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
+import it.ute.QAUTE.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +26,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,26 +49,34 @@ public class AuthenticationService {
     @Autowired
     InvalidatedTokenRepository invalidatedTokenRepository;
     @Autowired
+    RefreshTokenRepository refreshTokenRepository;
+    @Autowired
     private EmailService emailService;
     @NonFinal
     @Value("${jwt.signerKey_access}")
     protected String SIGNER_KEY;
-    @Value("${jwt.signerKey_refresh}")
-    protected String SIGNER_REFRESH_REFRESH;
     @NonFinal
     @Value("${jwt.valid-duration}")
     protected long VALID_DURATION;
     @Value("${jwt.refresh-duration}")
     protected long REFRESH_DURATION;
+    @Value("${openweather.apikey}")
+    protected String ApiKey;
+
+    @Value("${openweather.units:metric}")
+    protected String Units;
+
     public boolean check(String text,String hasedText){
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.matches(text,hasedText);
     }
+
     public String hashed(String text){
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         return passwordEncoder.encode(text);
     }
-    public AuthenticationResponse authentication(Account account) {
+
+    public AuthenticationResponse authentication(Account account, String name_device) throws ParseException {
         Account accountRep = accountRepository.findByUsername(account.getUsername());
         if (accountRep == null) {
             return AuthenticationResponse.builder()
@@ -64,29 +85,39 @@ public class AuthenticationService {
         } else {
             boolean authenticated = check(account.getPassword(),
                     accountRep.getPassword());
-            if (authenticated)
+            if (authenticated){
+                RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
+                log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
                 return AuthenticationResponse.builder()
                         .authenticated(true)
-                        .token(generateToken(accountRep))
+                        .token(generateToken(accountRep, null, false))
+                        .RefreshID(refreshToken.getRefreshID())
+                        .Refreshtoken(refreshToken.getRefreshtoken())
                         .role(accountRep.getRole())
                         .build();
+            }
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
                 .build();
     }
+
     private String builtScope(Account account){
         StringJoiner stringJoiner = new StringJoiner(" ");
         stringJoiner.add("ROLE_" + account.getRole().name());
         return stringJoiner.toString();
     }
-    public String generateToken(Account account){
+
+    public String generateToken(Account account, String signKey, boolean isRefresh){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        long duration = isRefresh ? REFRESH_DURATION : VALID_DURATION;
+
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(account.getUsername())
                 .issuer("qaute.com")
                 .issueTime(new Date())                .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
+                        Instant.now().plus(duration, ChronoUnit.SECONDS).toEpochMilli()
                 ))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", builtScope(account))
@@ -96,17 +127,36 @@ public class AuthenticationService {
         JWSObject jwsObject = new JWSObject(header, payload);
 
         try{
-            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            if (signKey == null){
+                jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+                log.info("Create token: SIGNER_KEY");
+            } else {
+                jwsObject.sign(new MACSigner(signKey.getBytes()));
+                log.info("Create token: SIGNER_KEY_WEATHER + " + jwsObject.serialize());
+            }
             return jwsObject.serialize();
         } catch (JOSEException e){
             log.error("Cannot create token", e);
             throw new RuntimeException(e);
         }
     }
-    public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
+    public SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         SignedJWT signedJWT = SignedJWT.parse(token);
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+
+        String signKey = SIGNER_KEY;
+
+        if (isRefresh){
+            RefreshToken refreshToken = refreshTokenRepository
+                    .findById(jti)
+                    .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+            signKey = refreshToken.getSignKey();
+            log.info("Get sign key: " + signKey);
+        }
+
+        // verifier token
+        JWSVerifier verifier = new MACVerifier(signKey.getBytes());
 
         Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
@@ -116,25 +166,33 @@ public class AuthenticationService {
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
             throw new AppException(ErrorCode.TOKEN_REVOKED);
         }
-        // sau viet them code refesh token o day
 
         return signedJWT;
     }
-    public void logout(String token) throws ParseException, JOSEException{
+
+    public void logout(String token, String tokenRefresh) throws ParseException, JOSEException{
         try {
-            var signToken = verifyToken(token);
-
-            String jit = signToken.getJWTClaimsSet().getJWTID();
-            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-
-            InvalidatedToken invalidatedToken =
-                    InvalidatedToken.builder().invalidatedTokenId(jit).expiryTime(expiryTime).build();
-
-            invalidatedTokenRepository.save(invalidatedToken);
+            if (tokenRefresh == null){
+                var signToken = verifyToken(token, false);
+                String jit = signToken.getJWTClaimsSet().getJWTID();
+                Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+                InvalidatedToken invalidatedToken =
+                        InvalidatedToken.builder().invalidatedTokenId(jit).expiryTime(expiryTime).build();
+                invalidatedTokenRepository.save(invalidatedToken);
+            } else {
+                var signTokenRefresh = verifyToken(tokenRefresh, true);
+                String jitRefresh = signTokenRefresh.getJWTClaimsSet().getJWTID();
+                Date expiryTimeRefresh = signTokenRefresh.getJWTClaimsSet().getExpirationTime();
+                InvalidatedToken invalidatedTokenRefresh =
+                        InvalidatedToken.builder().invalidatedTokenId(jitRefresh).expiryTime(expiryTimeRefresh).build();
+                // add cau lenh xoa token luu ben bang [RefreshToken] neu muon khong du thua du lieu
+                invalidatedTokenRepository.save(invalidatedTokenRefresh);
+            }
         } catch (AppException exception) {
             log.info("Token already expired");
         }
     }
+
     public String forgetPassword(String email) {
         if (accountRepository.existsByEmail(email)) {
             String otp= emailService.sendForgetPasswordEmail(email);
@@ -144,6 +202,7 @@ public class AuthenticationService {
             return null;
         }
     }
+
     public String register(String username,String email){
         if (accountRepository.existsByUsername(username) || accountRepository.existsByEmail(email)){
             return null;
@@ -152,6 +211,81 @@ public class AuthenticationService {
             System.out.println(otp);
             return hashed(otp);
         }
+    }
+    // Func call in func Authenticated after check user, pass
+    public RefreshTokenResponse refreshToken(Account account, String deviceName) throws ParseException {
+        String signKey = generateSignMaxSecurity();
+
+        String token = generateToken(account, signKey, true);
+        log.info("Step create token refresh"+ token);
+
+        Instant now = Instant.now();
+
+        Instant expires = now.plus(REFRESH_DURATION, ChronoUnit.SECONDS);  // In seconds
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        String jit = signedJWT.getJWTClaimsSet().getJWTID();
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .refreshId(jit)
+                .signKey(signKey)
+                .deviceName(deviceName)
+                .createdAt(Date.from(now))
+                .expiresAt(Date.from(expires))
+                .build();
+
+        refreshTokenRepository.save(refreshToken);
+
+        return RefreshTokenResponse.builder()
+                .RefreshID(jit)
+                .Refreshtoken(token)
+                .build();
+    }
+
+    public String generateSignMaxSecurity() {
+        try {
+            String city = "Ho Chi Minh City";
+            String cityParam = URLEncoder.encode(city, StandardCharsets.UTF_8);
+            String url = "https://api.openweathermap.org/data/2.5/weather?q="
+                    + cityParam + "&appid=" + ApiKey + "&units=metric";
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response.body());
+            String desc = root.path("weather").get(0).path("description").asText();
+            double temp = root.path("main").path("temp").asDouble();
+
+            String noise = desc + ":" + temp + ":" + Instant.now().toEpochMilli();
+
+            //Băm SHA-512 → ra 128 ký tự
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            byte[] digest = md.digest(noise.getBytes(StandardCharsets.UTF_8));
+
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) sb.append(String.format("%02x", b));
+            log.info("thanh cong");
+            return sb.toString();
+
+        } catch (Exception e) {
+            log.info("fall");
+            return fallbackSecureRandom128();
+        }
+    }
+    private String fallbackSecureRandom128() {
+        byte[] buf = new byte[64];
+        new SecureRandom().nextBytes(buf);
+        return toHex(buf);
+    }
+
+    private String toHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        for (byte b : bytes) sb.append(String.format("%02x", b));
+        return sb.toString();
     }
 }
 

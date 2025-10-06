@@ -2,7 +2,6 @@ package it.ute.QAUTE.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import it.ute.QAUTE.entity.Account;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,10 +12,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AuthenticationResponse {
-    String token;
+
+public class RefreshTokenResponse {
     String Refreshtoken;
     String RefreshID;
-    boolean authenticated;
-    Account.Role role;
 }
