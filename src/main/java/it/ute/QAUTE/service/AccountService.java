@@ -37,4 +37,7 @@ public class AccountService {
         account.setProfile(profiles);
         accountRepository.save(account);
     }
+    public Account findUserByUsername(String username){
+        return accountRepository.findByUsername(username);
+    }
 }

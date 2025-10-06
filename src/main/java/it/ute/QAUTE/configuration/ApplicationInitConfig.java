@@ -3,7 +3,6 @@ package it.ute.QAUTE.configuration;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.repository.AccountRepository;
-import it.ute.QAUTE.repository.UserReponsitory;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

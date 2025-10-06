@@ -31,7 +31,7 @@
                         <span class="fw-semibold" th:text="${account.profile.fullName}">Người dùng</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item active" href="/profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
+                        <li><a class="dropdown-item active" href="/home/profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
                         <li><a class="dropdown-item" href="/settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
                         <li><a class="dropdown-item" href="/history"><i class="fas fa-history me-2"></i>Lịch sử tư vấn</a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -60,8 +60,17 @@
                             </button>
                         </div>
                         <h5 class="mb-1" th:text="${account.profile.fullName}">Tên người dùng</h5>
-                        <p class="text-muted small mb-2" th:text="${account.profile.roleName != null ? account.profile.roleName : 'Chưa cập nhật vai trò'}">Vai trò</p>
-                        <span class="badge bg-primary">User</span>
+                        <p class="text-muted small mb-2">
+                            <span th:if="${user != null && user.roleName != null}" th:text="${user.roleName}">Vai trò User</span>
+                            <span th:unless="${user != null && user.roleName != null}">Chưa cập nhật vai trò</span>
+                        </p>
+                        <div class="mb-2">
+                            <span class="badge bg-info" th:text="${account.role}">Role Account</span>
+                        </div>
+                        <span class="badge bg-success" th:if="${user != null && user.studentCode != null}">
+                            <i class="fas fa-id-card me-1"></i>
+                            <span th:text="${user.studentCode}">Mã SV</span>
+                        </span>
                     </div>
                 </div>
 
@@ -115,7 +124,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
 
-                        <form th:action="@{/profile/update}" method="post" enctype="multipart/form-data" th:object="${account}">
+                        <form th:action="@{/home/profile/update}" method="post" enctype="multipart/form-data">
                             <!-- Avatar Upload (Hidden) -->
                             <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
 
@@ -130,56 +139,52 @@
                                         <label for="fullName" class="form-label fw-semibold">
                                             Họ và tên <span class="text-danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control" id="fullName"
-                                               th:field="*{profile.fullName}"
+                                        <input type="text" class="form-control" id="fullName" name="fullName"
+                                               th:value="${account.profile.fullName}"
                                                placeholder="Nhập họ tên đầy đủ" required>
                                     </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="roleName" class="form-label fw-semibold">
-                                            Vai trò của bạn <span class="text-danger">*</span>
-                                        </label>
-                                        <select class="form-select" id="roleName" th:field="*{profile.roleName}" required>
-                                            <option value="">-- Chọn vai trò của bạn --</option>
-                                            <option value="Sinh viên">Sinh viên</option>
-                                            <option value="Cựu sinh viên">Cựu sinh viên</option>
-                                            <option value="Phụ huynh">Phụ huynh</option>
-                                            <option value="Giáo viên">Giáo viên</option>
-                                            <option value="Người tìm việc">Người tìm việc</option>
-                                            <option value="Khác">Khác</option>
-                                        </select>
-                                        <div class="form-text">
-                                            <i class="fas fa-info-circle me-1"></i>
-                                            Giúp chúng tôi phục vụ bạn tốt hơn
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
                                         <label for="phone" class="form-label fw-semibold">Số điện thoại</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-phone"></i></span>
-                                            <input type="tel" class="form-control" id="phone"
-                                                   th:field="*{profile.phone}"
+                                            <input type="tel" class="form-control" id="phone" name="phone"
+                                                   th:value="${account.profile.phone}"
                                                    placeholder="0123456789"
                                                    pattern="[0-9]{10,11}">
                                         </div>
                                         <div class="form-text">Số điện thoại 10-11 chữ số</div>
                                     </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="roleName" class="form-label fw-semibold">
+                                            Vai trò của bạn <span class="text-danger">*</span>
+                                        </label>
+                                        <select class="form-select" id="roleName" name="roleName" required>
+                                            <option value="">-- Chọn vai trò của bạn --</option>
+                                            <option value="Sinh viên" th:selected="${user != null && user.roleName == 'Sinh viên'}">Sinh viên</option>
+                                            <option value="Cựu sinh viên" th:selected="${user != null && user.roleName == 'Cựu sinh viên'}">Cựu sinh viên</option>
+                                            <option value="Phụ huynh" th:selected="${user != null && user.roleName == 'Phụ huynh'}">Phụ huynh</option>
+                                            <option value="Học sinh THPT" th:selected="${user != null && user.roleName == 'Học sinh THPT'}">Học sinh THPT</option>
+                                            <option value="Khác" th:selected="${user != null && user.roleName == 'Khác'}">Khác</option>
+                                        </select>
+                                        <div class="form-text">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            Vai trò này khác với quyền hệ thống (<strong th:text="${account.role}">Role</strong>)
+                                        </div>
+                                    </div>
 
                                     <div class="col-md-6 mb-3">
-                                        <label for="email" class="form-label fw-semibold">
-                                            Email <span class="text-danger">*</span>
-                                        </label>
+                                        <label for="studentCode" class="form-label fw-semibold">Mã sinh viên</label>
                                         <div class="input-group">
-                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                            <input type="email" class="form-control bg-light" id="email"
-                                                   th:field="*{email}" required readonly>
+                                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                            <input type="text" class="form-control" id="studentCode" name="studentCode"
+                                                   th:value="${user != null ? user.studentCode : ''}"
+                                                   placeholder="Nhập mã sinh viên (nếu có)">
                                         </div>
-                                        <div class="form-text text-muted">
-                                            <i class="fas fa-lock me-1"></i>Email không thể thay đổi
-                                        </div>
+                                        <div class="form-text">Chỉ dành cho sinh viên</div>
                                     </div>
                                 </div>
                             </div>
@@ -192,6 +197,20 @@
 
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label fw-semibold">
+                                            Email <span class="text-danger">*</span>
+                                        </label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control bg-light" id="email"
+                                                   th:value="${account.email}" readonly>
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            <i class="fas fa-lock me-1"></i>Email không thể thay đổi
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
                                         <label for="username" class="form-label fw-semibold">Tên đăng nhập</label>
                                         <div class="input-group">
                                             <span class="input-group-text"><i class="fas fa-user"></i></span>
@@ -200,6 +219,20 @@
                                         </div>
                                         <div class="form-text text-muted">
                                             <i class="fas fa-lock me-1"></i>Tên đăng nhập không thể thay đổi
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="accountRole" class="form-label fw-semibold">Quyền hệ thống</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                                            <input type="text" class="form-control bg-light" id="accountRole"
+                                                   th:value="${account.role}" readonly>
+                                        </div>
+                                        <div class="form-text text-muted">
+                                            Quyền hệ thống do Admin cấp
                                         </div>
                                     </div>
 
@@ -213,10 +246,25 @@
                                     </div>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="password" class="form-label fw-semibold">Mật khẩu</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                        <input type="password" class="form-control bg-light" id="password"
+                                               value="••••••••" readonly>
+                                        <a href="/settings/change-password" class="btn btn-outline-primary">
+                                            <i class="fas fa-key me-1"></i>Đổi mật khẩu
+                                        </a>
+                                    </div>
+                                </div>
+
                                 <div class="alert alert-info mb-0">
-                                    <i class="fas fa-shield-alt me-2"></i>
-                                    <strong>Bảo mật tài khoản:</strong>
-                                    Muốn thay đổi mật khẩu? <a href="/settings/change-password" class="alert-link fw-semibold">Đổi mật khẩu tại đây</a>
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Phân biệt:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li><strong>Quyền hệ thống (Role):</strong> Xác định quyền truy cập trong hệ thống (Admin, Manager, Consultant, User)</li>
+                                        <li><strong>Vai trò (RoleName):</strong> Mô tả vai trò thực tế của bạn (Sinh viên, Giáo viên, Phụ huynh...)</li>
+                                    </ul>
                                 </div>
                             </div>
 
@@ -244,8 +292,9 @@
                         <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Mẹo hữu ích</h6>
                         <ul class="mb-0">
                             <li class="mb-2">Cập nhật đầy đủ thông tin giúp tư vấn viên hiểu bạn tốt hơn</li>
-                            <li class="mb-2">Chọn đúng vai trò để nhận được tư vấn phù hợp nhất</li>
-                            <li class="mb-2">Thêm số điện thoại để nhận thông báo quan trọng</li>
+                            <li class="mb-2"><strong>Vai trò của bạn</strong> giúp chúng tôi cung cấp nội dung phù hợp</li>
+                            <li class="mb-2"><strong>Quyền hệ thống</strong> xác định các chức năng bạn có thể sử dụng</li>
+                            <li class="mb-2">Nếu bạn là sinh viên, hãy điền mã sinh viên để được hỗ trợ tốt hơn</li>
                             <li>Thay đổi avatar để cá nhân hóa tài khoản của bạn</li>
                         </ul>
                     </div>
