@@ -39,6 +39,21 @@ public class ApplicationInitConfig {
                 accountRepository.save(account);
                 log.warn("✅ Admin account created: username=admin, password=admin. Please change it!");
             }
+            // tạo consultant
+            if(accountRepository.findByUsername("consultant") == null){
+                Profiles profile = new Profiles();
+                profile.setFullName("Consultant");
+                profile.setPhone("0000000000");
+                profile.setAvatar(null);
+                Account account = new Account();
+                account.setUsername("consultant");
+                account.setPassword(passwordEncoder.encode("consultant"));
+                account.setEmail("consultant@gmail.com");
+                account.setRole(Account.Role.Consultant);
+                account.setProfile(profile);
+                accountRepository.save(account);
+                log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
+            }
         };
     }
 }
