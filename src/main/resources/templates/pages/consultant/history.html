@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<!-- include head fragment, truyền title -->
+<th:block th:replace="~{fragments/head :: head('QAUTE - Lịch sử tư vấn')}"></th:block>
+<body>
+<!-- Navigation - Using consultant-navbar fragment -->
+<th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
+
+<!-- Main Content -->
+<main style="padding-top: 70px;">
+    <!-- History Content -->
+    <div class="container">
+        <div class="row my-4">
+            <div class="col-12">
+                <h2 class="mb-4">Lịch sử tư vấn</h2>
+                
+                <!-- Filter options -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">Loại hoạt động</label>
+                                <select class="form-select">
+                                    <option selected>Tất cả</option>
+                                    <option>Câu hỏi</option>
+                                    <option>Trò chuyện</option>
+                                    <option>Tư vấn nhóm</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Thời gian</label>
+                                <select class="form-select">
+                                    <option selected>Tất cả</option>
+                                    <option>7 ngày qua</option>
+                                    <option>30 ngày qua</option>
+                                    <option>3 tháng qua</option>
+                                    <option>Tùy chọn</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Từ khóa</label>
+                                <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-2"></i>Lọc
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- History List -->
+                <div class="card shadow-sm">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Tư vấn: Làm thế nào để chuẩn bị CV cho thực tập?</h6>
+                                    <p class="mb-0 text-muted small">
+                                        <i class="fas fa-user me-1"></i> Nguyễn Văn A
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-tag me-1"></i> Câu hỏi
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success mb-2">Đã hoàn thành</span>
+                                    <p class="mb-0 text-muted small">4/10/2025, 14:30</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Trò chuyện với Trần Thị B</h6>
+                                    <p class="mb-0 text-muted small">
+                                        <i class="fas fa-comments me-1"></i> Trò chuyện
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-clock me-1"></i> 45 phút
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success mb-2">Đã hoàn thành</span>
+                                    <p class="mb-0 text-muted small">3/10/2025, 10:15</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Tư vấn: Chọn chuyên ngành phù hợp</h6>
+                                    <p class="mb-0 text-muted small">
+                                        <i class="fas fa-user me-1"></i> Lê Văn C
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-tag me-1"></i> Câu hỏi
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success mb-2">Đã hoàn thành</span>
+                                    <p class="mb-0 text-muted small">2/10/2025, 16:45</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="list-group-item p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Tư vấn nhóm: Kỹ năng mềm trong công việc</h6>
+                                    <p class="mb-0 text-muted small">
+                                        <i class="fas fa-users me-1"></i> 8 người tham gia
+                                        <span class="mx-2">|</span>
+                                        <i class="fas fa-clock me-1"></i> 90 phút
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success mb-2">Đã hoàn thành</span>
+                                    <p class="mb-0 text-muted small">1/10/2025, 14:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
+</body>
+</html>

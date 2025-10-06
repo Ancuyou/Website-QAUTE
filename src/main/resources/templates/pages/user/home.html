@@ -172,6 +172,9 @@
                     <a class="nav-link fw-semibold" href="#consultants">Tư vấn viên</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="#chat">Trò chuyện</a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link fw-semibold" href="#community">Cộng đồng</a>
                 </li>
                 <li class="nav-item">
@@ -1162,64 +1165,19 @@
     </div>
 </div>
 
-<!-- Chat Modal -->
-<div class="modal fade" id="chatModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">
-                    <i class="fas fa-comments me-2"></i>Chat với Tư vấn viên
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-4 border-end">
-                        <h6 class="fw-bold mb-3">Tư vấn viên Online</h6>
-                        <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
-                                <div class="position-relative me-3">
-                                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Consultant">
-                                    <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" style="width: 12px; height: 12px;"></span>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">TS. Nguyễn Thị Lan</div>
-                                    <small class="text-muted">Tâm lý học</small>
-                                </div>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
-                                <div class="position-relative me-3">
-                                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Consultant">
-                                    <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle" style="width: 12px; height: 12px;"></span>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">ThS. Trần Văn Minh</div>
-                                    <small class="text-muted">Nghề nghiệp</small>
-                                </div>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex align-items-center">
-                                <div class="position-relative me-3">
-                                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Consultant">
-                                    <span class="position-absolute bottom-0 end-0 bg-warning border border-white rounded-circle" style="width: 12px; height: 12px;"></span>
-                                </div>
-                                <div>
-                                    <div class="fw-semibold">PGS. Lê Thị Hương</div>
-                                    <small class="text-muted">Giáo dục - Bận</small>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-md-8">
-                        <div class="text-center text-muted py-5">
-                            <i class="fas fa-comment-dots fa-3x mb-3 opacity-50"></i>
-                            <p>Chọn một tư vấn viên để bắt đầu cuộc trò chuyện</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Chat Section -->
+<section id="chat" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Trò chuyện với tư vấn viên</h2>
+            <p class="lead text-muted">Đặt câu hỏi và nhận tư vấn trực tiếp từ đội ngũ chuyên gia</p>
         </div>
+        
+        <!-- Include user-chat fragment -->
+        <div th:replace="~{fragments/user/user-chat :: user-chat}"></div>
     </div>
-</div>
+</section>
+
 <script>
     function toggleComments(commentId) {
         const commentSection = document.getElementById(commentId);
@@ -1250,6 +1208,9 @@
         }
     });
 </script>
+<!-- Include chat bubble fragment -->
+<div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
+
 <!-- Include footer fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>

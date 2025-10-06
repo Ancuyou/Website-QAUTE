@@ -120,6 +120,8 @@ public class AuthenticationController {
                             RedirectAttributes redirectAttributes) {
         try {
             var auth = authenticationService.authentication(account);
+            System.out.println("Vai trò: " + auth.getRole());
+            System.out.println("Token: " + auth.getToken());
             if (auth.isAuthenticated()) {
                 ResponseCookie cookie = ResponseCookie.from("ACCESS_TOKEN", auth.getToken())
                         .httpOnly(true)

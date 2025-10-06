@@ -9,9 +9,9 @@ spring:
   thymeleaf:
     cache: false
   datasource:
-    url: jdbc:mysql://localhost:3306/StudentConsultingSystem
+    url: jdbc:mysql://localhost:3306/qaute
     username: root
-    password: Quangle2005@
+    password: 1234
   jpa:
     hibernate:
       ddl-auto: update
