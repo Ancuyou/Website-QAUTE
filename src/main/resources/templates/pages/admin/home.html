@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/head :: head('QAUTE - Admin Dashboard')}"></th:block>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold fs-4" href="/admin">
+      <i class="fas fa-shield-alt me-2"></i>QAUTE Admin
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+            <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+            <span>Admin</span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
+            <li><a class="dropdown-item" href="/admin/settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="container-fluid" style="margin-top: 70px;">
+  <div class="row">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" href="#dashboard">
+              <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#users">
+              <i class="fas fa-users me-2"></i>Quản lý người dùng
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#consultants">
+              <i class="fas fa-user-tie me-2"></i>Quản lý Consultant
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#managers">
+              <i class="fas fa-user-shield me-2"></i>Quản lý Manager
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#departments">
+              <i class="fas fa-building me-2"></i>Quản lý Khoa/Ban
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#fields">
+              <i class="fas fa-graduation-cap me-2"></i>Quản lý Ngành học
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#questions">
+              <i class="fas fa-question-circle me-2"></i>Quản lý câu hỏi
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#reports">
+              <i class="fas fa-chart-line me-2"></i>Báo cáo thống kê
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Main content area -->
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <!-- Dashboard Overview -->
+      <div id="dashboard" class="section-content">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</h1>
+          <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-sm btn-outline-secondary">
+              <i class="fas fa-download me-1"></i>Xuất báo cáo
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+          <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+              <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                      Tổng người dùng
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">5,234</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="fas fa-users fa-2x text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+              <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                      Tư vấn viên
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">127</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="fas fa-user-tie fa-2x text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+              <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                      Câu hỏi hôm nay
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">48</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="fas fa-question-circle fa-2x text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+              <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                  <div class="col mr-2">
+                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                      Câu hỏi chờ xử lý
+                    </div>
+                    <div class="h5 mb-0 font-weight-bold text-gray-800">23</div>
+                  </div>
+                  <div class="col-auto">
+                    <i class="fas fa-clock fa-2x text-gray-300"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="row">
+          <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                    <tr>
+                      <th>Thời gian</th>
+                      <th>Người dùng</th>
+                      <th>Hoạt động</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                      <td>10:30</td>
+                      <td>Nguyễn Văn A</td>
+                      <td>Đăng câu hỏi mới</td>
+                      <td><span class="badge bg-info">Pending</span></td>
+                    </tr>
+                    <tr>
+                      <td>10:15</td>
+                      <td>TS. Trần B</td>
+                      <td>Trả lời câu hỏi #1234</td>
+                      <td><span class="badge bg-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                      <td>09:45</td>
+                      <td>Lê Thị C</td>
+                      <td>Đăng ký tài khoản</td>
+                      <td><span class="badge bg-primary">New User</span></td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4 mb-4">
+            <div class="card shadow">
+              <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Thống kê nhanh</h6>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <small class="fw-bold">Tỷ lệ phản hồi</small>
+                  <div class="progress mt-2">
+                    <div class="progress-bar bg-success" style="width: 85%">85%</div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <small class="fw-bold">Độ hài lòng</small>
+                  <div class="progress mt-2">
+                    <div class="progress-bar bg-info" style="width: 92%">92%</div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <small class="fw-bold">Consultant hoạt động</small>
+                  <div class="progress mt-2">
+                    <div class="progress-bar bg-warning" style="width: 78%">78%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Management -->
+      <div id="users" class="section-content" style="display: none;">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="fas fa-users me-2"></i>Quản lý người dùng</h1>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-plus me-2"></i>Thêm người dùng
+          </button>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Tìm kiếm theo tên, email...">
+          </div>
+          <div class="col-md-3">
+            <select class="form-select">
+              <option>Tất cả vai trò</option>
+              <option>Admin</option>
+              <option>Manager</option>
+              <option>Consultant</option>
+              <option>User</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select">
+              <option>Trạng thái: Tất cả</option>
+              <option>Hoạt động</option>
+              <option>Bị khóa</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="card shadow">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Họ tên</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Ngày tạo</th>
+                  <th>Trạng thái</th>
+                  <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32">
+                      Nguyễn Văn A
+                    </div>
+                  </td>
+                  <td>nguyenvana@email.com</td>
+                  <td><span class="badge bg-primary">User</span></td>
+                  <td>05/01/2024</td>
+                  <td><span class="badge bg-success">Hoạt động</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <img src="https://via.placeholder.com/32" class="rounded-circle me-2" width="32">
+                      TS. Trần Văn B
+                    </div>
+                  </td>
+                  <td>tranvanb@email.com</td>
+                  <td><span class="badge bg-success">Consultant</span></td>
+                  <td>03/01/2024</td>
+                  <td><span class="badge bg-success">Hoạt động</span></td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <nav>
+              <ul class="pagination justify-content-center">
+                <li class="page-item disabled"><a class="page-link" href="#">Trước</a></li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      <!-- Department Management -->
+      <div id="departments" class="section-content" style="display: none;">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="fas fa-building me-2"></i>Quản lý Khoa/Ban</h1>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDepartmentModal">
+            <i class="fas fa-plus me-2"></i>Thêm Khoa/Ban
+          </button>
+        </div>
+
+        <div class="card shadow">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên Khoa/Ban</th>
+                  <th>Loại</th>
+                  <th>Thuộc</th>
+                  <th>Mô tả</th>
+                  <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><strong>Khoa Công nghệ thông tin</strong></td>
+                  <td><span class="badge bg-primary">Faculty</span></td>
+                  <td>-</td>
+                  <td>Đào tạo chuyên ngành CNTT</td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Ban Công nghệ phần mềm</td>
+                  <td><span class="badge bg-secondary">Department</span></td>
+                  <td>Khoa CNTT</td>
+                  <td>Phát triển phần mềm</td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fields Management -->
+      <div id="fields" class="section-content" style="display: none;">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2"><i class="fas fa-graduation-cap me-2"></i>Quản lý Ngành học</h1>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFieldModal">
+            <i class="fas fa-plus me-2"></i>Thêm Ngành học
+          </button>
+        </div>
+
+        <div class="card shadow">
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên ngành</th>
+                  <th>Thuộc khoa</th>
+                  <th>Số sinh viên</th>
+                  <th>Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Công nghệ phần mềm</td>
+                  <td>Khoa CNTT</td>
+                  <td>450</td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>Khoa học máy tính</td>
+                  <td>Khoa CNTT</td>
+                  <td>380</td>
+                  <td>
+                    <button class="btn btn-sm btn-info"><i class="fas fa-eye"></i></button>
+                    <button class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thêm người dùng mới</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Họ tên</label>
+            <input type="text" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tên đăng nhập</label>
+            <input type="text" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Mật khẩu</label>
+            <input type="password" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Vai trò</label>
+            <select class="form-select" required>
+              <option value="">Chọn vai trò</option>
+              <option value="User">User</option>
+              <option value="Consultant">Consultant</option>
+              <option value="Manager">Manager</option>
+              <option value="Admin">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary">Thêm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .border-left-primary {
+    border-left: 4px solid #4e73df !important;
+  }
+  .border-left-success {
+    border-left: 4px solid #1cc88a !important;
+  }
+  .border-left-info {
+    border-left: 4px solid #36b9cc !important;
+  }
+  .border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+  }
+  .sidebar {
+    position: sticky;
+    top: 70px;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+  }
+  .sidebar .nav-link {
+    color: #333;
+    padding: 12px 20px;
+  }
+  .sidebar .nav-link:hover {
+    background-color: #f8f9fa;
+  }
+  .sidebar .nav-link.active {
+    background-color: #4e73df;
+    color: white;
+  }
+</style>
+
+<script>
+  // Navigation between sections
+  document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+
+      // Remove active class from all links
+      document.querySelectorAll('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+
+      // Hide all sections
+      document.querySelectorAll('.section-content').forEach(section => {
+        section.style.display = 'none';
+      });
+
+      // Show selected section
+      const targetId = this.getAttribute('href').substring(1);
+      const targetSection = document.getElementById(targetId);
+      if (targetSection) {
+        targetSection.style.display = 'block';
+      }
+    });
+  });
+</script>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
