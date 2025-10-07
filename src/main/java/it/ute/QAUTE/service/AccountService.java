@@ -4,13 +4,11 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Random;
 
-// này dùng cho thêm sửa xóa liên quan tài khoản
 @Service
 public class AccountService {
     @Autowired
@@ -38,6 +36,18 @@ public class AccountService {
         accountRepository.save(account);
     }
     public Account findUserByUsername(String username){
+        return accountRepository.findByUsername(username);
+    }
+    
+    public Profiles getProfileByUsername(String username) {
+        Account account = accountRepository.findByUsername(username);
+        if (account != null) {
+            return account.getProfile();
+        }
+        return null;
+    }
+
+    public Account findByUsername(String username) {
         return accountRepository.findByUsername(username);
     }
 }

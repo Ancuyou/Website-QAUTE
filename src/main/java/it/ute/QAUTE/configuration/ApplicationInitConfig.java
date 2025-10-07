@@ -1,8 +1,12 @@
 package it.ute.QAUTE.configuration;
 
 import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Consultant;
 import it.ute.QAUTE.entity.Profiles;
+import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
+import it.ute.QAUTE.repository.ConsultantRepository;
+import it.ute.QAUTE.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +25,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationInitConfig {
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    ConsultantRepository consultantRepository;
 
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
@@ -45,15 +53,44 @@ public class ApplicationInitConfig {
                 profile.setFullName("Consultant");
                 profile.setPhone("0000000000");
                 profile.setAvatar(null);
+                
                 Account account = new Account();
                 account.setUsername("consultant");
                 account.setPassword(passwordEncoder.encode("consultant"));
                 account.setEmail("consultant@gmail.com");
                 account.setRole(Account.Role.Consultant);
                 account.setProfile(profile);
-                accountRepository.save(account);
-                log.warn("Consultant account created: username=consultant, password=consultant. Please change it!");
+
+                Account savedAccount = accountRepository.save(account);  // Lưu account và cascade profile
+                
+                // Lấy profile đã được lưu (có ID)
+                Profiles savedProfile = savedAccount.getProfile();
+                
+                Consultant consultant = new Consultant();
+                consultant.setExperienceYears(1);
+                consultant.setProfile(savedProfile);  // Dùng profile đã được lưu
+                consultantRepository.save(consultant);
+                
+                log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
             }
+            if(accountRepository.findByUsername("user") == null){
+                Profiles profile = new Profiles();
+                profile.setFullName("User");
+                profile.setPhone("0000000000");
+                profile.setAvatar(null);
+                Account account = new Account();
+                account.setUsername("user");
+                account.setPassword(passwordEncoder.encode("user"));
+                account.setEmail("23112074@student.hcmute.edu.vn");
+                account.setRole(Account.Role.User);
+                account.setProfile(profile);
+                Account savedAccount = accountRepository.save(account);
+                User user = new User();
+                user.setProfile(savedAccount.getProfile());
+                user.setStudentCode("23112074");
+                userRepository.save(user);
+                log.warn("✅ User account created: username=user, password=user. Please change it!");
+            }   
         };
     }
 }

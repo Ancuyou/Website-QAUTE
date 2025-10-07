@@ -1,8 +1,10 @@
 package it.ute.QAUTE.service;
 
 import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
+import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +15,25 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private ProfilesRepository profilesRepository;
+    
+    @Autowired
+    private AccountRepository accountRepository;
+    
     public Optional<User> findByProfileId(Integer profileId) {
         return userRepository.findByProfile_ProfileID(profileId);
+    }
+    
+    public Profiles getCurrentUserProfile(String username) {
+        Account account = accountRepository.findByUsername(username);
+        Profiles profiles = account.getProfile();
+        return profiles;
+    }
+    
+    public Profiles getProfileById(Integer profileId) {
+        return profilesRepository.findById(profileId)
+            .orElseThrow(() -> new RuntimeException("Profile not found with ID: " + profileId));
     }
 }

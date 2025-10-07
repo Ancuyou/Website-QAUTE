@@ -1,5 +1,7 @@
 package it.ute.QAUTE.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +10,10 @@ import lombok.Setter;
 @Table(name="Profiles")
 @Getter
 @Setter
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "profileID"
+)
 public class Profiles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,4 +25,13 @@ public class Profiles {
     private String phone;
     @Column(name="Avatar")
     private String avatar;
+
+    @OneToOne(mappedBy = "profile", fetch = FetchType.LAZY)
+    private Account account;
+
+    @OneToOne(mappedBy = "profile", fetch = FetchType.LAZY)
+    private Consultant consultant;
+
+    @OneToOne(mappedBy = "profile", fetch = FetchType.LAZY)
+    private User user;
 }

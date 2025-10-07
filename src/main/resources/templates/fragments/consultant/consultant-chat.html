@@ -29,75 +29,53 @@
                   <!-- Contact List -->
                   <div style="position: relative; height: 400px; overflow-y: auto;">
                     <ul class="list-unstyled mb-0">
-                      <!-- Contact 1 - Active with notifications -->
-                      <li class="p-2 border-bottom">
-                        <a href="#!" class="d-flex justify-content-between">
-                          <div class="d-flex flex-row">
-                            <div class="position-relative">
-                              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
-                                alt="avatar" class="d-flex align-self-center me-3" width="60">
-                              <span class="badge bg-success badge-dot position-absolute bottom-0 end-0"></span>
+                      <!-- Kiểm tra nếu có tin nhắn -->
+                      <th:block th:if="${recentMessages != null && !recentMessages.isEmpty()}">
+                        <!-- Duyệt qua danh sách tin nhắn gần đây -->
+                        <li th:each="message : ${recentMessages}" class="p-2 border-bottom">
+                          <!-- Xác định người gửi/nhận là ai (không phải consultant) -->
+                          <a href="#" th:data-user-id="${message.senderID == account?.profile?.profileID ? message.receiverID : message.senderID}" 
+                             class="chat-contact d-flex justify-content-between">
+                            <div class="d-flex flex-row">
+                              <div class="position-relative">
+                                <!-- Hiển thị ảnh của người chat với consultant -->
+                                <img th:src="${message.senderID == account?.profile?.profileID ? 
+                                      (message.receiver?.avatar != null ? message.receiver?.avatar : 'https://via.placeholder.com/60') : 
+                                      (message.sender?.avatar != null ? message.sender?.avatar : 'https://via.placeholder.com/60')}"
+                                  alt="avatar" class="d-flex align-self-center me-3" width="60">
+                                <!-- Trạng thái online/offline -->
+                                <span class="badge bg-success badge-dot position-absolute bottom-0 end-0"></span>
+                              </div>
+                              <div class="pt-1">
+                                <!-- Tên người chat với consultant -->
+                                <p class="fw-bold mb-0" th:text="${message.senderID == account?.profile?.profileID ? 
+                                      message.receiver?.fullName : message.sender?.fullName}">Tên người dùng</p>
+                                <!-- Nội dung tin nhắn gần nhất -->
+                                <p class="small text-muted" th:text="${#strings.abbreviate(message.content, 40)}">Nội dung tin nhắn...</p>
+                              </div>
                             </div>
                             <div class="pt-1">
-                              <p class="fw-bold mb-0">Trần Thị B</p>
-                              <p class="small text-muted">Cảm ơn thầy/cô đã giải đáp chi tiết...</p>
+                              <!-- Thời gian tin nhắn -->
+                              <p class="small text-muted mb-1" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">12:45</p>
+                              <!-- Số lượng tin nhắn chưa đọc - có thể thêm trong tương lai -->
+                              <th:block th:if="${message.status != 'read' && message.senderID != account?.profile?.profileID}">
+                                <span class="badge bg-danger rounded-pill float-end">1</span>
+                              </th:block>
                             </div>
-                          </div>
-                          <div class="pt-1">
-                            <p class="small text-muted mb-1">12:45</p>
-                            <span class="badge bg-danger rounded-pill float-end">3</span>
-                          </div>
-                        </a>
-                      </li>
+                          </a>
+                        </li>
+                      </th:block>
                       
-                      <!-- Contact 2 - Away with notifications -->
-                      <li class="p-2 border-bottom">
-                        <a href="#!" class="d-flex justify-content-between">
-                          <div class="d-flex flex-row">
-                            <div class="position-relative">
-                              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava2-bg.webp"
-                                alt="avatar" class="d-flex align-self-center me-3" width="60">
-                              <span class="badge bg-warning badge-dot position-absolute bottom-0 end-0"></span>
-                            </div>
-                            <div class="pt-1">
-                              <p class="fw-bold mb-0">Nguyễn Văn A</p>
-                              <p class="small text-muted">Em có một số thắc mắc về thời khóa biểu...</p>
-                            </div>
+                      <!-- Hiển thị khi không có tin nhắn nào -->
+                      <th:block th:if="${recentMessages == null || recentMessages.isEmpty()}">
+                        <li class="p-3 text-center">
+                          <div class="d-flex flex-column align-items-center">
+                            <i class="far fa-comment-dots mb-3" style="font-size: 3rem; color: #ccc;"></i>
+                            <p class="text-muted mb-0">Chưa nhắn tin với ai</p>
+                            <p class="text-muted small">Khi có user nhắn tin, họ sẽ xuất hiện ở đây</p>
                           </div>
-                          <div class="pt-1">
-                            <p class="small text-muted mb-1">5 phút trước</p>
-                            <span class="badge bg-danger rounded-pill float-end">2</span>
-                          </div>
-                        </a>
-                      </li>
-                      
-                      <!-- Contact 3 - Online -->
-                      <li class="p-2 border-bottom">
-                        <a href="#!" class="d-flex justify-content-between">
-                          <div class="d-flex flex-row">
-                            <div class="position-relative">
-                              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3-bg.webp"
-                                alt="avatar" class="d-flex align-self-center me-3" width="60">
-                              <span class="badge bg-success badge-dot position-absolute bottom-0 end-0"></span>
-                            </div>
-                            <div class="pt-1">
-                              <p class="fw-bold mb-0">Lê Văn C</p>
-                              <p class="small text-muted">Em sẽ nộp đơn vào ngày mai. Cảm ơn!</p>
-                            </div>
-                          </div>
-                          <div class="pt-1">
-                            <p class="small text-muted mb-1">Hôm qua</p>
-                          </div>
-                        </a>
-                      </li>
-                      
-                      <!-- Contact 4 - Offline -->
-                      <li class="p-2 border-bottom">
-                        <a href="#!" class="d-flex justify-content-between">
-                          <div class="d-flex flex-row">
-                            <div class="position-relative">
-                              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava4-bg.webp"
-                                alt="avatar" class="d-flex align-self-center me-3" width="60">
+                        </li>
+                      </th:block>
                               <span class="badge bg-danger badge-dot position-absolute bottom-0 end-0"></span>
                             </div>
                             <div class="pt-1">

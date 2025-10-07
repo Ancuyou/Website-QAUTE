@@ -1,8 +1,9 @@
 package it.ute.QAUTE.entity;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.context.annotation.Profile;
 
 import java.util.Date;
 @Entity
@@ -12,6 +13,10 @@ import java.util.Date;
 @Table(name="Account")
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+  generator = ObjectIdGenerators.PropertyGenerator.class, 
+  property = "accountID"
+)
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +36,7 @@ public class Account {
     @Column(name = "Email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Enumerated(EnumType.STRING)   // Map enum trong DB sang Enum trong Java
+    @Enumerated(EnumType.STRING) 
     @Column(name = "Role", nullable = false)
     private Role role;
 
@@ -43,5 +48,9 @@ public class Account {
         Manager,
         Consultant,
         User;
+    }
+    public Account orElseThrow(Object object) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
     }
 }
