@@ -21,7 +21,8 @@ public enum ErrorCode {
     UNAUTHORIZED(403, "Forbidden: You do not have permission"),
     INVALID_TOKEN(401, "Unauthorized: Invalid Token"),
     TOKEN_EXPIRED(401, "Unauthorized: Token Expired"),
-    TOKEN_REVOKED(401, "Unauthorized: Token Revoked")
+    TOKEN_REVOKED(401, "Unauthorized: Token Revoked"),
+    SAVE_MESSAGE_ERROR(500, "Internal Server Error: Unable to save message")
     ;
 
     ErrorCode(int code, String message) {

@@ -2,9 +2,6 @@ package it.ute.QAUTE.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.context.annotation.Profile;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,6 +23,7 @@ public class User {
     @Column(name = "StudentCode", length = 20)
     private String studentCode;
 
-    @Column(name = "RoleName", nullable = false, length = 50)
+    @Column(name = "RoleName", length = 50)
     private String roleName;
+
 }

@@ -1,13 +1,8 @@
 package it.ute.QAUTE.Exception;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,7 +14,6 @@ public class GlobalExceptionHandler {
             ra.addFlashAttribute("error", "Vui lòng đăng nhập lại.");
             return "redirect:/auth/login";
         }
-        // Mặc định: trả về trang lỗi chung (hoặc 401 tùy bạn)
         ra.addFlashAttribute("error", ex.getMessage());
         return "redirect:/auth/login";
     }
