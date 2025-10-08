@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{fragments/head :: head('Chỉnh sửa người dùng - QAUTE Admin')}"></th:block>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold fs-4" href="/admin/home">
+            <i class="fas fa-shield-alt me-2"></i>QAUTE Admin
+        </a>
+    </div>
+</nav>
+
+<div class="container" style="margin-top: 100px; margin-bottom: 50px;">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-user-edit me-2"></i>Chỉnh sửa người dùng</h2>
+                <a th:href="@{/admin/home(section='users')}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Quay lại
+                </a>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="card shadow">
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/users/update}" method="post" th:object="${account}">
+                        <!-- Hidden ID -->
+                        <input type="hidden" th:field="*{accountID}">
+                        <input type="hidden" th:field="*{profile.profileID}">
+
+                        <!-- Avatar Section -->
+                        <div class="text-center mb-4">
+                            <img th:src="*{profile.avatar != null ? profile.avatar : 'https://via.placeholder.com/150'}"
+                                 class="rounded-circle mb-3"
+                                 width="150" height="150"
+                                 id="avatarPreview"
+                                 alt="Avatar">
+                            <div>
+                                <label for="avatarUrl" class="form-label">URL Avatar</label>
+                                <input type="url" class="form-control" id="avatarUrl"
+                                       th:field="*{profile.avatar}"
+                                       placeholder="https://example.com/avatar.jpg"
+                                       onchange="document.getElementById('avatarPreview').src = this.value || 'https://via.placeholder.com/150'">
+                                <small class="text-muted">Nhập URL hình ảnh hoặc để trống</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Full Name -->
+                            <div class="col-md-6 mb-3">
+                                <label for="fullName" class="form-label">
+                                    Họ tên <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="fullName"
+                                       th:field="*{profile.fullName}" required>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Số điện thoại</label>
+                                <input type="tel" class="form-control" id="phone"
+                                       th:field="*{profile.phone}"
+                                       placeholder="0123456789">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Username -->
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">
+                                    Username <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="username"
+                                       th:field="*{username}" required readonly>
+                                <small class="text-muted">Username không thể thay đổi</small>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">
+                                    Email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="email"
+                                       th:field="*{email}" required>
+                            </div>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="mb-3">
+                            <label for="role" class="form-label">
+                                Vai trò <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select" id="role" th:field="*{role}" required>
+                                <option th:each="role : ${T(it.ute.QAUTE.entity.Account.Role).values()}"
+                                        th:if="${role.name() != 'Admin'}"
+                                        th:value="${role}"
+                                        th:text="${role}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Password Section -->
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="changePassword"
+                                       onchange="togglePasswordFields()">
+                                <label class="form-check-label" for="changePassword">
+                                    Thay đổi mật khẩu
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="passwordFields" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="newPassword" class="form-label">Mật khẩu mới</label>
+                                    <input type="password" class="form-control" id="newPassword"
+                                           name="newPassword" minlength="6">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                                    <input type="password" class="form-control" id="confirmPassword"
+                                           minlength="6">
+                                </div>
+                            </div>
+                            <small class="text-muted">Để trống nếu không muốn đổi mật khẩu</small>
+                        </div>
+
+                        <!-- Created Date (Read-only) -->
+                        <div class="mb-3">
+                            <label class="form-label">Ngày tạo</label>
+                            <input type="text" class="form-control"
+                                   th:value="${#dates.format(account.createdDate, 'dd/MM/yyyy HH:mm')}"
+                                   readonly>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a th:href="@{/admin/home(section='users')}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary" onclick="return validateForm()">
+                                <i class="fas fa-save me-2"></i>Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePasswordFields() {
+        const passwordFields = document.getElementById('passwordFields');
+        const changePassword = document.getElementById('changePassword');
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+
+        if (changePassword.checked) {
+            passwordFields.style.display = 'block';
+            newPassword.required = true;
+            confirmPassword.required = true;
+        } else {
+            passwordFields.style.display = 'none';
+            newPassword.required = false;
+            confirmPassword.required = false;
+            newPassword.value = '';
+            confirmPassword.value = '';
+        }
+    }
+
+    function validateForm() {
+        const changePassword = document.getElementById('changePassword');
+
+        if (changePassword.checked) {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                alert('Mật khẩu xác nhận không khớp!');
+                return false;
+            }
+
+            if (newPassword.length < 6) {
+                alert('Mật khẩu phải có ít nhất 6 ký tự!');
+                return false;
+            }
+        }
+
+        return true;
+    }
+</script>
+
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+</style>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

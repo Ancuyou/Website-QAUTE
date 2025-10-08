@@ -20,7 +20,7 @@ public class HomeController {
     private UserService userService;
     @GetMapping("/user/home")
     public String homeUser() {
-        return "pages/admin/home";
+        return "pages/user/home";
     }
 
     @GetMapping("/home/profile")
