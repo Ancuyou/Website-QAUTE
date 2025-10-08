@@ -22,7 +22,7 @@
             <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
             <li><a class="dropdown-item" href="/admin/settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+            <li><a class="dropdown-item text-danger" href="/home/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
           </ul>
         </li>
       </ul>
@@ -309,8 +309,8 @@
                   <td>
                     <span class="badge"
                           th:classappend="${account.role.name() == 'Admin' ? 'bg-danger' :
-                                            account.role.name() == 'Manager' ? 'bg-warning' :
-                                            account.role.name() == 'Consultant' ? 'bg-success' : 'bg-primary'}"
+                                            (account.role.name() == 'Manager' ? 'bg-warning' :
+                                            (account.role.name() == 'Consultant' ? 'bg-success' : 'bg-primary'))}"
                           th:text="${account.role}">
                         User
                     </span>

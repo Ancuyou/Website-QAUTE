@@ -1,9 +1,3 @@
-<!--&lt;!&ndash; home.html &ndash;&gt;-->
-<!--<!DOCTYPE html>-->
-<!--<html lang="vi" xmlns:th="http://www.thymeleaf.org">-->
-<!--<th:block th:replace="~{fragments/head :: head}">-->
-<!--    <title>QAUTE - Trang chủ</title>-->
-<!--</th:block>-->
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <!-- include head fragment, truyền title -->
@@ -15,7 +9,7 @@
         outline: none;
         border-color: #667eea;
     }
-    
+
     /* Removed chat modal styles */
 </style>
 <body>
@@ -326,11 +320,11 @@
             <div th:each="consultant : ${consultants}" class="col-md-4 mb-4">
                 <div class="card consultant-card h-100">
                     <div class="card-body text-center">
-                        <img th:src="${consultant.avatar != null ? consultant.avatar : '/images/default-avatar.png'}" 
+                        <img th:src="${consultant.avatar != null ? consultant.avatar : '/images/default-avatar.png'}"
                              class="rounded-circle mb-3" width="80" height="80" alt="Tư vấn viên">
                         <h5 class="card-title" th:text="${consultant.fullName}">Tên tư vấn viên</h5>
                         <p class="card-text" th:text="${consultant.experienceYears + ' năm kinh nghiệm'}">Kinh nghiệm</p>
-                        <button class="btn btn-primary btn-sm" 
+                        <button class="btn btn-primary btn-sm"
                                 th:attr="data-consultant-id=${consultant.consultantID},data-profile-id=${consultant.profileID},data-consultant-name=${consultant.fullName}"
                                 onclick="startChatWithConsultant(this)">
                             Chat ngay
@@ -346,7 +340,7 @@
 <section id="community" class="bg-white py-5">
     <div class="container">
         <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">Cộng đồng QAUTE</h2>
+            <h2 class="fw-bold mb-3">Đặt câu hỏi cho cộng đồng</h2>
             <p class="lead text-muted">Nơi sinh viên chia sẻ, học hỏi và hỗ trợ lẫn nhau</p>
         </div>
 
@@ -561,6 +555,11 @@
                 </div>
             </div>
         </div>
+        <div class="text-center mt-5">
+            <a th:href="@{/user/questions}" class="btn btn-primary btn-lg px-4 py-2 shadow-sm">
+                <i class="fas fa-comments me-2"></i>Xem và Đặt câu hỏi
+            </a>
+        </div>
     </div>
 </section>
 
@@ -709,12 +708,7 @@
         </div>
     </div>
 </section>
-<!-- Floating Ask Question Button -->
-<div class="position-fixed bottom-0 end-0 mb-5 me-4">
-    <button class="btn btn-warning rounded-circle shadow-lg" style="width: 60px; height: 60px;" data-bs-toggle="modal" data-bs-target="#askQuestionModal">
-        <i class="fas fa-question-circle fa-lg"></i>
-    </button>
-</div>
+
 
 
 <script>
@@ -726,12 +720,12 @@
             commentSection.style.display = 'none';
         }
     }
-    
+
     function startChatWithConsultant(button) {
     const consultantID = button.getAttribute('data-consultant-id');
     const profileID = button.getAttribute('data-profile-id');
     const consultantName = button.getAttribute('data-consultant-name');
-    
+
     // Mở chat window trực tiếp
     openChatWindow(profileID, consultantName);
     loadChatHistory(profileID);

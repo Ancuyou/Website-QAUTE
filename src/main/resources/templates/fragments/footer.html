@@ -15,7 +15,13 @@
             </div>
         </div>
     </div>
+    <!-- WebSocket libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stomp-websocket@2.3.4-next/lib/stomp.min.js"></script>
 
+    <!-- App JavaScript -->
+    <script th:src="@{/js/script.js}" defer></script>
+    <script th:src="@{/js/chat-bubble.js}" defer></script>
     <!-- Scripts: để ở footer fragment nếu bạn muốn load js cuối trang -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/lottie-web@latest/build/player/lottie.min.js"></script>
