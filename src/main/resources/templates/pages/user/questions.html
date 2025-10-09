@@ -44,72 +44,64 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm mb-4">
+                <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
                         <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/40" class="rounded-circle me-3" alt="User Avatar">
+                            <img th:src="${question.user.profile.avatar ?: 'https://via.placeholder.com/40'}" class="rounded-circle me-3" alt="User Avatar">
                             <div>
-                                <h6 class="mb-0">Nguyễn Văn An</h6>
-                                <small class="text-muted">Sinh viên năm 3 - 2 giờ trước</small>
+                                <h6 class="mb-0" th:text="${question.user.profile.fullName}">Tên người dùng</h6>
+                                <small class="text-muted" th:text="${#temporals.format(question.dateSend, 'dd/MM/yyyy HH:mm')}"></small>
                             </div>
                         </div>
                     </div>
                     <div class="card-body">
-                        <h5 class="fw-bold">Lựa chọn giữa Machine Learning và Web Development cho chuyên ngành năm cuối?</h5>
-                        <p class="card-text">
-                            Em đang là sinh viên năm 3 khoa CNTT và sắp phải chọn chuyên ngành. Em đang phân vân giữa hai hướng là Machine Learning và Web Development. Mọi người có thể cho em xin ít kinh nghiệm về cơ hội việc làm, mức lương và lộ trình học tập của hai mảng này được không ạ? Em cảm ơn! 🤔
-                        </p>
+                        <h5 class="fw-bold" th:text="${question.title}">Tiêu đề câu hỏi</h5>
+                        <p class="card-text" th:text="${question.content}">Nội dung câu hỏi.</p>
                         <div class="mb-3">
-                            <span class="badge bg-primary">#CNTT</span>
-                            <span class="badge bg-secondary">#ChuyênNgành</span>
-                            <span class="badge bg-info">#HướngNghiệp</span>
+                            <span class="badge bg-primary" th:text="${question.department.departmentName}">Khoa</span>
+                            <span th:if="${question.field != null}" class="badge bg-secondary" th:text="${question.field.fieldName}">Ngành</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <button class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-thumbs-up me-1"></i>15</button>
-                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleComments('comments1')"><i class="fas fa-comment me-1"></i>2</button>
-                                <button th:if="${account.role.name() == 'Consultant'}" class="btn btn-sm btn-success" onclick="toggleAnswerForm('answerForm1')">
+                                <button class="btn btn-sm btn-outline-primary me-2"><i class="fas fa-thumbs-up me-1"></i>0</button>
+                                <button class="btn btn-sm btn-outline-secondary me-2" th:onclick="|toggleComments('comments${iterStat.count}')|"><i class="fas fa-comment me-1"></i> <span th:text="${#lists.size(question.answers)}">0</span></button>
+                                <button th:if="${account != null and account.role.name() == 'Consultant'}" class="btn btn-sm btn-success" th:onclick="|toggleAnswerForm('answerForm${iterStat.count}')|">
                                     <i class="fas fa-reply me-1"></i>Trả lời
                                 </button>
                             </div>
                             <div class="text-muted small">
-                                <i class="fas fa-eye me-1"></i> 128 lượt xem
+                                <i class="fas fa-eye me-1"></i> <span th:text="${question.views}">0</span> lượt xem
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer bg-light" id="comments1" style="display: none;">
-                        <h6 class="mb-3 small text-uppercase fw-bold">Các câu trả lời</h6>
-                        <div class="d-flex mb-3">
-                            <img src="https://via.placeholder.com/35" class="rounded-circle me-3" alt="Consultant Avatar" style="width: 35px; height: 35px;">
+
+                    <div class="card-footer bg-light" th:id="|comments${iterStat.count}|" style="display: none;">
+                        <h6 class="mb-3 small text-uppercase fw-bold">
+                            <span th:text="${#lists.size(question.answers)}">0</span> câu trả lời
+                        </h6>
+                        <div th:each="answer : ${question.answers}" class="d-flex mb-3">
+                            <img th:src="${answer.consultant.profile.avatar ?: 'https://via.placeholder.com/35'}" class="rounded-circle me-3" alt="Consultant Avatar" style="width: 35px; height: 35px;">
                             <div class="flex-grow-1">
                                 <div class="bg-white p-3 rounded border">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <strong class="me-2">TS. Lê Minh Tuấn</strong>
-                                            <span class="badge bg-success">Chuyên gia IT</span>
+                                            <strong class="me-2" th:text="${answer.consultant.profile.fullName}">Tên Consultant</strong>
+                                            <span class="badge bg-success">Tư vấn viên</span>
                                         </div>
-                                        <small class="text-muted">1 giờ trước</small>
+                                        <small class="text-muted" th:text="${#temporals.format(answer.dateAnswered, 'dd/MM/yyyy HH:mm')}"></small>
                                     </div>
-                                    <p class="mb-0 mt-2">Chào em, đây là một lựa chọn phổ biến. Tóm tắt nhanh: ML đòi hỏi nền tảng toán tốt, tiềm năng lương cao nhưng cũng cạnh tranh. Web Dev thì thị trường rộng, dễ tìm việc hơn cho fresher. Em nên thử làm project nhỏ ở cả 2 mảng để xem mình hợp với cái nào hơn nhé!</p>
+                                    <p class="mb-0 mt-2" th:text="${answer.content}">Nội dung câu trả lời.</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="d-flex">
-                            <img src="https://via.placeholder.com/35" class="rounded-circle me-3" alt="User Avatar" style="width: 35px; height: 35px;">
-                            <div class="flex-grow-1">
-                                <div class="bg-white p-3 rounded border">
-                                    <div class="d-flex justify-content-between">
-                                        <strong>Trần Hoàng Bách</strong>
-                                        <small class="text-muted">30 phút trước</small>
-                                    </div>
-                                    <p class="mb-0 mt-2">Mình cũng từng phân vân như bạn, cuối cùng mình chọn Web vì thích nhìn thấy sản phẩm mình làm ra được nhiều người dùng. Học ML thấy hơi "hàn lâm" :D</p>
-                                </div>
-                            </div>
+                        <div th:if="${#lists.isEmpty(question.answers)}" class="text-center text-muted p-3">
+                            Chưa có câu trả lời nào cho câu hỏi này.
                         </div>
                     </div>
-                    <div class="card-footer answer-form" id="answerForm1">
+
+                    <div class="card-footer answer-form" th:id="|answerForm${iterStat.count}|">
                         <form th:action="@{/user/questions/answer}" method="post">
-                            <input type="hidden" name="questionId" value="1" />
+                            <input type="hidden" name="questionId" th:value="${question.questionID}" />
                             <div class="d-flex align-items-start">
                                 <img th:src="${account?.profile?.avatar ?: 'https://via.placeholder.com/40'}" class="rounded-circle me-3" width="40" height="40" alt="My Avatar">
                                 <div class="flex-grow-1">
@@ -120,6 +112,12 @@
                                 </div>
                             </div>
                         </form>
+                    </div>
+                </div>
+                <div th:if="${questions == null or #lists.isEmpty(questions)}" class="card border-0 shadow-sm">
+                    <div class="card-body p-5 text-center">
+                        <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có câu hỏi nào trong cộng đồng. Hãy là người đầu tiên!</p>
                     </div>
                 </div>
             </div>

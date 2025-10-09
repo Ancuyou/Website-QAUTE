@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -14,8 +15,9 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "QuestionID")
-    private int questionID;
+    private Integer questionID;
 
+    // ... (các trường khác giữ nguyên)
     @Column(name = "Title", nullable = false, length = 200)
     private String title;
 
@@ -31,18 +33,23 @@ public class Question {
     @Column(name = "FileAttachment", length = 255)
     private String fileAttachment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "DepartmentID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "DepartmentID", nullable = false)
     private Department department;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FieldID")
     private Field field;
 
     @Column(name = "Status", length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'Pending'")
     private String status = "Pending";
+
+    // === THÊM MỚI: Tải danh sách câu trả lời cùng lúc với câu hỏi ===
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
+    @OrderBy("dateAnswered ASC") // Sắp xếp câu trả lời theo thời gian
+    private Set<Answer> answers;
 }
