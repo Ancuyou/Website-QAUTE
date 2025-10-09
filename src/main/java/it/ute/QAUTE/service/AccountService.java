@@ -23,6 +23,9 @@ public class AccountService {
         account.setPassword(authenticationService.hashed(password));
         accountRepository.save(account);
     }
+    public void updateAccount(Account account){
+        accountRepository.save(account);
+    }
     public void createAccount(String username,String password,String email){
         Account account=new Account();
         account.setUsername(username);

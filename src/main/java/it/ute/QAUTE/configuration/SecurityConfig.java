@@ -49,8 +49,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINT).permitAll()
-                        .requestMatchers("/user/home").hasAuthority("ROLE_User")
+                        // 1. ĐỊNH NGHĨA QUY TẮC CHUNG TRƯỚC: Cho phép cả User và Consultant
+                        .requestMatchers("/user/questions/**").hasAnyAuthority("ROLE_User", "ROLE_Consultant")
+
+                        // 2. CÁC QUY TẮC CỤ THỂ CHO TỪNG ROLE:
+                        .requestMatchers("/user/**").hasAuthority("ROLE_User") // Áp dụng cho các link /user/ còn lại
                         .requestMatchers("/consultant/**").hasAuthority("ROLE_Consultant")
+
+                        // 3. QUY TẮC CUỐI CÙNG:
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
