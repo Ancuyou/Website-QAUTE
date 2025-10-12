@@ -4,16 +4,19 @@ import it.ute.QAUTE.entity.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
     Account findUserByEmail(String email);
+    Account findByAccountID(Integer id);
     Account findByUsername(String username);
     Account findByEmail(String email);
 
@@ -34,13 +37,20 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Page<Account> searchByKeywordAndRole(String keyword, Account.Role role, Pageable pageable);
 
     @Query("SELECT a FROM Account a JOIN a.profile p WHERE a.role != 'Admin' AND a.role=:role")
+    Page<Account> getListAccount(Account.Role role, Pageable pageable);
+
+    @Query("SELECT a FROM Account a JOIN a.profile p WHERE a.role != 'Admin' AND a.role=:role")
     Page<Account> searchByRole(Account.Role role, Pageable pageable);
 
     @EntityGraph(attributePaths = "profile")
     @Query("SELECT a FROM Account a WHERE a.accountID=:id")
     Account findByAccountIDWithProfiles(int id);
 
-    // Thêm phần mới từ remote
     @Query("SELECT a FROM Account a WHERE a.profile.profileID = :profileId")
     Account findByProfile_ProfileID(@Param("profileId") Integer profileId);
+
+    /*@Modifying
+    @Transactional
+    @Query("UPDATE Account a SET a.isBlock = true WHERE a.accountID = :id")
+    void blockAccount(@Param("id") Integer id);*/
 }

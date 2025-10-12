@@ -4,6 +4,8 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -52,5 +54,33 @@ public class AccountService {
 
     public Account findByUsername(String username) {
         return accountRepository.findByUsername(username);
+    }
+
+
+
+    // search to role and keyword   (nhan so hoc code)
+
+    public Page<Account> searchByKeywordAndRole(String search, Account.Role role, Pageable pageable){
+        return accountRepository.searchByKeywordAndRole(search, role, pageable);
+    }
+    public Page<Account> getListAccount(Account.Role role, Pageable pageable){
+        return accountRepository.getListAccount(role, pageable);
+    }
+    public Account insertAccount(Account account){
+        account.setCreatedDate(new Date()); // fix loi khong nhan duoc gio hien tai
+        return accountRepository.save(account);
+    }
+
+    public void blockOrOpenAccount(Integer id){
+        Account acc = accountRepository.findByAccountID(id);
+        if (acc.isBlock()){  // lock
+            acc.setBlock(Boolean.FALSE);
+            accountRepository.save(acc);
+        }
+        else {  // open
+            acc.setBlock(Boolean.TRUE);
+            accountRepository.save(acc);
+        }
+
     }
 }

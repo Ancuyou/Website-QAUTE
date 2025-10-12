@@ -19,4 +19,5 @@ public class AuthenticationResponse {
     String RefreshID;
     boolean authenticated;
     Account.Role role;
+    boolean isBlock;
 }

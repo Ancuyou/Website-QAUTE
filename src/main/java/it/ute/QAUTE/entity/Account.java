@@ -36,6 +36,9 @@ public class Account {
     @Column(name = "Email", nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(name = "IsBlock", nullable = false)
+    private boolean isBlock = false;
+
     @Enumerated(EnumType.STRING) 
     @Column(name = "Role", nullable = false)
     private Role role;

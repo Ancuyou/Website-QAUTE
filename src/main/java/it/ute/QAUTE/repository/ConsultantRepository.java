@@ -14,4 +14,5 @@ public interface ConsultantRepository extends JpaRepository<Consultant, Integer>
     List<Consultant> findAllWithProfiles();
     
     Consultant findByProfile_ProfileID(Integer profileID);
+
 }

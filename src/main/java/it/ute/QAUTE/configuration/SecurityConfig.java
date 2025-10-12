@@ -51,10 +51,11 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINT).permitAll()
                         // 1. ĐỊNH NGHĨA QUY TẮC CHUNG TRƯỚC: Cho phép cả User và Consultant
                         .requestMatchers("/user/questions/**").hasAnyAuthority("ROLE_User", "ROLE_Consultant")
-
+                        .requestMatchers("/images/**").permitAll()
                         // 2. CÁC QUY TẮC CỤ THỂ CHO TỪNG ROLE:
                         .requestMatchers("/user/**").hasAuthority("ROLE_User") // Áp dụng cho các link /user/ còn lại
                         .requestMatchers("/consultant/**").hasAuthority("ROLE_Consultant")
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_Admin")
 
                         // 3. QUY TẮC CUỐI CÙNG:
                         .anyRequest().authenticated()
@@ -175,6 +176,8 @@ public class SecurityConfig {
                 return "/user/home";
             case "ROLE_Consultant":
                 return "/consultant/home";
+            case  "ROLE_Admin":
+                return "/admin/consultants";
             default:
                 return "/auth/login";
         }

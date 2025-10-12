@@ -84,8 +84,16 @@ public class AuthenticationService {
             if (accountRep == null) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
+                        .isBlock(false)
                         .build();
-            } else {
+            }
+            if (accountRep.isBlock()) {
+                return AuthenticationResponse.builder()
+                        .authenticated(false)
+                        .isBlock(true)
+                        .build();
+            }
+            else {
                 authenticated = check(account.getPassword(),
                         accountRep.getPassword());
             }
@@ -94,11 +102,18 @@ public class AuthenticationService {
             if (accountRep == null) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
+                        .isBlock(false)
                         .build();
-            } else {
+            }
+            if (accountRep.isBlock()) {
+                return AuthenticationResponse.builder()
+                        .authenticated(false)
+                        .isBlock(true)
+                        .build();
+            }
+            else {
                 authenticated = true;
             }
-
         }
         if (authenticated){
             RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
@@ -198,7 +213,7 @@ public class AuthenticationService {
                 Date expiryTimeRefresh = signTokenRefresh.getJWTClaimsSet().getExpirationTime();
                 InvalidatedToken invalidatedTokenRefresh =
                         InvalidatedToken.builder().invalidatedTokenId(jitRefresh).expiryTime(expiryTimeRefresh).build();
-                // add cau lenh xoa token luu ben bang [RefreshToken] neu muon khong du thua du lieu
+                refreshTokenRepository.deleteById(jitRefresh);
                 invalidatedTokenRepository.save(invalidatedTokenRefresh);
             }
         } catch (AppException exception) {
@@ -245,6 +260,7 @@ public class AuthenticationService {
                 .deviceName(deviceName)
                 .createdAt(Date.from(now))
                 .expiresAt(Date.from(expires))
+                .account(account)
                 .build();
 
         refreshTokenRepository.save(refreshToken);

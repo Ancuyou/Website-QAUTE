@@ -33,4 +33,8 @@ public class RefreshToken {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "Expires_at", nullable = false)
     Date expiresAt;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "AccountID", nullable = false)
+    private Account account;
 }
