@@ -41,7 +41,7 @@
                             </td>
                             <td th:text="${a.email}">email@example.com</td>
                             <td><span class="badge bg-success" th:text="${a.role}">Consultant</span></td>
-                            <td th:text="${a.createdDate != null ? #temporals.format(a.createdDate, 'dd/MM/yyyy') : 'N/A'}">05/01/2024</td>
+                            <span th:text="${a.createdDate != null ? #dates.format(a.createdDate, 'dd/MM/yyyy') : 'N/A'}"></span>
                             <td class="text-nowrap">
                                 <a class="btn btn-sm"
                                    th:classappend="${a.isBlock} ? 'btn-danger' : 'btn-success'"
