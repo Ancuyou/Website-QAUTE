@@ -18,24 +18,13 @@
                     <a class="nav-link fw-semibold" th:href="@{/user/questions}">Cộng đồng</a>
                 </li>
             </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2 border border-light" alt="Avatar" width="32" height="32">
-                        <span class="fw-semibold text-white" th:text="${(#authentication != null and #authentication.principal != null and #authentication.principal instanceof T(it.ute.QAUTE.entity.Account)) ? #authentication.principal.profile.fullName : 'Tư vấn viên'}">Tư vấn viên</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" th:href="@{/user/profile}"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                        <li><a class="dropdown-item" th:href="@{/user/settings}"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                    </ul>
-                </li>
-            </ul>
+
             <th:block th:if="${account != null}" th:replace="~{fragments/userDropDown :: userDropdown(
                 ${account.profile?.fullName},
-                ${account.profile?.avatar}
+                ${account.profile?.avatar},
+                false
             )}"></th:block>
+
         </div>
     </div>
 </nav>

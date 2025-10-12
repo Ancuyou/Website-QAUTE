@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<th:block th:replace="~{fragments/user/user-navbar :: user-navbar}"></th:block>
+<th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
 
 <main style="padding-top: 80px; background-color: #f8f9fa; min-height: 100vh;">
     <div class="container py-5">
@@ -167,7 +167,7 @@
 <div class="modal fade" id="askQuestionModal" tabindex="-1" aria-labelledby="askQuestionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
-            <form th:action="@{/user/questions/ask}" method="post">
+            <form th:action="@{/consultant/questions/ask}" method="post">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title" id="askQuestionModalLabel"><i class="fas fa-question-circle me-2"></i>Soạn câu hỏi của bạn</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>

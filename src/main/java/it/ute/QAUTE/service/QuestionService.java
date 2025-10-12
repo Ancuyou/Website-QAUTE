@@ -37,4 +37,9 @@ public class QuestionService {
     public void saveQuestion(Question question) {
         questionRepository.save(question);
     }
+    
+    public Question getQuestionById(Integer questionId) {
+        return questionRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Câu hỏi không tồn tại với ID: " + questionId));
+    }
 }

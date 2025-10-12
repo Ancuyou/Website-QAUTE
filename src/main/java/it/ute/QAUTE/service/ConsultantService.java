@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,9 +34,15 @@ public class ConsultantService {
             return dto;
         }).collect(Collectors.toList());
     }
-
+    public Optional<Consultant> findByProfileId(Integer profileId) {
+        return Optional.ofNullable(consultantRepository.findByProfile_ProfileID(profileId));
+    }
     public List<Consultant> findAllConsultants() {
         return consultantRepository.findAllWithProfiles();
+    }
+
+    public void updateConsultant(Consultant consultant) {
+        consultantRepository.save(consultant);
     }
     
     public void saveConsultant(Consultant consultant) {

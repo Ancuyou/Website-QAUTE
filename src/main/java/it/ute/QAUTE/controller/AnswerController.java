@@ -4,7 +4,7 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
 import it.ute.QAUTE.entity.Question;
-import it.ute.QAUTE.repository.ConsultantRepository;
+import it.ute.QAUTE.service.ConsultantService;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/consultant")
 public class AnswerController {
 
     @Autowired
@@ -28,7 +28,7 @@ public class AnswerController {
     private AccountService accountService;
 
     @Autowired
-    private ConsultantRepository consultantRepository;
+    private ConsultantService consultantService;
 
     @PostMapping("/questions/answer")
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
@@ -46,14 +46,11 @@ public class AnswerController {
         // Ensure the user is a consultant
         if (account.getRole() != Account.Role.Consultant) {
             redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có tư vấn viên mới có thể trả lời.");
-            return "redirect:/user/questions";
+            return "redirect:/consultant/questions";
         }
 
-        Consultant consultant = consultantRepository.findByProfile_ProfileID(account.getProfile().getProfileID());
-        if (consultant == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin tư vấn viên.");
-            return "redirect:/user/questions";
-        }
+        Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
 
         Answer answer = new Answer();
         Question question = new Question();
@@ -67,6 +64,6 @@ public class AnswerController {
         answerService.saveAnswer(answer);
 
         redirectAttributes.addFlashAttribute("successMessage", "Câu trả lời của bạn đã được gửi thành công!");
-        return "redirect:/user/questions";
+        return "redirect:/consultant/questions";
     }
 }
