@@ -1,64 +1,6 @@
 <!-- templates/fragments/consultant-navbar.html -->
-<nav th:fragment="consultant-navbar" class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
-    <div class="container">
-        <a class="navbar-brand fw-bold fs-3" href="#">
-            <i class="fas fa-graduation-cap me-2"></i>QAUTE - Tư vấn viên
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant}">
-                        <i class="fas fa-tachometer-alt me-1"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/questions}">
-                        <i class="fas fa-question-circle me-1"></i> Câu hỏi
-                        <span class="badge bg-warning ms-1">12</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/chats}">
-                        <i class="fas fa-comments me-1"></i> Trò chuyện
-                        <span class="badge bg-danger ms-1">5</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/history}">
-                        <i class="fas fa-history me-1"></i> Lịch sử tư vấn
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/community}">
-                        <i class="fas fa-users me-1"></i> Cộng đồng
-                    </a>
-                </li>
-            </ul>
-            <ul class="navbar-nav">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2 border border-light" alt="Avatar" width="32" height="32">
-                        <span class="fw-semibold text-white" th:text="${(#authentication != null and #authentication.principal != null and #authentication.principal instanceof T(it.ute.QAUTE.entity.Account)) ? #authentication.principal.profile.fullName : 'Tư vấn viên'}">Tư vấn viên</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" th:href="@{/consultant/profile}"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                        <li><a class="dropdown-item" th:href="@{/consultant/settings}"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                    </ul>
-                </li>
-                <li class="nav-item ms-2">
-                    <a class="nav-link position-relative" th:href="@{/consultant/notifications}">
-                        <i class="fas fa-bell fs-5"></i>
-                        <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger">
-                            8+
-                        </span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<th:block th:fragment="consultant-navbar" th:replace="~{fragments/userDropDown :: consultantHeader(
+    ${account?.profile?.fullName},
+    ${account?.profile?.avatar},
+    true
+)}"></th:block>

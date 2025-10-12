@@ -18,7 +18,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Controller
-@RequestMapping("/user")
+@RequestMapping("/consultant")
 public class AnswerController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class AnswerController {
         // Ensure the user is a consultant
         if (account.getRole() != Account.Role.Consultant) {
             redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có tư vấn viên mới có thể trả lời.");
-            return "redirect:/user/questions";
+            return "redirect:/consultant/questions";
         }
 
         Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
@@ -64,6 +64,6 @@ public class AnswerController {
         answerService.saveAnswer(answer);
 
         redirectAttributes.addFlashAttribute("successMessage", "Câu trả lời của bạn đã được gửi thành công!");
-        return "redirect:/user/questions";
+        return "redirect:/consultant/questions";
     }
 }

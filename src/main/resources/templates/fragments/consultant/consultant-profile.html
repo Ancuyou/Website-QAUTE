@@ -7,210 +7,146 @@
                 <h2 class="fw-bold">Hồ sơ tư vấn viên</h2>
                 <p class="text-muted">Quản lý thông tin cá nhân và chuyên môn</p>
             </div>
-            <div>
-                <button type="button" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i> Lưu thay đổi
-                </button>
-            </div>
         </div>
-
-        <div class="row g-4">
-            <!-- Left Column - Personal Info -->
-            <div class="col-lg-4">
-                <!-- Profile Card -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body text-center p-4">
-                        <div class="position-relative d-inline-block mb-4">
-                            <img src="https://via.placeholder.com/150" class="rounded-circle img-thumbnail" alt="Avatar" width="150" height="150">
-                            <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle">
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <!-- Form bao bọc toàn bộ -->
+        <form th:action="@{/consultant/profile/update}" method="post" enctype="multipart/form-data">
+            <div class="row g-4">
+                <!-- Left Column - Personal Info -->
+                <div class="col-lg-4">
+                    <!-- Profile Card -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body text-center p-4">
+                           <div class="position-relative d-inline-block mb-4">
+                            <img id="avatarPreview"
+                                th:src="${profile.avatar != null and !#strings.isEmpty(profile.avatar) ? '/qaute' + profile.avatar : '/qaute/images/default_avatar.png'}"
+                                class="rounded-circle img-thumbnail"
+                                alt="Avatar"
+                                width="150"
+                                height="150">
+                                
+                            <label for="avatarUpload"
+                                class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle"
+                                style="cursor: pointer;">
                                 <i class="fas fa-camera"></i>
-                            </button>
+                            </label>
+                            
+                            <input type="file"
+                                id="avatarUpload"
+                                name="avatarFile"
+                                accept="image/*"
+                                style="display: none;"
+                                onchange="previewAvatar(this)">
                         </div>
-                        <h4 class="fw-bold mb-1" th:text="${(#authentication != null and #authentication.principal != null and #authentication.principal instanceof T(it.ute.QAUTE.entity.Account)) ? #authentication.principal.profile.fullName : 'Nguyễn Văn Tư Vấn'}">Nguyễn Văn Tư Vấn</h4>
-                        <p class="text-muted mb-3">Tư vấn viên</p>
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-outline-primary">
-                                <i class="fas fa-eye me-2"></i> Xem hồ sơ công khai
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Status Card -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Trạng thái</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="onlineStatus" checked>
-                            <label class="form-check-label" for="onlineStatus">Hiển thị trạng thái trực tuyến</label>
-                        </div>
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="availableStatus" checked>
-                            <label class="form-check-label" for="availableStatus">Sẵn sàng nhận câu hỏi mới</label>
-                        </div>
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="notificationStatus" checked>
-                            <label class="form-check-label" for="notificationStatus">Nhận thông báo</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Social Links Card -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Liên kết mạng xã hội</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="input-group mb-3">
-                            <span class="input-group-text bg-light">
-                                <i class="fab fa-facebook text-primary"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="Facebook URL">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text bg-light">
-                                <i class="fab fa-linkedin text-primary"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="LinkedIn URL">
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text bg-light">
-                                <i class="fab fa-twitter text-info"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="Twitter URL">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light">
-                                <i class="fab fa-github text-dark"></i>
-                            </span>
-                            <input type="text" class="form-control" placeholder="GitHub URL">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Column - Professional Info -->
-            <div class="col-lg-8">
-                <!-- Personal Information Card -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Thông tin cá nhân</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" value="Nguyễn Văn Tư Vấn">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" value="tuvan@ute.edu.vn" disabled>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control" value="0901234567">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ngày sinh</label>
-                                <input type="date" class="form-control" value="1985-01-15">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Địa chỉ</label>
-                                <textarea class="form-control" rows="2">1 Võ Văn Ngân, P. Linh Chiểu, Tp. Thủ Đức, Tp. HCM</textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Professional Information Card -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Thông tin chuyên môn</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Học vị</label>
-                                <select class="form-select">
-                                    <option>Cử nhân</option>
-                                    <option selected>Thạc sĩ</option>
-                                    <option>Tiến sĩ</option>
-                                    <option>Giáo sư</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Chức vụ</label>
-                                <input type="text" class="form-control" value="Giảng viên">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Khoa/Bộ môn</label>
-                                <select class="form-select">
-                                    <option>Công nghệ thông tin</option>
-                                    <option selected>Quản trị kinh doanh</option>
-                                    <option>Kỹ thuật ô tô</option>
-                                    <option>Điện - Điện tử</option>
-                                    <option>Xây dựng</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Năm kinh nghiệm</label>
-                                <input type="number" class="form-control" value="8">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Lĩnh vực chuyên môn</label>
-                                <select class="form-select" multiple size="3">
-                                    <option selected>Tư vấn học tập</option>
-                                    <option selected>Hướng nghiệp</option>
-                                    <option>Học bổng</option>
-                                    <option>Quy trình đào tạo</option>
-                                    <option>Thực tập, việc làm</option>
-                                </select>
-                                <small class="text-muted">Giữ Ctrl để chọn nhiều lĩnh vực</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Biography Card -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Giới thiệu bản thân</h5>
-                    </div>
-                    <div class="card-body">
-                        <textarea class="form-control" rows="5">Tôi là giảng viên khoa Quản trị kinh doanh với hơn 8 năm kinh nghiệm giảng dạy và tư vấn sinh viên. Chuyên môn của tôi tập trung vào hướng nghiệp và tư vấn học tập. Tôi đã giúp hàng trăm sinh viên định hướng nghề nghiệp và giải quyết các vấn đề trong quá trình học tập.</textarea>
-                    </div>
-                </div>
-
-                <!-- Password Change Card -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white">
-                        <h5 class="card-title mb-0 fw-semibold">Thay đổi mật khẩu</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-12">
-                                <label class="form-label">Mật khẩu hiện tại</label>
-                                <input type="password" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Mật khẩu mới</label>
-                                <input type="password" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Xác nhận mật khẩu mới</label>
-                                <input type="password" class="form-control">
-                            </div>
-                            <div class="col-12">
+                            <h4 class="fw-bold mb-1" th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Nguyễn Văn Tư Vấn</h4>
+                            <p class="text-muted mb-3">Tư vấn viên</p>
+                            <div class="d-grid gap-2">
                                 <button type="button" class="btn btn-outline-primary">
-                                    <i class="fas fa-key me-2"></i> Đổi mật khẩu
+                                    <i class="fas fa-eye me-2"></i> Xem hồ sơ công khai
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Professional Info -->
+                <div class="col-lg-8">
+                    <!-- Personal Information Card -->
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0 fw-semibold">Thông tin cá nhân</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="fullName" th:value="${profile.fullName}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" class="form-control" th:value="${account.email}" disabled>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" name="phone" th:value="${profile.phone}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên đăng nhập</label>
+                                    <input type="text" class="form-control" th:value="${account.username}" disabled>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Vai trò</label>
+                                    <input type="text" class="form-control" th:value="${account.role}" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information Card -->
+                    <div class="card border-0 shadow-sm mb-4" th:if="${consultant != null}">
+                        <div class="card-header bg-white">
+                            <h5 class="card-title mb-0 fw-semibold">Thông tin chuyên môn</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Consultant ID</label>
+                                    <input type="text" class="form-control" th:value="${consultant.consultantID}" disabled>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Năm kinh nghiệm <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="experienceYears" th:value="${consultant.experienceYears}" min="0" required>
+                                </div>
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Thông tin tư vấn viên:</strong><br>
+                                        ID: <span th:text="${consultant.consultantID}">N/A</span><br>
+                                        Kinh nghiệm: <span th:text="${consultant.experienceYears}">N/A</span> năm
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No Consultant Profile Message -->
+                    <div class="card border-0 shadow-sm mb-4" th:if="${consultant == null}">
+                        <div class="card-body text-center py-5">
+                            <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có thông tin tư vấn viên</h5>
+                            <p class="text-muted">Vui lòng liên hệ quản trị viên để thiết lập hồ sơ tư vấn viên</p>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save me-2"></i> Lưu thay đổi
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
+    <script>
+        function previewAvatar(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            const preview = document.getElementById('avatarPreview');
+            preview.src = e.target.result; // Gán ảnh base64 vào thẻ <img>
+        };
+
+        reader.readAsDataURL(input.files[0]); // Đọc file vừa chọn
+    }
+}
+    </script>
 </section>

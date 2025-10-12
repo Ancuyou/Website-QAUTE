@@ -40,6 +40,10 @@ public class ConsultantService {
     public List<Consultant> findAllConsultants() {
         return consultantRepository.findAllWithProfiles();
     }
+
+    public void updateConsultant(Consultant consultant) {
+        consultantRepository.save(consultant);
+    }
     
     public void saveConsultant(Consultant consultant) {
         consultantRepository.save(consultant);

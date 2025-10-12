@@ -1,24 +1,96 @@
-<!-- templates/fragments/user-dropdown.html -->
-<ul th:fragment="userDropdown(userName, avatarUrl)"
+<ul th:fragment="userDropdown(userName, avatarUrl, isConsultant)"
     class="navbar-nav ms-auto">
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center"
            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="${avatarUrl} ?: 'https://via.placeholder.com/32'"
-                 src="https://via.placeholder.com/32"
+            <img th:src="${avatarUrl} ? '/qaute' + ${avatarUrl} : '/qaute/images/default_avatar.png'"
                  class="rounded-circle me-2" alt="Avatar" width="32" height="32">
             <span class="fw-semibold" th:text="${userName} ?: 'Nguyễn Văn A'">Nguyễn Văn A</span>
         </a>
+
         <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" th:href="@{/home/profile}">
-                <i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-            <li><a class="dropdown-item" th:href="@{/settings}">
-                <i class="fas fa-cog me-2"></i>Cài đặt</a></li>
-            <li><a class="dropdown-item" th:href="@{/advice/history}">
-                <i class="fas fa-history me-2"></i>Lịch sử tư vấn</a></li>
+
+            <!-- Nếu là consultant -->
+            <li th:if="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/consultant/home}">
+                    <i class="fas fa-home me-2"></i>Trang chính
+                </a>
+            </li>
+            <li th:if="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/consultant/profile}">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </a>
+            </li>
+            <li th:if="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/consultant/questions}">
+                    <i class="fas fa-comments me-2"></i>Câu hỏi khách hàng
+                </a>
+            </li>
+            <li th:if="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/consultant/history}">
+                    <i class="fas fa-history me-2"></i>Lịch sử tư vấn
+                </a>
+            </li>
+
+            <!-- Nếu KHÔNG phải consultant -->
+            <li th:unless="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/home/profile}">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </a>
+            </li>
+            <li th:unless="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/settings}">
+                    <i class="fas fa-cog me-2"></i>Cài đặt
+                </a>
+            </li>
+            <li th:unless="${isConsultant}">
+                <a class="dropdown-item" th:href="@{/advice/history}">
+                    <i class="fas fa-history me-2"></i>Lịch sử tư vấn
+                </a>
+            </li>
+
             <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item text-danger" th:href="@{/auth/logout}">
-                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+
+            <!-- Logout cho cả hai -->
+            <li>
+                <a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                </a>
+            </li>
         </ul>
     </li>
 </ul>
+
+<!-- Fragment cho header của consultant -->
+<nav th:fragment="consultantHeader(userName, avatarUrl, isConsultant)" 
+     class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container">
+        <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/}">
+            <i class="fas fa-graduation-cap me-2"></i>QAUTE
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Menu trái cho consultant -->
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/home}">Trang chính</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/questions}">Câu hỏi khách hàng</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/history}">Lịch sử tư vấn</a>
+                </li>
+            </ul>
+
+            <!-- User dropdown -->
+            <th:block th:replace="~{fragments/userDropDown :: userDropdown(${userName}, ${avatarUrl}, ${isConsultant})}"></th:block>
+        </div>
+    </div>
+</nav>

@@ -21,7 +21,8 @@
 
             <th:block th:if="${account != null}" th:replace="~{fragments/userDropDown :: userDropdown(
                 ${account.profile?.fullName},
-                ${account.profile?.avatar}
+                ${account.profile?.avatar},
+                false
             )}"></th:block>
 
         </div>
