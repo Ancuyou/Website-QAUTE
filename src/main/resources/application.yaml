@@ -12,9 +12,9 @@ spring:
   thymeleaf:
     cache: false
   datasource:
-    url: jdbc:mysql://localhost:3306/StudentConsultingSystem
+    url: jdbc:mysql://localhost:3306/studentconsultingsystem
     username: root
-    password: 123456
+    password: root
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -29,8 +29,8 @@ spring:
   mail:
       host: smtp.gmail.com
       port: 587
-      username: lmht312113@gmail.com
-      password: cgou vhkl hxop sedj
+      username: herothaibao99@gmail.com
+      password: nzop khsn iycb rdba
       properties:
         mail:
           smtp:
