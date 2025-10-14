@@ -146,16 +146,29 @@
                 </div>
                 
                 <!-- Pagination -->
-                <nav class="mt-4" th:if="${!#lists.isEmpty(answersHistory)}">
+               <nav class="mt-4" th:if="${totalPages > 1}">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#"><i class="fas fa-chevron-left"></i></a>
+                        <!-- Previous button -->
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                            th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                            <a class="page-link" href="#"><i class="fas fa-chevron-right"></i></a>
+                        <!-- Page numbers -->
+                        <li class="page-item"
+                            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link"
+                            th:href="@{/consultant/history(page=${i}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}"
+                            th:text="${i + 1}">1</a>
+                        </li>
+                        <!-- Next button -->
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                            <a class="page-link"
+                            th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
                         </li>
                     </ul>
                 </nav>
