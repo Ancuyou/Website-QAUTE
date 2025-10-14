@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.ConsultantRepository;
+import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,8 @@ public class ApplicationInitConfig {
     UserRepository userRepository;
     @Autowired
     ConsultantRepository consultantRepository;
-
+    @Autowired
+    ProfilesRepository profilesRepository;
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
@@ -73,7 +75,7 @@ public class ApplicationInitConfig {
                 
                 log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
             }
-            if(accountRepository.findByUsername("user") == null){
+            if(accountRepository.findByUsername("user") == null) {
                 Profiles profile = new Profiles();
                 profile.setFullName("User");
                 profile.setPhone("0000000000");
@@ -84,13 +86,15 @@ public class ApplicationInitConfig {
                 account.setEmail("23112074@student.hcmute.edu.vn");
                 account.setRole(Account.Role.User);
                 account.setProfile(profile);
-                Account savedAccount = accountRepository.save(account);
                 User user = new User();
-                user.setProfile(savedAccount.getProfile());
                 user.setStudentCode("23112074");
-                userRepository.save(user);
+                user.setProfile(profile);
+                user.setRoleName("Sinh Viên");
+                profile.setUser(user);
+                profile.setAccount(account);
+                accountRepository.save(account);
                 log.warn("✅ User account created: username=user, password=user. Please change it!");
-            }   
+            }
         };
     }
 }

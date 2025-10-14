@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AdminService;
 import it.ute.QAUTE.service.DepartmentService;
+import it.ute.QAUTE.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 
 
 @Controller
@@ -34,26 +36,8 @@ public class AdminController {
     private AccountService accountService;
     @Autowired
     private DepartmentService departmentService;
-    @GetMapping("/home")
-    public String home(@RequestParam(name = "page", defaultValue = "1") int page,
-                       @RequestParam(name = "size", defaultValue = "10") int size,
-                       @RequestParam(name = "search", defaultValue = "") String search,
-                       @RequestParam(name = "role", defaultValue = "") String role,
-                       @RequestParam(name = "section", defaultValue = "users") String section,
-                       Model model) {
-        Page<Account> pageData = adminService.getPage(page, size,search,role);
-        model.addAttribute("accounts", pageData.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", pageData.getTotalPages());
-        model.addAttribute("totalItems", pageData.getTotalElements());
-        model.addAttribute("pageSize", size);
-        model.addAttribute("pageSizeOptions", new int[]{5, 10, 20, 50});
-        model.addAttribute("search", search);
-        model.addAttribute("selectedRole", role);
-        model.addAttribute("section", section);
-        return "pages/admin/home";
-    }
-
+    @Autowired
+    private UserService userService;
     @GetMapping("/consultants")
     public String listConsultants(
             @RequestParam(defaultValue = "") String q,
@@ -66,7 +50,7 @@ public class AdminController {
         if (q != null && !q.equals("")) {
             data = accountService.searchByKeywordAndRole(q, Account.Role.Consultant, pageable);
         } else {
-            data = accountService.getListAccount(Account.Role.Consultant, pageable);
+            data = accountService.findAccountByRole(Account.Role.Consultant, pageable);
         }
 
         model.addAttribute("accounts", data.getContent());
@@ -295,7 +279,7 @@ public class AdminController {
         if (q != null && !q.equals("")) {
             data = accountService.searchByKeywordAndRole(q, Account.Role.Manager, pageable);
         } else {
-            data = accountService.getListAccount(Account.Role.Manager, pageable);
+            data = accountService.findAccountByRole(Account.Role.Manager, pageable);
         }
 
         model.addAttribute("accounts", data.getContent());
@@ -327,42 +311,27 @@ public class AdminController {
     public String blockAccount(@PathVariable("id") Integer id) {
         accountService.blockOrOpenAccount(id);
         return "redirect:/admin/consultants"; // map ve cho manager./ not manager chua xg   }
-
-
-    /*@GetMapping("/users/edit/{id}")
-    public String edit(@PathVariable Integer id, Model model) {
-        Account account=adminService.findById(id);
-        model.addAttribute("account",account);
-        return "pages/admin/edit";
     }
-    @PostMapping("users/update")
-    public String update(@ModelAttribute Account account,
-                         @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile) throws IOException {
-        System.out.println(account.getAccountID());
-        Account existing = adminService.findById(account.getAccountID());
-        if (existing == null) {
-            throw new RuntimeException("Account not found!");
+    @GetMapping("/users")
+    public String listUsers(@RequestParam(defaultValue = "") String q,
+                            @RequestParam(defaultValue = "1") int page,
+                            @RequestParam(defaultValue = "5") int size,
+                            Model model){
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("accountID").descending());
+        Page<Account> data;
+        if (q != null && !q.equals("")) {
+            data = accountService.searchByKeywordAndRole(q, Account.Role.User, pageable);
+        } else {
+            data = accountService.findAccountByRole(Account.Role.User, pageable);
         }
-        existing.setEmail(account.getEmail());
-        existing.setRole(account.getRole());
-        existing.getProfile().setFullName(account.getProfile() != null ? account.getProfile().getFullName() : existing.getProfile().getFullName());
-        existing.getProfile().setPhone(account.getProfile() != null ? account.getProfile().getPhone() : existing.getProfile().getPhone());
-        if (avatarFile!=null) {
-            String uploadDir = "src/main/resources/static/images/avatars/";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-            String originalFileName = avatarFile.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-            String fileName = account.getAccountID() + extension;
-            existing.getProfile().setAvatar("/images/avatars/" + fileName);
-            java.nio.file.Path filePath = Paths.get(uploadDir, fileName);
-            Files.copy(avatarFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        }
-        accountService.updateAccount(existing);
-        return "redirect:/admin/home?section=users";
-    }*/
+        model.addAttribute("accounts", data.getContent());
+        model.addAttribute("q", q);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("size", size);
+        model.addAttribute("totalPages", data.getTotalPages());
+        model.addAttribute("totalItems", data.getTotalElements());
+        model.addAttribute("pageSizeOptions", new int[]{5, 10, 15, 20});
+        model.addAttribute("active", "users");
+        return "pages/admin/users";
     }
 }

@@ -7,6 +7,8 @@ import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -25,7 +27,6 @@ public class UserService {
     public Optional<User> findByProfileId(Integer profileId) {
         return userRepository.findByProfile_ProfileID(profileId);
     }
-    
     public Profiles getCurrentUserProfile(String username) {
         Account account = accountRepository.findByUsername(username);
         Profiles profiles = account.getProfile();
