@@ -29,6 +29,9 @@ public class AccountService {
         account.setPassword(authenticationService.hashed(password));
         accountRepository.save(account);
     }
+    public Account findById(int id){
+        return accountRepository.findByAccountID(id);
+    }
     public void updateAccount(Account account){
         accountRepository.save(account);
     }
@@ -78,20 +81,18 @@ public class AccountService {
         return accountRepository.getListAccount(role, pageable);
     }
     public Account insertAccount(Account account){
-        account.setCreatedDate(new Date()); // fix loi khong nhan duoc gio hien tai
+        account.setCreatedDate(new Date());
         return accountRepository.save(account);
     }
-
     public void blockOrOpenAccount(Integer id){
         Account acc = accountRepository.findByAccountID(id);
-        if (acc.isBlock()){  // lock
+        if (acc.isBlock()){
             acc.setBlock(Boolean.FALSE);
             accountRepository.save(acc);
         }
-        else {  // open
+        else {
             acc.setBlock(Boolean.TRUE);
             accountRepository.save(acc);
         }
-
     }
 }
