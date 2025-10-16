@@ -24,7 +24,13 @@ public class User {
     @Column(name = "StudentCode", length = 20)
     private String studentCode;
 
-    @Column(name = "RoleName", length = 50)
-    private String roleName;
+    @Column(name = "RoleName", nullable = false)  // dùng để xác minh danh tinh khong co tac dung autho
+    @Enumerated(EnumType.STRING)
+    private Role roleName;
 
+    public enum Role {
+        SinhVien,
+        HocSinh,
+        PhuHuynh
+    }
 }

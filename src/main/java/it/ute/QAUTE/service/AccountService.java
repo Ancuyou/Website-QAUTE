@@ -1,19 +1,27 @@
 package it.ute.QAUTE.service;
 
+import it.ute.QAUTE.Exception.AppException;
+import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.Random;
 
+@Slf4j
 @Service
 public class AccountService {
     @Autowired
@@ -21,9 +29,10 @@ public class AccountService {
     @Autowired
     private AuthenticationService authenticationService;
     @Autowired
-    private UserRepository userRepository;
+    private PasswordEncoder passwordEncoder;
     @Autowired
-    private ProfilesRepository profilesRepository;
+    private FileStorageService fileStorageService;
+
     public void changePassword(String email,String password){
         Account account=accountRepository.findByEmail(email);
         account.setPassword(authenticationService.hashed(password));
@@ -47,7 +56,8 @@ public class AccountService {
         User user = new User();
         user.setStudentCode("123");
         user.setProfile(profiles);
-        user.setRoleName("Sinh Viên");
+        //user.setRoleName("Sinh Viên");
+        user.setRoleName(User.Role.SinhVien);
         profiles.setUser(user);
         profiles.setAccount(account);
         accountRepository.save(account);
@@ -71,27 +81,81 @@ public class AccountService {
     public Page<Account> searchByKeywordAndRole(String search, Account.Role role, Pageable pageable){
         return accountRepository.searchByKeywordAndRole(search, role, pageable);
     }
+
+    public Page<Account> searchUserByKeywordAndRoleName(String search, Pageable pageable){
+        return accountRepository.searchUserByKeywordAndRoleName(search, Account.Role.User, pageable);
+    }
+    public Page<Account> findAccountByRoleAndUserRole(User.Role roleName, Pageable pageable){
+        return accountRepository.findAccountByRoleAndUserRole(roleName, pageable);
+    }
+    // ??? wtf
     public Page<Account> findAccountByRole(Account.Role role, Pageable pageable){
         if (role == Account.Role.User) {
             return accountRepository.findAccountByUser(role, pageable);
         }
         return accountRepository.getListAccount(role, pageable);
     }
-    public Account insertAccount(Account account){
-        account.setCreatedDate(new Date()); // fix loi khong nhan duoc gio hien tai
-        return accountRepository.save(account);
-    }
 
-    public void blockOrOpenAccount(Integer id){
+    //done clean
+    public Account blockOrOpenAccount(Integer id){
         Account acc = accountRepository.findByAccountID(id);
         if (acc.isBlock()){  // lock
             acc.setBlock(Boolean.FALSE);
             accountRepository.save(acc);
+            return acc;
         }
         else {  // open
             acc.setBlock(Boolean.TRUE);
             accountRepository.save(acc);
+            return acc;
+        }
+    }
+    public Account findAccountByID(Integer id){
+        return accountRepository.findByAccountID(id);
+    }
+
+    @Transactional
+    public Account createManagerOrConsultant(Account account, String password, MultipartFile avatarFile) {
+        if (accountRepository.findByUsername(account.getUsername()) != null) {
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
+        }
+        if (accountRepository.findByEmail(account.getEmail()) != null) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
+        account.setPassword(passwordEncoder.encode(password));
+        account.setCreatedDate(new Date());
+        Account acc = accountRepository.save(account);  // save lan 1
+
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String avatarFileName = fileStorageService.storeFile(avatarFile, acc.getAccountID());
+            acc.getProfile().setAvatar(avatarFileName);
+        }
+        return accountRepository.save(acc);
+    }
+
+    @Transactional
+    public Account editManagerOrConsultant(Account account,String pass, MultipartFile avatarFile) {
+        if (accountRepository.existsByUsernameAndAccountIDNot(account.getUsername(), account.getAccountID())) {
+            throw new AppException(ErrorCode.USERNAME_EXISTED);
+        }
+        if (accountRepository.existsByEmailIgnoreCaseAndAccountIDNot(account.getEmail(), account.getAccountID())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        account.setPassword(passwordEncoder.encode(pass));
+
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String avatarFileName = fileStorageService.storeFile(avatarFile, account.getAccountID());
+            account.getProfile().setAvatar( avatarFileName);
+        }
+        return accountRepository.save(account);
+    }
+    public void deleteAccount(Integer id) {
+        try {
+            accountRepository.deleteById(id);
+        } catch (AppException e) {
+            throw new AppException(ErrorCode.ERROR_DELETED);
+        }
     }
 }

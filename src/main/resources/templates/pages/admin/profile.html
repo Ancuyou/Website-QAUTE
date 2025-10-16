@@ -1,10 +1,10 @@
-<th:block th:replace="~{pages/admin/layout :: layout(~{::consultant_edit_content}, 'consultants')}">
-    <th:block th:fragment="consultant_edit_content">
+<th:block th:replace="~{pages/admin/layout :: layout(~{::profile_Admin}, 'user')}">
+    <th:block th:fragment="profile_Admin">
         <div class="container py-3">
             <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                <h2 class="h4 mb-0">
-                    <i class="fas fa-user-edit me-2"></i>Chỉnh sửa tư vấn viên
-                </h2>
+                <h1 class="h2">
+                    <i class="fas fa-arrows-rotate me-2"></i>Quản lý Phiên Đăng Nhập
+                </h1>
             </div>
 
             <div class="alert alert-info d-flex align-items-center" role="alert">
@@ -15,9 +15,9 @@
             <div class="card shadow-sm">
                 <div class="card-body">
 
-                    <form th:action="@{/admin/consultant/update}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <form th:action="@{/admin/profile}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
                         <input type="hidden" name="accountID" th:value="${account.accountID}"/>
-
+                        <input type="hidden" name="role" th:value="${account.role}"/>
                         <!-- Avatar -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block" onclick="document.getElementById('avatarFile').click();">
@@ -57,7 +57,7 @@
                                        name="username"
                                        th:value="${account.username}"
                                        required
-                                       placeholder="username (3–30 ký tự, a-z, 0-9, . _ -)">
+                                       placeholder="user_123">
                             </div>
 
                             <div class="col-md-6">
@@ -66,7 +66,7 @@
                                 </label>
                                 <input type="tel" class="form-control" id="phone" name="profile.phone"
                                        th:value="${account.profile != null ? account.profile.phone : ''}"
-                                       placeholder="0123456789">
+                                       placeholder="0841234567">
                             </div>
 
                             <div class="col-md-6">
@@ -74,18 +74,25 @@
                                     <i class="fas fa-envelope me-1 text-primary"></i>Email <span class="text-danger">*</span>
                                 </label>
                                 <input type="email" class="form-control" id="email" name="email"
-                                       th:value="${account.email}" required placeholder="example@email.com">
+                                       th:value="${account.email}" required placeholder="user@email.com">
                             </div>
 
+                            <!-- 🟢 Vai trò (Role) -->
                             <div class="col-md-6">
-                                <label for="role" class="form-label fw-semibold">
-                                    <i class="fas fa-user-tag me-1 text-primary"></i>Vai trò <span class="text-danger">*</span>
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-user-shield me-1 text-primary"></i>Vai trò
                                 </label>
-                                <select class="form-select" id="role" name="role" required>
-                                    <option th:value="Manager"    th:selected="${account.role == T(it.ute.QAUTE.entity.Account.Role).Manager}">Quản lý</option>
-                                    <option th:value="Consultant" th:selected="${account.role == T(it.ute.QAUTE.entity.Account.Role).Consultant}">Tư vấn viên</option>
-                                    <option th:value="User"       th:selected="${account.role == T(it.ute.QAUTE.entity.Account.Role).User}">Người dùng</option>
-                                </select>
+                                <input type="text" class="form-control bg-light" readonly
+                                       th:value="${account.role}">
+                            </div>
+
+                            <!-- 🕓 Ngày tạo tài khoản -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">
+                                    <i class="fas fa-calendar-alt me-1 text-primary"></i>Ngày tạo tài khoản
+                                </label>
+                                <input type="text" class="form-control bg-light" readonly
+                                       th:value="${#dates.format(account.createdDate, 'dd/MM/yyyy HH:mm')}">
                             </div>
                         </div>
 
@@ -123,7 +130,7 @@
 
                         <!-- Actions -->
                         <div class="d-flex justify-content-between mt-4">
-                            <a th:href="@{/admin/consultants}" class="btn btn-secondary">
+                            <a th:href="@{/admin/users}" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i>Hủy
                             </a>
                             <button type="submit" class="btn btn-primary" id="submitBtn">

@@ -16,4 +16,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
     @Query("SELECT d FROM Department d WHERE LOWER(d.departmentName) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     Page<Department> findByNameDepartment(String keyword, Pageable pageable);
     List<Department> findByType(Department.DepartmentType type);
+
+    boolean existsByDepartmentNameIsIgnoreCaseAndDepartmentIDNot(String departmentName, Integer departmentID);
 }

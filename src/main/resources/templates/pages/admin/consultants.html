@@ -41,7 +41,7 @@
                             </td>
                             <td th:text="${a.email}">email@example.com</td>
                             <td><span class="badge bg-success" th:text="${a.role}">Consultant</span></td>
-                            <span th:text="${a.createdDate != null ? #dates.format(a.createdDate, 'dd/MM/yyyy') : 'N/A'}"></span>
+                            <td th:text="${a.createdDate != null ? #dates.format(a.createdDate, 'dd/MM/yyyy') : 'N/A'}"></td>
                             <td class="text-nowrap">
                                 <a class="btn btn-sm"
                                    th:classappend="${a.isBlock} ? 'btn-danger' : 'btn-success'"
@@ -52,7 +52,7 @@
                                 <a class="btn btn-sm btn-warning" th:href="@{/admin/consultant/edit/{id}(id=${a.accountID})}" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form th:action="@{/admin/consultant/{id}/delete(id=${a.accountID})}"
+                                <form th:action="@{/admin/account/delete/{id} (id=${a.accountID})}"
                                       method="post"
                                       class="d-inline"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa consultant này?');">

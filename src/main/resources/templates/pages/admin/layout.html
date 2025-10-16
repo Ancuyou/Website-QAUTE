@@ -15,12 +15,10 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32"/>
                         <span>Admin</span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/admin/profile"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                        <li><a class="dropdown-item" href="/admin/settings"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                        <li><a class="dropdown-item" href="/qaute/admin/profile"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
                         <li><hr class="dropdown-divider"/></li>
                         <li><a class="dropdown-item text-danger" href="/qaute/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
                     </ul>
@@ -36,12 +34,11 @@
         <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link" th:classappend="${active=='dashboard'}? 'active'" th:href="@{/admin/dashboard}"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" th:classappend="${active=='users'}? 'active'"      th:href="@{/admin/users}"><i class="fas fa-users me-2"></i>Quản lý người dùng</a></li>
                     <li class="nav-item"><a class="nav-link" th:classappend="${active=='consultants'}? 'active'" th:href="@{/admin/consultants}"><i class="fas fa-user-tie me-2"></i>Quản lý Consultant</a></li>
                     <li class="nav-item"><a class="nav-link" th:classappend="${active=='managers'}? 'active'"    th:href="@{/admin/managers}"><i class="fas fa-user-shield me-2"></i>Quản lý Manager</a></li>
                     <li class="nav-item"><a class="nav-link" th:classappend="${active=='departments'}? 'active'" th:href="@{/admin/departments}"><i class="fas fa-building me-2"></i>Quản lý Khoa/Ngành</a></li>
-                    <li class="nav-item"><a class="nav-link" th:classappend="${active=='refresh-tokens'}? 'active'"      th:href="@{/admin/refresh-tokens}"><i class="fas fa-graduation-cap me-2"></i>Quản lý phiên đăng nhập </a></li>
+                    <li class="nav-item"><a class="nav-link" th:classappend="${active=='refresh-tokens'}? 'active'"      th:href="@{/admin/refresh-tokens}"><i class="fas fa-arrows-rotate me-2"></i>Quản lý phiên đăng nhập </a></li>
                 </ul>
             </div>
         </nav>
@@ -64,5 +61,6 @@
     .sidebar .nav-link.active { background-color: #4e73df; color: #fff; }
 </style>
 <div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/toast :: toast}"></div>
 </body>
 </html>
