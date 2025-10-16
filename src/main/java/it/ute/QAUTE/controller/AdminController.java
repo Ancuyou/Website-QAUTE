@@ -3,14 +3,10 @@ package it.ute.QAUTE.controller;
 import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.entity.*;
-<<<<<<< HEAD
 import it.ute.QAUTE.service.*;
 import lombok.extern.slf4j.Slf4j;
-=======
-import it.ute.QAUTE.repository.NotificationRepository;
 import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpSession;
->>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,15 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
-<<<<<<< HEAD
 import java.util.Arrays;
-=======
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
->>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
 import java.util.List;
 
 
@@ -48,14 +37,11 @@ public class AdminController {
     @Autowired
     private UserService userService;
     @Autowired
-<<<<<<< HEAD
     private AuthenticationService authenticationService;
-
-=======
-    private NotificationService notificationService;
     @Autowired
-    private AuthenticationService authenticationService;
->>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
+    private NotificationService notificationService;
+
+
     @GetMapping("/consultants")
     public String listConsultants(
             @RequestParam(defaultValue = "") String q,
