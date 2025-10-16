@@ -1,9 +1,16 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.entity.*;
+<<<<<<< HEAD
 import it.ute.QAUTE.service.*;
 import lombok.extern.slf4j.Slf4j;
+=======
+import it.ute.QAUTE.repository.NotificationRepository;
+import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpSession;
+>>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,7 +23,15 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
+<<<<<<< HEAD
 import java.util.Arrays;
+=======
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+>>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
 import java.util.List;
 
 
@@ -33,8 +48,14 @@ public class AdminController {
     @Autowired
     private UserService userService;
     @Autowired
+<<<<<<< HEAD
     private AuthenticationService authenticationService;
 
+=======
+    private NotificationService notificationService;
+    @Autowired
+    private AuthenticationService authenticationService;
+>>>>>>> f2bdef29616ad0b44ebb1556caecb8597c7d83a2
     @GetMapping("/consultants")
     public String listConsultants(
             @RequestParam(defaultValue = "") String q,
@@ -585,5 +606,51 @@ public class AdminController {
         model.addAttribute("userRoles", Arrays.asList(User.Role.values()));
         model.addAttribute("selectedRole", roleName);
         return "pages/admin/users";
+    }
+    @GetMapping("/notifications")
+    public String listNotifications(@RequestParam(defaultValue = "") String q,
+                                    @RequestParam(defaultValue = "") String status,
+                                    @RequestParam(defaultValue = "1") int page,
+                                    @RequestParam(defaultValue = "10") int size,
+                                    Model model){
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
+        Page<Notification> notifications=notificationService.findAllNotifications(pageable);
+        model.addAttribute("notifications", notifications.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", notifications.getTotalPages());
+        model.addAttribute("q", q);
+        model.addAttribute("selectedStatus", status);
+        return "pages/admin/notifications";
+    }
+    @GetMapping("/notifications/new")
+    public String addNotification(Model model){
+        model.addAttribute("notification", null);
+        return "pages/admin/addNotification";
+    }
+    @GetMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Integer id, Model model){
+        model.addAttribute("notification", notificationService.findNotificationById(id));
+        return "pages/admin/addNotification";
+    }
+    @PostMapping("/notification/add")
+    public String addNotifications(@RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("status") String status,
+                                   HttpSession session) throws ParseException, JOSEException {
+        int id= Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Account account=accountService.findById(id);
+        notificationService.createNotification(account, title, content, targetType, status);
+        return "redirect:/admin/notifications";
+    }
+    @PostMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Integer id,
+                                   @RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("status") String status){
+        Notification notification=notificationService.findNotificationById(id);
+        notificationService.updateNotification(title, content, targetType, status);
+        return "redirect:/admin/notifications";
     }
 }

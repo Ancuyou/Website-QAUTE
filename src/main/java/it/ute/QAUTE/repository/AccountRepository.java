@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Integer> {
     boolean existsByEmail(String email);
@@ -57,7 +59,10 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @EntityGraph(attributePaths = "profile")
     @Query("SELECT a FROM Account a WHERE a.accountID=:id")
     Account findByAccountIDWithProfiles(int id);
-
+    @Query("SELECT a FROM Account a JOIN a.profile p WHERE a.role != 'Admin' AND a.role = :role")
+    List<Account> findByRoleExcludeAdmin(Account.Role role);
+    @Query("SELECT a FROM Account a WHERE a.role != 'Admin'")
+    List<Account> findAllExcludeAdmin();
     @Query("SELECT a FROM Account a WHERE a.profile.profileID = :profileId")
     Account findByProfile_ProfileID(@Param("profileId") Integer profileId);
 

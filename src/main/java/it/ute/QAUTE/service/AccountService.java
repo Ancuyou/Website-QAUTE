@@ -6,11 +6,8 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
-import it.ute.QAUTE.repository.ProfilesRepository;
-import it.ute.QAUTE.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,6 +35,9 @@ public class AccountService {
         account.setPassword(authenticationService.hashed(password));
         accountRepository.save(account);
     }
+    public Account findById(int id){
+        return accountRepository.findByAccountID(id);
+    }
     public void updateAccount(Account account){
         accountRepository.save(account);
     }
@@ -56,7 +56,6 @@ public class AccountService {
         User user = new User();
         user.setStudentCode("123");
         user.setProfile(profiles);
-        //user.setRoleName("Sinh Viên");
         user.setRoleName(User.Role.SinhVien);
         profiles.setUser(user);
         profiles.setAccount(account);
@@ -96,15 +95,18 @@ public class AccountService {
         return accountRepository.getListAccount(role, pageable);
     }
 
-    //done clean
+    public Account insertAccount(Account account){
+        account.setCreatedDate(new Date());
+        return accountRepository.save(account);
+    }
     public Account blockOrOpenAccount(Integer id){
         Account acc = accountRepository.findByAccountID(id);
-        if (acc.isBlock()){  // lock
+        if (acc.isBlock()){
             acc.setBlock(Boolean.FALSE);
             accountRepository.save(acc);
             return acc;
         }
-        else {  // open
+        else {
             acc.setBlock(Boolean.TRUE);
             accountRepository.save(acc);
             return acc;
