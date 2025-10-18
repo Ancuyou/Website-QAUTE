@@ -27,9 +27,9 @@ public class ConsultantService {
             dto.setConsultantID(consultant.getConsultantID());
             dto.setProfileID(profile.getProfileID());
             dto.setFullName(profile.getFullName());
-            dto.setAvatar(profile.getAvatar()); // Thay đổi nếu tên field khác
+            dto.setAvatar(profile.getAvatar());
             dto.setExperienceYears(consultant.getExperienceYears());
-            dto.setIsOnline(false); // Tùy chỉnh logic online/offline
+            dto.setIsOnline(false); 
             
             return dto;
         }).collect(Collectors.toList());

@@ -52,4 +52,5 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     @OrderBy("dateAnswered ASC") // Sắp xếp câu trả lời theo thời gian
     private Set<Answer> answers;
+
 }
