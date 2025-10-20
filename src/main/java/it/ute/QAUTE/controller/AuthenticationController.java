@@ -312,7 +312,7 @@ public class AuthenticationController {
             case "ROLE_Consultant":
                 return "/consultant/home";
             case "ROLE_Admin":
-                return "/admin/consultants";
+                return "/admin/users";
             default:
                 return "/auth/login";
         }

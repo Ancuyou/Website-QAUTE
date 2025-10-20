@@ -1,9 +1,9 @@
-<th:block th:replace="~{pages/admin/layout :: layout(~{::consultant_add_content}, 'consultants')}">
-    <th:block th:fragment="consultant_add_content">
+<th:block th:replace="~{pages/admin/layout :: layout(~{::manager_add_content}, 'managers')}">
+    <th:block th:fragment="manager_add_content">
         <div class="container py-3">
             <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
                 <h2 class="h4 mb-0">
-                    <i class="fas fa-user-plus me-2"></i>Thêm mới tư vấn viên
+                    <i class="fas fa-user-plus me-2"></i>Thêm mới Manager
                 </h2>
             </div>
 
@@ -14,8 +14,7 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <form th:action="@{/admin/consultant/insert}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
-
+                    <form th:action="@{/admin/manager/insert}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
                         <!-- Avatar -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block" onclick="document.getElementById('avatarFile').click();">
@@ -60,7 +59,7 @@
                                        th:value="${account.username}"
                                        required
                                        pattern="^[a-z0-9._-]{3,30}$"
-                                       placeholder="username (3–30 ký tự, a-z, 0-9, . _ -)"
+                                       placeholder="user_123"
                                        title="3-30 ký tự, chỉ gồm chữ thường, số và ký tự . _ -">
                             </div>
 
@@ -74,7 +73,7 @@
                                        name="profile.phone"
                                        th:value="${account.profile != null ? account.profile.phone : ''}"
                                        pattern="[0-9]{10,11}"
-                                       placeholder="0123456789">
+                                       placeholder="0841234567">
                             </div>
 
                             <div class="col-md-6">
@@ -87,25 +86,9 @@
                                        name="email"
                                        th:value="${account.email}"
                                        required
-                                       placeholder="example@email.com">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="experienceYears" class="form-label fw-semibold">
-                                    <i class="fas fa-briefcase me-1 text-primary"></i>Số năm kinh nghiệm
-                                </label>
-                                <input type="number"
-                                       class="form-control"
-                                       id="experienceYears"
-                                       name="profile.consultant.experienceYears"
-                                       min="0"
-                                       max="50"
-                                       step="1"
-                                       th:value="${account.profile.consultant.experienceYears != null ? account.profile.consultant.experienceYears : ''}"
-                                       placeholder="Nhập số năm kinh nghiệm">
+                                       placeholder="user@gmail.com">
                             </div>
                         </div>
-
                         <!-- Mật khẩu -->
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
@@ -157,11 +140,11 @@
 
                         <!-- Actions -->
                         <div class="d-flex justify-content-between mt-4">
-                            <a th:href="@{/admin/consultants}" class="btn btn-secondary">
+                            <a th:href="@{/admin/managers}" class="btn btn-secondary">
                                 <i class="fas fa-times me-1"></i>Hủy
                             </a>
                             <button type="submit" class="btn btn-primary" id="submitBtn">
-                                <i class="fas fa-save me-1"></i>Lưu tư vấn viên
+                                <i class="fas fa-save me-1"></i>Lưu tư manager
                             </button>
                         </div>
                     </form>

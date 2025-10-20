@@ -159,8 +159,6 @@ public class EmailService {
                 "    Liên hệ với chúng tôi qua email support@qaute.edu.vn" +
                 "</p>";
     }
-
-    // Template cho email OTP quên mật khẩu
     private String getForgetPasswordOTPContent(String otp) {
         return "<h2>Lấy lại mật khẩu</h2>" +
                 "<p>Xin chào! 👋</p>" +
@@ -180,6 +178,28 @@ public class EmailService {
                 "<p style='color: #999999; font-size: 14px; text-align: center;'>" +
                 "    <strong>Bảo mật tài khoản</strong><br>" +
                 "    Đừng chia sẻ mã OTP với bất kỳ ai, kể cả nhân viên QAUTE" +
+                "</p>";
+    }
+    public String getSystemNotificationContent(String title, String messageBody) {
+        return "<h2>" + title + "</h2>" +
+                "<p>Xin chào bạn 👋</p>" +
+                "<p>Đây là thông báo quan trọng từ hệ thống <strong>QAUTE</strong>:</p>" +
+                "<div class='otp-box'>" +
+                "    <div class='otp-icon'>📢</div>" +
+                "    <div class='otp-label'>Nội dung thông báo</div>" +
+                "    <div class='otp-code' " +
+                "         style='font-size: 20px; letter-spacing: 1px; line-height: 1.8; font-family: Segoe UI, Arial, sans-serif; " +
+                "                background: none; color: #0d6efd; text-shadow: none;'>" +
+                messageBody +
+                "    </div>" +
+                "</div>" +
+                "<div class='info-box'>" +
+                "    <p>🔔 Hãy đảm bảo bạn đã đọc kỹ thông tin và cập nhật kế hoạch của mình nếu cần.</p>" +
+                "</div>" +
+                "<div class='divider'></div>" +
+                "<p style='color: #999999; font-size: 14px; text-align: center;'>" +
+                "    <strong>QAUTE - Hệ thống tư vấn & thông báo trực tuyến</strong><br>" +
+                "    Mọi thắc mắc xin liên hệ: <a href='mailto:support@qaute.edu.vn'>support@qaute.edu.vn</a>" +
                 "</p>";
     }
 }

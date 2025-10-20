@@ -14,6 +14,8 @@ import it.ute.QAUTE.service.ConsultantService;
 import it.ute.QAUTE.service.MessageService;
 import it.ute.QAUTE.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
 import org.springframework.security.core.Authentication;
@@ -147,7 +149,9 @@ public class ConsultantController {
     }
 
     @GetMapping("/questions")
-    public String questionsConsultant(Principal principal, Model model) {
+    public String questionsConsultant(Principal principal, 
+                                     Model model,
+                                     @RequestParam(required = false) Integer highlightQuestion) {
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
 
@@ -155,6 +159,12 @@ public class ConsultantController {
         model.addAttribute("questions", questionService.getAllQuestions());
         model.addAttribute("departments", questionService.getAllDepartments());
         model.addAttribute("fields", questionService.getAllFields());
+        
+        // Truyền ID câu hỏi cần highlight
+        if (highlightQuestion != null) {
+            model.addAttribute("highlightQuestion", highlightQuestion);
+        }
+        
         return "pages/consultant/questions-answer";
     }
     
@@ -175,40 +185,24 @@ public class ConsultantController {
 
     @GetMapping("/history")
     public String historyConsultant(
-            Model model, 
+            Model model,
             Principal principal,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) Integer timeRange,
-            @RequestParam(required = false) String keyword) {
-        
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
         Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
-        
-        List<Answer> answers = answerService.getAllAnswersByConsultant(consultant.getConsultantID());
-        
-     
-        Stream<Answer> answerStream = answers.stream();
-        
-       
-        if (timeRange != null) {
-            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(timeRange);
-            answerStream = answerStream.filter(a -> a.getDateAnswered().isAfter(cutoffDate));
-        }
-        
-        
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String lowerKeyword = keyword.toLowerCase();
-            answerStream = answerStream.filter(a -> 
-                (a.getQuestion() != null && 
-                a.getQuestion().getTitle().toLowerCase().contains(lowerKeyword)) ||
-                a.getContent().toLowerCase().contains(lowerKeyword)
-            );
-        }
-        
-       
-        List<AnswerQuestionDTO> answerQuestionDTOs = answerStream
+
+        // Gọi service lấy Page<Answer>
+        Page<Answer> answerPage = answerService.getAnswersHistoryByConsultant(
+                consultant.getConsultantID(), timeRange, keyword, PageRequest.of(page, size));
+
+        List<AnswerQuestionDTO> answerQuestionDTOs = answerPage.getContent().stream()
             .map(answer -> {
                 AnswerQuestionDTO dto = new AnswerQuestionDTO();
                 dto.setAnswerID(answer.getAnswerID());
@@ -216,14 +210,14 @@ public class ConsultantController {
                 dto.setConsultantName(account.getProfile().getFullName());
                 dto.setContentAnswer(answer.getContent());
                 dto.setAnswerAt(answer.getDateAnswered());
-                
+
                 if (answer.getQuestion() != null) {
                     dto.setQuestionID(answer.getQuestion().getQuestionID());
                     dto.setTitle(answer.getQuestion().getTitle());
                     dto.setCreatedAt(answer.getQuestion().getDateSend());
                     dto.setContentQuestion(answer.getQuestion().getContent());
-                    
-                    if (answer.getQuestion().getUser() != null && 
+
+                    if (answer.getQuestion().getUser() != null &&
                         answer.getQuestion().getUser().getProfile() != null) {
                         dto.setUserName(answer.getQuestion().getUser().getProfile().getFullName());
                         dto.setUserID(answer.getQuestion().getUser().getUserID());
@@ -231,11 +225,8 @@ public class ConsultantController {
                 }
                 return dto;
             })
-            .sorted((a1, a2) -> a2.getAnswerAt().compareTo(a1.getAnswerAt()))
             .toList();
-        
-        // Calculate statistics
-        int totalAnswers = answerQuestionDTOs.size();
+
         long uniqueQuestions = answerQuestionDTOs.stream()
             .map(AnswerQuestionDTO::getQuestionID)
             .distinct()
@@ -245,14 +236,30 @@ public class ConsultantController {
             .filter(id -> id != null)
             .distinct()
             .count();
-        
-        // Add to model
+
         model.addAttribute("account", account);
         model.addAttribute("answersHistory", answerQuestionDTOs);
-        model.addAttribute("totalAnswers", totalAnswers);
+        model.addAttribute("totalAnswers", answerPage.getTotalElements());
         model.addAttribute("uniqueQuestions", uniqueQuestions);
         model.addAttribute("uniqueUsers", uniqueUsers);
-        
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", answerPage.getTotalPages());
+        model.addAttribute("pageSize", size);
+
         return "pages/consultant/history";
+    }
+    @GetMapping("/question-details/{id}")
+    public String questionDetails(@PathVariable("id") Integer questionId, Model model, Principal principal) {
+        String username = principal.getName();
+        Account account = accountService.findUserByUsername(username);
+
+        var question = questionService.getQuestionById(questionId);
+        var answers = answerService.getAnswersByQuestionId(questionId);
+
+        model.addAttribute("account", account);
+        model.addAttribute("question", question);
+        model.addAttribute("answers", answers);
+
+        return "pages/consultant/questiondetails";
     }
 }

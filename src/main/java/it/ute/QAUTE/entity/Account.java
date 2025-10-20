@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 @Entity
@@ -17,6 +19,7 @@ import java.util.Date;
   generator = ObjectIdGenerators.PropertyGenerator.class, 
   property = "accountID"
 )
+@EntityListeners(AuditingEntityListener.class)
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,13 +47,13 @@ public class Account {
     private Role role;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CreatedDate", updatable = false, insertable = false)
+    @Column(name = "CreatedDate", updatable = false)
     private Date createdDate;
     public enum Role {
         Admin,
         Manager,
         Consultant,
-        User;
+        User,
     }
     public Account orElseThrow(Object object) {
         // TODO Auto-generated method stub

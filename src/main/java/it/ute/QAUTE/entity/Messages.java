@@ -35,7 +35,7 @@ public class Messages {
     private MessageType type = MessageType.text;
 
     @Column(name = "Status", length = 20)
-    private String status;
+    private String status="sent";
 
     @Column(name = "CreatedAt", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
@@ -50,6 +50,10 @@ public class Messages {
     @ManyToOne
     @JoinColumn(name = "ReceiverID", referencedColumnName = "ProfileID", insertable = false, updatable = false)
     private Profiles receiver;
+    
+    @Column(name = "is_recalled")
+    private Boolean isRecalled = false;
+
     
     public enum MessageType {
         text, image, file

@@ -1,5 +1,4 @@
 <th:block th:replace="~{pages/admin/layout :: layout(~{::mamagers_content}, 'managers')}">
-
     <th:block th:fragment="mamagers_content">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 class="h2"><i class="fas fa-user-tie me-2"></i>Quản lý Managers</h1>
@@ -40,13 +39,19 @@
                                 </div>
                             </td>
                             <td th:text="${a.email}">email@example.com</td>
-                            <td><span class="badge bg-success" th:text="${a.role}">Manager</span></td>
-                            <td th:text="${a.createdDate != null ? #temporals.format(a.createdDate, 'dd/MM/yyyy') : 'N/A'}">05/01/2024</td>
+                            <td><span class="badge bg-success" th:text="${a.role.Manager}">Manager</span></td>
+                            <td th:text="${a.createdDate != null ? a.createdDate: 'N/A'}">14/10/2025</td>
                             <td class="text-nowrap">
+                                <a class="btn btn-sm"
+                                   th:classappend="${a.isBlock} ? 'btn-danger' : 'btn-success'"
+                                   th:href="@{/admin/account/block/{id}(id=${a.accountID})}"
+                                   th:title="${a.isBlock} ? 'Mở khóa tài khoản' : 'Khóa tài khoản'">
+                                    <i th:class="${a.isBlock} ? 'fas fa-lock-open' : 'fas fa-lock'"></i>
+                                </a>
                                 <a class="btn btn-sm btn-warning" th:href="@{/admin/manager/edit/{id}(id=${a.accountID})}" title="Sửa">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form th:action="@{/admin/manager/{id}/delete(id=${a.accountID})}"
+                                <form th:action="@{/admin/account/delete/{id} (id=${a.accountID})}"
                                       method="post"
                                       class="d-inline"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa managers này?');">
@@ -101,5 +106,4 @@
             </div>
         </div>
     </th:block>
-
 </th:block>

@@ -313,5 +313,15 @@ public class AuthenticationService {
         for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
+    public int getCurrentUserId(HttpSession session) throws ParseException, JOSEException {
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        if (tokenObj instanceof String token && !token.isBlank()) {
+            SignedJWT signedJWT = verifyToken(token, false);
+            String username = signedJWT.getJWTClaimsSet().getSubject();
+            Account acc = accountRepository.findByUsername(username);
+            if (acc != null) return acc.getAccountID();
+        }
+        return 0;
+    }
 }
 

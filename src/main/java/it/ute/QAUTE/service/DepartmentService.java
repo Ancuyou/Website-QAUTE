@@ -1,5 +1,7 @@
 package it.ute.QAUTE.service;
 
+import it.ute.QAUTE.Exception.AppException;
+import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.entity.Department;
 import it.ute.QAUTE.repository.DepartmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DepartmentService {
+public class DepartmentService {  // done clean
     @Autowired
     DepartmentRepository departmentRepository;
-    public Page<Department> findAll(Pageable pageable) {
-        return departmentRepository.findAll(pageable);
-    }
 
     public Page<Department> searchNameDepartment(String keyword, Pageable pageable) {
         if (keyword != null && !keyword.equals("")) {
@@ -34,8 +33,11 @@ public class DepartmentService {
     }
 
     public void updateDepartment(Department department) {
-        Department saved = departmentRepository.save(department);
 
+        if(departmentRepository.existsByDepartmentNameIsIgnoreCaseAndDepartmentIDNot(department.getDepartmentName(), department.getDepartmentID())){
+            throw new AppException(ErrorCode.DEPARTMENTNAME_EXISTED);
+        }
+        Department saved = departmentRepository.save(department);
         if (saved.getParent() == null) {
             saved.setParent(saved);
             departmentRepository.save(saved);

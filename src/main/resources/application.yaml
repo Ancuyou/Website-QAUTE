@@ -57,7 +57,7 @@ spring:
             jwk-set-uri: https://www.googleapis.com/oauth2/v3/certs
 jwt:
   signerKey_access: "Ol4TrKY5pNZf+zUjfsgMcjA+7ZphkCRs61AFHtDW/Aq/bmz9QASBYYM/mzAg7dZ5"
-  valid-duration: 60 #in seconds
-  refresh-duration: 3600 #in seconds : 10 day
+  valid-duration: 3600 #in seconds
+  refresh-duration: 864000 #in seconds : 10 day
 openweather:
   apikey: 8b62d623ee124b44cb88d85bade58e38

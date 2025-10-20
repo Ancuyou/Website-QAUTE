@@ -89,7 +89,8 @@ public class ApplicationInitConfig {
                 User user = new User();
                 user.setStudentCode("23112074");
                 user.setProfile(profile);
-                user.setRoleName("Sinh Viên");
+                //user.setRoleName("Sinh Viên");
+                user.setRoleName(User.Role.SinhVien);
                 profile.setUser(user);
                 profile.setAccount(account);
                 accountRepository.save(account);

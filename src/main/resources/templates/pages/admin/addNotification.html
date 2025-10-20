@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{pages/admin/layout :: layout(~{::notification_form_content}, 'notifications')}">
+
+    <th:block th:fragment="notification_form_content">
+        <div class="container py-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h2 class="h4 mb-0">
+                    <i class="fas fa-bell me-2"></i>
+                    <span th:text="${notification != null} ? 'Chỉnh sửa thông báo' : 'Thêm thông báo mới'"></span>
+                </h2>
+                <a th:href="@{/admin/notifications}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <!-- Nếu có notification thì là edit, không thì là add -->
+                    <form th:action="${notification != null} ?
+                            @{/admin/notifications/edit/{id}(id=${notification.notificationID})} :
+                            @{/admin/notifications/add}"
+                          method="post"
+                          onsubmit="return validateForm()">
+
+                        <div class="row g-3">
+                            <!-- Tiêu đề -->
+                            <div class="col-12">
+                                <label for="title" class="form-label fw-semibold">
+                                    <i class="fas fa-heading me-1 text-primary"></i>Tiêu đề <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="title"
+                                       name="title"
+                                       th:value="${notification?.title}"
+                                       maxlength="200"
+                                       required
+                                       placeholder="Nhập tiêu đề thông báo">
+                            </div>
+
+                            <!-- Đối tượng nhận -->
+                            <div class="col-md-6">
+                                <label for="targetType" class="form-label fw-semibold">
+                                    <i class="fas fa-users me-1 text-primary"></i>Đối tượng nhận <span class="text-danger">*</span>
+                                </label>
+                                <select id="targetType" name="targetType" class="form-select" required>
+                                    <option value="">-- Chọn đối tượng --</option>
+                                    <option value="ALL" th:selected="${notification?.targetType?.name() == 'ALL'}">Tất cả người dùng</option>
+                                    <option value="Manager" th:selected="${notification?.targetType?.name() == 'Manager'}">Người quản lý</option>
+                                    <option value="Consultant" th:selected="${notification?.targetType?.name() == 'Consultant'}">Tư vấn viên</option>
+                                    <option value="User" th:selected="${notification?.targetType?.name() == 'User'}">Người dùng</option>
+                                </select>
+                            </div>
+
+                            <!-- Trạng thái -->
+                            <input type="hidden" id="status" name="status"
+                                   th:value="${notification?.status != null ? notification.status : 'PUBLISHED'}"/>
+
+                            <!-- Nội dung -->
+                            <div class="col-12">
+                                <label for="content" class="form-label fw-semibold">
+                                    <i class="fas fa-align-left me-1 text-primary"></i>Nội dung <span class="text-danger">*</span>
+                                </label>
+                                <textarea id="content"
+                                          name="content"
+                                          class="form-control"
+                                          rows="6"
+                                          required
+                                          placeholder="Nhập nội dung thông báo... "
+                                          th:text="${notification?.content}"></textarea>
+                            </div>
+
+                            <!-- Xem trước -->
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-eye me-1"></i>Xem trước thông báo
+                                    </h6>
+                                    <hr>
+                                    <div id="previewContent">
+                                        <strong id="previewTitle"
+                                                th:text="${notification?.title != null ? notification.title : 'Tiêu đề sẽ hiển thị ở đây'}">
+                                        </strong>
+                                        <p id="previewText" class="mb-0 mt-2"
+                                           th:text="${notification?.content != null ? notification.content : 'Nội dung sẽ hiển thị ở đây'}">
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hành động -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a th:href="@{/admin/notifications}" class="btn btn-secondary">
+                                <i class="fas fa-times me-1"></i>Hủy
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-outline-primary me-2" onclick="saveDraft()">
+                                    <i class="fas fa-file-alt me-1"></i>Lưu nháp
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="submitBtn">
+                                    <i class="fas fa-paper-plane me-1"></i>
+                                    <span th:text="${notification != null} ? 'Cập nhật thông báo' : 'Gửi thông báo'"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script -->
+        <script>
+            const titleInput = document.getElementById('title');
+            const contentInput = document.getElementById('content');
+            const previewTitle = document.getElementById('previewTitle');
+            const previewText = document.getElementById('previewText');
+
+            titleInput.addEventListener('input', () => {
+                previewTitle.textContent = titleInput.value || 'Tiêu đề sẽ hiển thị ở đây';
+            });
+
+            contentInput.addEventListener('input', () => {
+                previewText.textContent = contentInput.value || 'Nội dung sẽ hiển thị ở đây';
+            });
+
+            function validateForm() {
+                const title = titleInput.value.trim();
+                const content = contentInput.value.trim();
+                const targetType = document.getElementById('targetType').value;
+                if (!title) { alert('Vui lòng nhập tiêu đề'); return false; }
+                if (!content) { alert('Vui lòng nhập nội dung'); return false; }
+                if (!targetType) { alert('Vui lòng chọn đối tượng nhận'); return false; }
+                return true;
+            }
+
+            function saveDraft() {
+                document.getElementById('status').value = 'DRAFT';
+                if (validateForm()) {
+                    document.querySelector('form').submit();
+                }
+            }
+
+            document.getElementById('submitBtn').addEventListener('click', function() {
+                document.getElementById('status').value = 'PUBLISHED';
+            });
+        </script>
+    </th:block>
+</th:block>
+</html>

@@ -9,12 +9,11 @@ public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(500, "Internal Server Error"),
     INVALID_KEY(400, "Invalid Key"),
 
-    // User Management Errors
-    USER_EXISTED(409, "Conflict: User already exists"),
-    USERNAME_INVALID(400, "Bad Request: Username must be at least {min} characters"),
-    PASSWORD_INVALID(400, "Bad Request: Password must be at least {min} characters"),
-    USER_NOT_EXISTED(404, "Not Found: User not found"),
-    INVALID_DOB(400, "Bad Request: Your age must be at least {min}"),
+    // Account Management Errors
+    USERNAME_EXISTED(410, "Bad Request: Username exists"),
+    EMAIL_EXISTED(411, "Conflict: Email already exists"),
+    DEPARTMENTNAME_EXISTED(412, "Conflict: Department name already exists"),
+    ERROR_DELETED(413, "Error deleted"),
 
     // Authentication & Authorization Errors
     UNAUTHENTICATED(401, "Unauthorized: Authentication required"),

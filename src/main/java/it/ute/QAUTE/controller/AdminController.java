@@ -1,12 +1,12 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.Exception.AppException;
-import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AdminService;
-import it.ute.QAUTE.service.DepartmentService;
-import it.ute.QAUTE.service.UserService;
+import it.ute.QAUTE.service.*;
+import lombok.extern.slf4j.Slf4j;
+import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,15 +18,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.text.ParseException;
 import java.util.List;
 
 
+@Slf4j
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -38,6 +36,12 @@ public class AdminController {
     private DepartmentService departmentService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private AuthenticationService authenticationService;
+    @Autowired
+    private NotificationService notificationService;
+
+
     @GetMapping("/consultants")
     public String listConsultants(
             @RequestParam(defaultValue = "") String q,
@@ -75,14 +79,63 @@ public class AdminController {
         model.addAttribute("account", account);
         return "pages/admin/editConsultant";
     }
+    @GetMapping("/user/edit/{id}")
+    public String editUser(
+            @PathVariable Integer id,
+            Model model
+    ) {
+        Account account = adminService.findById(id);
+        model.addAttribute("account", account);
+        return "pages/admin/editUser";
+    }
+
+    @GetMapping("/manager/edit/{id}")
+    public String editManager(
+            @PathVariable Integer id,
+            Model model) {
+        Account account = adminService.findById(id);
+        model.addAttribute("account", account);
+        return "pages/admin/editManager";
+    }
+
+    @GetMapping("/user/add")
+    public String addUserForm(Model model) {
+        Profiles profile = new Profiles();
+        User user = new User();
+
+        profile.setUser(user);
+        user.setProfile(profile);
+
+        Account account = new Account();
+        account.setProfile(profile);
+
+        model.addAttribute("account", account);
+        return "pages/admin/addUser";
+    }
 
     @GetMapping("/consultant/add")
     public String addConsultant(Model model) {
+        Profiles profile = new Profiles();
+        Consultant consultant = new Consultant();
+
+        profile.setConsultant(consultant);
+        consultant.setProfile(profile);
+
+        Account account = new Account();
+        account.setProfile(profile);
+
+        model.addAttribute("account", account);
+
+        return "pages/admin/addConsultant";
+    }
+
+    @GetMapping("/manager/add")
+    public String addManager(Model model) {
         Account acc = new Account();
         acc.setProfile(new Profiles());
         acc.getProfile().setConsultant(new Consultant());
         model.addAttribute("account", acc);
-        return "pages/admin/addConsultant";
+        return "pages/admin/addManager";
     }
 
     @GetMapping("/departments")
@@ -106,6 +159,24 @@ public class AdminController {
 
         return "pages/admin/departments";
     }
+
+    @GetMapping("/profile")
+    public String showAdminProfile(@CookieValue(value = "REFRESH_TOKEN", required = false) String refresh,
+                                   Model model) {
+        if (refresh == null || refresh.isBlank()) return "redirect:/auth/login";
+
+        try {
+            var jwt = authenticationService.verifyToken(refresh, true);
+            String username = jwt.getJWTClaimsSet().getSubject();
+            Account acc = accountService.findUserByUsername(username);
+
+            model.addAttribute("account", acc);
+            return "pages/admin/profile";
+
+        } catch (Exception e) {
+            return "redirect:/auth/login";
+        }
+    }
     @GetMapping("/department/edit/{id}")
     public String updateDepartment(
             @PathVariable Integer id,
@@ -122,103 +193,253 @@ public class AdminController {
         return "pages/admin/addDepartment";
     }
 
+    @PostMapping("/profile")
+    public String ProfileUpdate(
+            @ModelAttribute("account") Account form,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+            RedirectAttributes redirectAttributes){
+        try {
+            accountService.editManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/profile";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/profile";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Sửa thành công! Manager " + form.getProfile().getFullName());
+        return "redirect:/admin/profile";
+    }
+
     @PostMapping("/consultant/update")
     public String updateConsultant(
             @ModelAttribute("account") Account form,
+            @RequestParam("newPassword") String newPassword,
+            RedirectAttributes redirectAttributes,
             @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile) throws IOException {
 
-        Account existing = adminService.findById(form.getAccountID());
-        if (existing == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
-
-        existing.setUsername(form.getUsername());
-        existing.setEmail(form.getEmail());
-        existing.setRole(form.getRole());
-
-        if (existing.getProfile() == null) {
-            existing.setProfile(new Profiles());
+        try {
+            accountService.editManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/consultant/edit/" + form.getAccountID();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/consultant/edit/" + form.getAccountID();
         }
-        if (form.getProfile() != null) {
-            existing.getProfile().setFullName(form.getProfile().getFullName());
-            existing.getProfile().setPhone(form.getProfile().getPhone());
-        }
-        existing.setPassword(form.getPassword() != null ? form.getPassword() : existing.getPassword());
-
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String uploadDir = "src/main/resources/static/images/avatars/";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-
-            String originalFileName = avatarFile.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-
-            String fileName = form.getAccountID() + extension;
-            Path filePath = Paths.get(uploadDir, fileName);
-
-            Files.copy(avatarFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            existing.getProfile().setAvatar("/images/avatars/" + fileName);
-        }
-
-        accountService.updateAccount(existing);
-
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Sửa thành công! Consultant " + form.getProfile().getFullName());
         return "redirect:/admin/consultants";
+    }
+    @PostMapping("/user/update")
+    public String updateUser(
+            @ModelAttribute("account") Account form,
+            @RequestParam("newPassword") String newPassword,
+            RedirectAttributes redirectAttributes,
+            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile) throws IOException {
+
+        try {
+            accountService.editManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/user/edit/" + form.getAccountID();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/user/edit/" + form.getAccountID();
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Sửa thành công! User " + form.getProfile().getFullName());
+        return "redirect:/admin/users";
     }
 
 
     @PostMapping("/consultant/insert")
     public String insertConsultant(@ModelAttribute("account") Account form,
                                    @RequestParam("newPassword") String newPassword,
+                                   RedirectAttributes redirectAttributes,
                                    @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile) throws IOException {
-        form.setPassword(newPassword);
-        form.setRole(Account.Role.Consultant);
-        int AccountID = accountService.insertAccount(form).getAccountID();
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String uploadDir = "src/main/resources/static/images/avatars/";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-
-            String originalFileName = avatarFile.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        try {
+            if (form.getProfile() != null && form.getProfile().getConsultant() != null) {
+                form.getProfile().getConsultant().setProfile(form.getProfile());
             }
-
-            String fileName = AccountID + extension;
-            Path filePath = Paths.get(uploadDir, fileName);
-
-            Files.copy(avatarFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            form.getProfile().setAvatar("/images/avatars/" + fileName);
+            form.setRole(Account.Role.Consultant);
+            accountService.createManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm consultant thất bại: " + e.getMessage());
+            return "redirect:/admin/consultant/add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm consultant thất bại: " + e.getMessage());
+            return "redirect:/admin/consultant/add";
         }
-        // not clean, need query
-        form.setAccountID(AccountID);
-        accountService.updateAccount(form);
-
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đăng ký thành công! Consultant: " + form.getProfile().getFullName());
         return "redirect:/admin/consultants";
+    }
+    @PostMapping("/user/insert")
+    public String insertUser(@ModelAttribute("account") Account form,
+                                   @RequestParam("password") String newPassword,
+                                   RedirectAttributes redirectAttributes,
+                                   @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile) throws IOException {
+        try {
+            if (form.getProfile() != null && form.getProfile().getUser() != null) {
+                form.getProfile().getUser().setProfile(form.getProfile());
+            }
+            form.setRole(Account.Role.User);
+            accountService.createManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm user thất bại: " + e.getMessage());
+            return "redirect:/admin/user/add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm user thất bại: " + e.getMessage());
+            return "redirect:/admin/user/add";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Đăng ký thành công! User: " + form.getProfile().getFullName());
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/manager/insert")
+    public String insertManager(@ModelAttribute("account") Account form,
+                                @RequestParam("newPassword") String newPassword,
+                                @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                                RedirectAttributes redirectAttributes){
+        try {
+            form.setRole(Account.Role.Manager);
+            accountService.createManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm manager thất bại: " + e.getMessage());
+            return "redirect:/admin/manager/add";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm manager thất bại: " + e.getMessage());
+            return "redirect:/admin/manager/add";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Thêm thành công! Manager: " + form.getProfile().getFullName());
+        return "redirect:/admin/managers";
     }
 
     @PostMapping("/department/update")
     public String updateDepartment(@ModelAttribute Department department,
+                                   RedirectAttributes redirectAttributes,
                                    @RequestParam(value = "parent.departmentID", required = false) Integer parentId) {
         if (parentId == null) {
             department.setParent(null);
         }
-        departmentService.updateDepartment(department);
+        try {
+            departmentService.updateDepartment(department);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Chỉnh sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/department/edit/" + department.getDepartmentID();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Chỉnh sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/department/edit/" + department.getDepartmentID();
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Chỉnh sửa thành công! Department: " + department.getDepartmentName());
         return "redirect:/admin/departments";
     }
 
     @PostMapping("/department/insert")
     public String insertDepartment(@ModelAttribute Department department,
+                                   RedirectAttributes redirectAttributes,
                                    @RequestParam(value = "parent.departmentID", required = false) Integer parentId){
         if (parentId == null) {
             department.setParent(null);
         }
-        departmentService.updateDepartment(department);
+        try {
+            departmentService.updateDepartment(department);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm Department thất bại: " + e.getMessage());
+            return "redirect:/admin/department/insert";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Thêm Department thất bại: " + e.getMessage());
+            return "redirect:/admin/department/insert";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Thêm thành công! Department: " + department.getDepartmentName());
         return "redirect:/admin/departments";
     }
+    @PostMapping("/account/delete/{id}")
+    public String AccountDelete(
+            @PathVariable("id") Integer id,
+            RedirectAttributes redirectAttributes) {
+
+        Account acc = accountService.findAccountByID(id);
+        try {
+            accountService.deleteAccount(id);
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Xóa thành công! Manager " + acc.getProfile().getFullName());
+
+            if (acc.getRole() == Account.Role.Manager) {
+                return "redirect:/admin/managers";
+            }
+            if (acc.getRole() == Account.Role.Consultant) {
+                return "redirect:/admin/consultants";
+            }
+            return "redirect:/admin/users";
+
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Xóa thất bại: " + e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Xóa thất bại: " + e.getMessage());
+        }
+
+        if (acc.getRole() == Account.Role.Manager) {
+            return "redirect:/admin/managers";
+        }
+        if (acc.getRole() == Account.Role.Consultant) {
+            return "redirect:/admin/consultants";
+        }
+        return "redirect:/admin/users";
+    }
+
     @PostMapping("/department/delete/{id}")
     public String deleteDepartment(@PathVariable("id") Integer id){
         departmentService.deleteDepartment(id);
@@ -295,6 +516,32 @@ public class AdminController {
         return "pages/admin/managers";
     }
 
+
+    @PostMapping("/manager/update")
+    public String updateManager(
+            @ModelAttribute("account") Account form,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+            RedirectAttributes redirectAttributes){
+        try {
+            accountService.editManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/manager/edit/" + form.getAccountID();
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/admin/manager/edit/" + form.getAccountID();
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Sửa thành công! Manager " + form.getProfile().getFullName());
+        return "redirect:/admin/managers";
+    }
+
     @PostMapping("/refresh-token/revoke/{id}")
     public String  revokeRefreshToken(@PathVariable("id") String id){
         adminService.revokeToken(id);
@@ -309,29 +556,87 @@ public class AdminController {
 
     @GetMapping("/account/block/{id}")
     public String blockAccount(@PathVariable("id") Integer id) {
-        accountService.blockOrOpenAccount(id);
-        return "redirect:/admin/consultants"; // map ve cho manager./ not manager chua xg   }
+        Account acc = accountService.blockOrOpenAccount(id);  // du thua du lieu tra ve void thay vi Account
+        if (acc.getRole() == Account.Role.Manager) {
+            return "redirect:/admin/managers";
+        }
+        if (acc.getRole() == Account.Role.Consultant) {
+            return "redirect:/admin/consultants";
+        }
+        return "redirect:/admin/users";  // neu duoc dung javasript doi trang thai khong nhat thiet phai load lai toan trang gay giam hieu suat
+
     }
     @GetMapping("/users")
-    public String listUsers(@RequestParam(defaultValue = "") String q,
-                            @RequestParam(defaultValue = "1") int page,
-                            @RequestParam(defaultValue = "5") int size,
-                            Model model){
-        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("accountID").descending());
-        Page<Account> data;
-        if (q != null && !q.equals("")) {
-            data = accountService.searchByKeywordAndRole(q, Account.Role.User, pageable);
+    public String listUsers(
+            @RequestParam(defaultValue = "") String q,
+            @RequestParam(required = false, defaultValue = "SinhVien") String roleName,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdDate").descending());
+        Page<Account> accountPage;
+        // search keywork
+        if (q != null &&!q.isEmpty()) {
+            accountPage = accountService.searchUserByKeywordAndRoleName(q, pageable);
         } else {
-            data = accountService.findAccountByRole(Account.Role.User, pageable);
+            accountPage = accountService.findAccountByRoleAndUserRole(User.Role.valueOf(roleName), pageable);
         }
-        model.addAttribute("accounts", data.getContent());
-        model.addAttribute("q", q);
+        model.addAttribute("accounts", accountPage.getContent());
         model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", accountPage.getTotalPages());
+        model.addAttribute("totalItems", accountPage.getTotalElements());
+        model.addAttribute("q", q);
         model.addAttribute("size", size);
-        model.addAttribute("totalPages", data.getTotalPages());
-        model.addAttribute("totalItems", data.getTotalElements());
-        model.addAttribute("pageSizeOptions", new int[]{5, 10, 15, 20});
-        model.addAttribute("active", "users");
+        model.addAttribute("pageSizeOptions", List.of(5, 10, 20, 50));
+        model.addAttribute("userRoles", Arrays.asList(User.Role.values()));
+        model.addAttribute("selectedRole", roleName);
         return "pages/admin/users";
+    }
+    @GetMapping("/notifications")
+    public String listNotifications(@RequestParam(defaultValue = "") String q,
+                                    @RequestParam(defaultValue = "") String status,
+                                    @RequestParam(defaultValue = "1") int page,
+                                    @RequestParam(defaultValue = "10") int size,
+                                    Model model){
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
+        Page<Notification> notifications=notificationService.findAllNotifications(pageable);
+        model.addAttribute("notifications", notifications.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", notifications.getTotalPages());
+        model.addAttribute("q", q);
+        model.addAttribute("selectedStatus", status);
+        return "pages/admin/notifications";
+    }
+    @GetMapping("/notifications/new")
+    public String addNotification(Model model){
+        model.addAttribute("notification", null);
+        return "pages/admin/addNotification";
+    }
+    @GetMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Integer id, Model model){
+        model.addAttribute("notification", notificationService.findNotificationById(id));
+        return "pages/admin/addNotification";
+    }
+    @PostMapping("/notification/add")
+    public String addNotifications(@RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("status") String status,
+                                   HttpSession session) throws ParseException, JOSEException {
+        int id= Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Account account=accountService.findById(id);
+        notificationService.createNotification(account, title, content, targetType, status);
+        return "redirect:/admin/notifications";
+    }
+    @PostMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Integer id,
+                                   @RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("status") String status){
+        Notification notification=notificationService.findNotificationById(id);
+        notificationService.updateNotification(title, content, targetType, status);
+        return "redirect:/admin/notifications";
     }
 }

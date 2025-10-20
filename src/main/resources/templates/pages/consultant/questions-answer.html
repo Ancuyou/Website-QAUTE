@@ -44,7 +44,10 @@
                     </div>
                 </div>
 
-                <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4">
+                <div th:each="question, iterStat : ${questions}" 
+                     class="card border-0 shadow-sm mb-4"
+                     th:id="|question-${question.questionID}|"
+                     th:classappend="${highlightQuestion != null && highlightQuestion == question.questionID} ? 'highlight-question' : ''">
                     <div class="card-header bg-white py-3">
                         <div class="d-flex align-items-center">
                             <img th:src="${question.user.profile.avatar ?: 'https://via.placeholder.com/40'}" class="rounded-circle me-3" alt="User Avatar">
@@ -100,7 +103,7 @@
                     </div>
 
                     <div class="card-footer answer-form" th:id="|answerForm${iterStat.count}|">
-                        <form th:action="@{/user/questions/answer}" method="post">
+                        <form th:action="@{/consultant/questions/answer}" method="post">
                             <input type="hidden" name="questionId" th:value="${question.questionID}" />
                             <div class="d-flex align-items-start">
                                 <img th:src="${account?.profile?.avatar ?: 'https://via.placeholder.com/40'}" class="rounded-circle me-3" width="40" height="40" alt="My Avatar">
@@ -231,7 +234,51 @@
             answerForm.style.display = answerForm.style.display === 'none' ? 'block' : 'none';
         }
     }
+
+    // Scroll to highlighted question
+    document.addEventListener('DOMContentLoaded', function() {
+        const highlightedQuestion = document.querySelector('.highlight-question');
+        if (highlightedQuestion) {
+            // Scroll to the question with smooth animation
+            setTimeout(() => {
+                highlightedQuestion.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+                
+                // Auto-expand comments if question is highlighted
+                const questionId = highlightedQuestion.id.replace('question-', '');
+                const cards = document.querySelectorAll('.card');
+                cards.forEach((card, index) => {
+                    if (card.id === highlightedQuestion.id) {
+                        const commentsId = 'comments' + (index + 1);
+                        const commentSection = document.getElementById(commentsId);
+                        if (commentSection) {
+                            commentSection.style.display = 'block';
+                        }
+                    }
+                });
+            }, 300);
+        }
+    });
 </script>
+
+<style>
+    .highlight-question {
+        animation: highlightPulse 2s ease-in-out;
+        border: 3px solid #ffc107 !important;
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.5) !important;
+    }
+    
+    @keyframes highlightPulse {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5);
+        }
+        50% {
+            box-shadow: 0 0 30px rgba(255, 193, 7, 0.8);
+        }
+    }
+</style>
 </body>
 
 </html>

@@ -2,10 +2,10 @@
     <th:block th:fragment="refresh_tokens_content">
         <div id="refresh-tokens" class="section-content">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2"><i class="fas fa-key me-2"></i>Quản lý Phiên Đăng Nhập</h1>
+                <h1 class="h2"><i class="fas fa-sync-alt me-2"></i>Quản lý Phiên Đăng Nhập</h1>
                 <form th:action="@{/admin/refresh-tokens/cleanup}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Xóa tất cả phiên đăng nhập hết hạn?');">
-                        <i class="fas fa-broom me-2"></i>Dọn dẹp phiên hết hạn
+                        <i class="fas fa-sync-alt me-2"></i>Dọn dẹp phiên hết hạn
                     </button>
                 </form>
             </div>
