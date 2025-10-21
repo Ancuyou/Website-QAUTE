@@ -30,8 +30,10 @@ public class NotificationService {
     }
     public Notification findNotificationByNotificationReceiverId(Long id) {
         NotificationReceiver notificationReceiver=notificationReceiverRepository.findById(id);
-        if(!notificationReceiver.isRead())notificationReceiver.setRead(true);
-        notificationReceiverRepository.save(notificationReceiver);
+        if(!notificationReceiver.isRead()) {
+            notificationReceiver.setRead(true);
+            notificationReceiverRepository.save(notificationReceiver);
+        }
         return notificationReceiver.getNotification();
     }
     public List<NotificationReceiver> findNotificationByAccountId(long receiverId){

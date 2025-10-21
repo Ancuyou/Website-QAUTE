@@ -152,7 +152,7 @@
        class="dropdown-item notification-item"
        th:each="notif : ${notifications}"
        th:classappend="${!notif.isRead()} ? 'unread' : ''"
-       th:attr="data-receiver-id=${notif.id}"
+       th:attr="data-receiver-id=${notif.id}, data-priority=${notif.notification.is_priority} ? 'true' : 'false'"
        onclick="return showNotificationDetail(this.dataset.receiverId);">
         <div class="d-flex align-items-start">
             <div class="notification-icon me-3">
@@ -237,7 +237,8 @@
     const USER_NOTI_URL   = /*[[@{/notifications/user}]]*/ '/notifications/user';
     const DETAIL_NOTI_URL = /*[[@{/notifications/detail}]]*/ '/notifications/detail';
     const WS_ENDPOINT     = /*[[@{/ws}]]*/ '/ws';
-
+    let __autoOpenLock = false;               // chốt chống mở lặp
+    const AUTO_OPEN_COOLDOWN_MS = 10000;      // 10s
     document.addEventListener('DOMContentLoaded', function() {
         const notificationDropdown = document.getElementById('notificationDropdown');
         if (notificationDropdown) {
@@ -249,7 +250,20 @@
         }
         initRealtime(); // <<< thêm dòng này để bật realtime
     });
+    function maybeAutoOpenPriority() {
+        if (__autoOpenLock) return;
+        const container = document.getElementById('notificationList');
+        if (!container) return;
 
+        // tìm item chưa đọc & ưu tiên
+        const priorityItem = container.querySelector('.notification-item.unread[data-priority="true"]');
+        if (priorityItem) {
+            const rid = priorityItem.getAttribute('data-receiver-id');
+            __autoOpenLock = true;
+            showNotificationDetail(rid);          // mở modal chi tiết
+            setTimeout(() => { __autoOpenLock = false; }, AUTO_OPEN_COOLDOWN_MS);
+        }
+    }
     function loadNotifications() {
         fetch(USER_NOTI_URL, {
             method: 'GET',
@@ -263,6 +277,7 @@
                     .parseFromString(html, 'text/html')
                     .querySelectorAll('.notification-item.unread').length;
                 updateNotificationBadge(unreadCount);
+                maybeAutoOpenPriority();
             })
             .catch(() => {
                 document.getElementById('notificationList').innerHTML =
@@ -331,6 +346,7 @@
                 client.subscribe('/user/queue/notifications', function() {
                     // Có thông báo mới → refresh list + badge
                     loadNotifications();
+                    maybeAutoOpenPriority();
                 });
             }, function onError() {
                 setTimeout(connect, 3000); // auto-reconnect đơn giản
