@@ -610,33 +610,35 @@ public class AdminController {
     }
     @GetMapping("/notifications/new")
     public String addNotification(Model model){
-        model.addAttribute("notification", null);
+        model.addAttribute("notification", new Notification());
         return "pages/admin/addNotification";
     }
+
     @GetMapping("/notifications/edit/{id}")
     public String editNotification(@PathVariable("id") Integer id, Model model){
         model.addAttribute("notification", notificationService.findNotificationById(id));
         return "pages/admin/addNotification";
     }
-    @PostMapping("/notification/add")
+
+    @PostMapping("/notifications/add")
     public String addNotifications(@RequestParam("title") String title,
                                    @RequestParam("content") String content,
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("status") String status,
                                    HttpSession session) throws ParseException, JOSEException {
-        int id= Math.toIntExact(authenticationService.getCurrentUserId(session));
-        Account account=accountService.findById(id);
-        notificationService.createNotification(account, title, content, targetType, status);
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Account account = accountService.findById(id);
+        notificationService.createNotification(account, title, content, targetType, status,true);
         return "redirect:/admin/notifications";
     }
+
     @PostMapping("/notifications/edit/{id}")
-    public String editNotification(@PathVariable("id") Integer id,
+    public String editNotification(@PathVariable("id") Long id,
                                    @RequestParam("title") String title,
                                    @RequestParam("content") String content,
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("status") String status){
-        Notification notification=notificationService.findNotificationById(id);
-        notificationService.updateNotification(title, content, targetType, status);
+        notificationService.updateNotification(id,title,content,targetType,status,true);
         return "redirect:/admin/notifications";
     }
 }
