@@ -2,7 +2,6 @@ package it.ute.QAUTE.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -28,4 +27,5 @@ public class Notification {
     private Date createdDate;
     @Column(name = "Status", length = 20)
     private String status; //Nháp, xuất bản,hết hiệu lực
+    private boolean is_priority;
 }
