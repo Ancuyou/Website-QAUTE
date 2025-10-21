@@ -166,7 +166,7 @@ public class AdminController {
         if (refresh == null || refresh.isBlank()) return "redirect:/auth/login";
 
         try {
-            var jwt = authenticationService.verifyToken(refresh, true);
+            var jwt = authenticationService.verifyToken(refresh);
             String username = jwt.getJWTClaimsSet().getSubject();
             Account acc = accountService.findUserByUsername(username);
 

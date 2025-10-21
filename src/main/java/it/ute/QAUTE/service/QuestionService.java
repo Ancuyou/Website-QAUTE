@@ -6,12 +6,16 @@ import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.repository.DepartmentRepository;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.repository.QuestionRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class QuestionService {
 
@@ -41,5 +45,45 @@ public class QuestionService {
     public Question getQuestionById(Integer questionId) {
         return questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Câu hỏi không tồn tại với ID: " + questionId));
+    }
+
+    public Page<Question> filterQuestions(Integer departmentId, Integer fieldId, String userName, String status, Pageable pageable) {
+        boolean hasDept = departmentId != null;
+        boolean hasField = fieldId != null;
+        boolean hasUser = userName != null && !userName.isEmpty();
+        boolean hasStatus = status != null && !status.isEmpty();
+
+        Question.QuestionStatus statusEnum = null;
+        if (hasStatus) {
+            statusEnum = Question.QuestionStatus.valueOf(status);
+        }
+
+        if (hasUser) {
+            return questionRepository.findQuestionsByUserName(userName, pageable);
+        }
+
+        if (hasDept && hasField && hasStatus) {
+            return questionRepository.findQuestionsByDeptAndField(departmentId, fieldId, statusEnum, pageable);
+        }
+        if (hasDept && !hasField && hasStatus) {
+            return questionRepository.findQuestionsByDeptAndStatus(departmentId, statusEnum, pageable);
+        }
+        if (hasDept && !hasField) {
+            return questionRepository.findQuestionsByDept(departmentId, pageable);
+        }
+        if (!hasDept && !hasField && hasStatus) {
+            return questionRepository.findQuestionsByStatus(statusEnum, pageable);
+        }
+
+        return questionRepository.findAllWithUser(pageable);
+    }
+
+
+    public Question findById(Integer questionId) {
+        return questionRepository.findById(questionId).orElse(null);
+    }
+
+    public Question save(Question question){
+        return questionRepository.save(question);
     }
 }

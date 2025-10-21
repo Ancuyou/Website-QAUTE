@@ -45,12 +45,18 @@ public class Question {
     @JoinColumn(name = "FieldID")
     private Field field;
 
-    @Column(name = "Status", length = 20, columnDefinition = "VARCHAR(20) DEFAULT 'Pending'")
-    private String status = "Pending";
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status", nullable = false)
+    private QuestionStatus status = QuestionStatus.Pending;
 
     // === THÊM MỚI: Tải danh sách câu trả lời cùng lúc với câu hỏi ===
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     @OrderBy("dateAnswered ASC") // Sắp xếp câu trả lời theo thời gian
     private Set<Answer> answers;
 
+    public enum QuestionStatus {
+        Pending,
+        Approved,
+        Rejected
+    }
 }
