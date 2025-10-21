@@ -24,6 +24,10 @@ public class DepartmentService {  // done clean
         }
     }
 
+    public List<Department> findAll(){
+        return departmentRepository.findAll();
+    }
+
     public Department findById(Integer id){
         return departmentRepository.findById(id).orElse(null);
     }

@@ -60,7 +60,7 @@ public class QuestionController {
 
         question.setUser(user);
         question.setDateSend(LocalDateTime.now());
-        question.setStatus("Pending");
+        question.setStatus(Question.QuestionStatus.Pending);
         
        
         
