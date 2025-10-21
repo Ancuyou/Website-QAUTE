@@ -67,15 +67,7 @@ public class NotificationService {
         notification.setSender(sender);
         notification.set_priority(is_priority);
         notification.setTitle(title);
-        if ("ALL".equalsIgnoreCase(targetType)) {
-            notification.setTargetType(Notification.NotificationTarget.User);
-        } else {
-            try {
-                notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("❌ Loại đối tượng không hợp lệ: " + targetType);
-            }
-        }
+        notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
         notification.setStatus(status);
         notification.setCreatedDate(new Date());
         Notification savedNotification = notificationRepository.save(notification);
