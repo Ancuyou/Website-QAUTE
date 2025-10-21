@@ -641,4 +641,11 @@ public class AdminController {
         notificationService.updateNotification(id,title,content,targetType,status,true);
         return "redirect:/admin/notifications";
     }
+    @PostMapping("/notifications/delete/{id}")
+    public String deleteNotification(@PathVariable("id") Long id,RedirectAttributes ra){
+        boolean result=notificationService.deleteNotification(id);
+        if(result) ra.addFlashAttribute("success", "Xóa thông báo thành công.");
+        else ra.addFlashAttribute("error", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
+        return "redirect:/admin/notifications";
+    }
 }
