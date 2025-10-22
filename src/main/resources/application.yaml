@@ -1,4 +1,4 @@
-server:
+qserver:
   port: 8080
   servlet:
     context-path: /qaute

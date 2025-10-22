@@ -1,10 +1,17 @@
 package it.ute.QAUTE.configuration;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.nimbusds.jwt.SignedJWT;
+import it.ute.QAUTE.Exception.AppException;
+import it.ute.QAUTE.Exception.ErrorCode;
+import it.ute.QAUTE.entity.RefreshToken;
+import it.ute.QAUTE.repository.RefreshTokenRepository;
 import it.ute.QAUTE.service.AuthenticationService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -16,35 +23,64 @@ import org.springframework.stereotype.Component;
 
 import com.nimbusds.jose.JOSEException;
 
+
+@Slf4j
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
+
     @Value("${jwt.signerKey_access}")
     private String signerKey;
 
     @Autowired
     private AuthenticationService authenticationService;
 
-    private NimbusJwtDecoder nimbusJwtDecoder = null;
+    @Autowired
+    private RefreshTokenRepository refreshTokenRepository;
 
     @Override
     public Jwt decode(String token) throws JwtException {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            String jti = signedJWT.getJWTClaimsSet().getJWTID();
+            String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("type");
 
-        try { // fix o day 1 ti la co nen cho refresh token thong qua o day khong ?
-            var response = authenticationService.verifyToken(token, false);
-            if (response == null) {
-                response = authenticationService.verifyToken(token, true);
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            Date now = new Date();
+
+            String activeSignKey = signerKey;
+
+            if ("refresh".equals(tokenType)) {
+                RefreshToken refreshToken = refreshTokenRepository
+                        .findById(jti)
+                        .orElseThrow(() -> new JwtException("Refresh token not found"));
+                activeSignKey = refreshToken.getSignKey();
             }
-            if (response == null) throw new JwtException("Token invalid");
-        } catch (JOSEException | ParseException e) {
-            throw new JwtException(e.getMessage());
-        }
 
-        if (Objects.isNull(nimbusJwtDecoder)) {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
+            if ("access".equals(tokenType) && expiryTime != null && expiryTime.before(now)) {
+                log.warn("Access token expired at {}, skipping verification", expiryTime);
+            }
+            else {
+                SignedJWT verified = authenticationService.verifyToken(token);
+
+                if (verified == null) {
+                    throw new JwtException("Token verification failed");
+                }
+            }
+
+            SecretKeySpec secretKeySpec = new SecretKeySpec(activeSignKey.getBytes(), "HmacSHA512");
+            NimbusJwtDecoder decoder = NimbusJwtDecoder
+                    .withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
+
+            return decoder.decode(token);
+
+        } catch (ParseException | JOSEException e) {
+            log.error("Token decode failed: {}", e.getMessage());
+            throw new JwtException("Invalid token format");
         }
-        return nimbusJwtDecoder.decode(token);
     }
+
+
 }
+

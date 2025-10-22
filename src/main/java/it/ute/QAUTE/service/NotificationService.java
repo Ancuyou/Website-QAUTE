@@ -9,6 +9,7 @@ import it.ute.QAUTE.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -22,29 +23,51 @@ public class NotificationService {
     private AccountRepository accountRepository;
     @Autowired
     private NotificationReceiverRepository notificationReceiverRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     public Page<Notification> findAllNotifications(Pageable pageable) {
         return notificationRepository.findAll(pageable);
     }
-    public Notification findNotificationById(Integer id) {
-        return notificationRepository.findById(id).orElse(null);
+    public Notification findNotificationByNotificationReceiverId(Long id) {
+        NotificationReceiver notificationReceiver=notificationReceiverRepository.findById(id);
+        if(!notificationReceiver.isRead()) {
+            notificationReceiver.setRead(true);
+            notificationReceiverRepository.save(notificationReceiver);
+        }
+        return notificationReceiver.getNotification();
     }
-    public void updateNotification(String title, String content, String targetType,String status) {
-
+    public List<NotificationReceiver> findNotificationByAccountId(long receiverId){
+        return notificationReceiverRepository.findByAccountId(receiverId);
     }
-    public void createNotification(Account sender, String title, String content, String targetType,String status){
+    public boolean deleteNotification(Long id){
+        Notification notification=notificationRepository.findById(Math.toIntExact(id)).orElse(null);
+        if(notification==null || notification.getStatus().equals("PUBLISHED")){
+            return false;
+        }
+        notificationRepository.delete(notification);
+        return true;
+    }
+    public void updateNotification(Long id,String title, String content, String targetType,String status,boolean is_priority) {
+        Notification notification = notificationRepository.findByNotificationID(id);
+        notification.setTitle(title);
+        notification.setContent(content);
+        notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
+        notification.setStatus(status);
+        notification.set_priority(is_priority);
+        Notification savedNotification = notificationRepository.save(notification);
+        sendByRole(savedNotification,targetType,status);
+        if(status.equals("DRAFT")) deleteNotificationReceiverByNotificationId(id);
+    }
+    public void deleteNotificationReceiverByNotificationId(Long notificationId){
+        notificationReceiverRepository.deleteAllByNotificationId(notificationId);
+    }
+    public void createNotification(Account sender, String title, String content, String targetType,String status,boolean is_priority){
         Notification notification = new Notification();
         notification.setContent(content);
         notification.setSender(sender);
+        notification.set_priority(is_priority);
         notification.setTitle(title);
-        if ("ALL".equalsIgnoreCase(targetType)) {
-            notification.setTargetType(Account.Role.User);
-        } else {
-            try {
-                notification.setTargetType(Account.Role.valueOf(targetType));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("❌ Loại đối tượng không hợp lệ: " + targetType);
-            }
-        }
+        notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
         notification.setStatus(status);
         notification.setCreatedDate(new Date());
         Notification savedNotification = notificationRepository.save(notification);
@@ -64,10 +87,19 @@ public class NotificationService {
                 notificationReceiver.setRead(false);
                 notificationReceiver.setNotification(savedNotification);
                 notificationReceiverRepository.save(notificationReceiver);
+                messagingTemplate.convertAndSendToUser(
+                        String.valueOf(receiver.getUsername()),
+                        "/queue/notifications",
+                        savedNotification.getTitle() + ": " + savedNotification.getContent()
+                );
             }
             System.out.println("✅ Gửi thông báo tới " + receivers.size() + " người dùng.");
         }else {
             System.out.println("lưu nháp");
         }
+    }
+
+    public Notification findNotificationById(Integer id) {
+        return notificationRepository.findById(id).orElse(null);
     }
 }

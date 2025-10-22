@@ -24,6 +24,10 @@ public class DepartmentService {  // done clean
         }
     }
 
+    public List<Department> findAll(){
+        return departmentRepository.findAll();
+    }
+
     public Department findById(Integer id){
         return departmentRepository.findById(id).orElse(null);
     }
@@ -47,4 +51,9 @@ public class DepartmentService {  // done clean
     public void deleteDepartment(Integer id) {
         departmentRepository.deleteById(id);
     }
+
+    public List<Department> findAllById(List<Integer> departmentIds) {
+        return departmentRepository.findAllById(departmentIds);
+    }
+
 }

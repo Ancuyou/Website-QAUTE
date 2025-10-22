@@ -1,13 +1,30 @@
 package it.ute.QAUTE.controller;
 
-import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Answer;
+import it.ute.QAUTE.entity.Consultant;
+import it.ute.QAUTE.entity.Question;
+import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.service.AccountService;
+import it.ute.QAUTE.service.AnswerService;
+import it.ute.QAUTE.service.ConsultantService;
+import it.ute.QAUTE.service.QuestionService;
+import it.ute.QAUTE.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
@@ -43,28 +60,68 @@ public class QuestionController {
     }
 
     @PostMapping("/questions/ask")
-    public String handleAskQuestion(@ModelAttribute Question question, Principal principal, RedirectAttributes redirectAttributes) {
+    public String handleAskQuestion(@ModelAttribute Question question,
+                                    @RequestParam("file") MultipartFile file,
+                                    Principal principal,
+                                    RedirectAttributes redirectAttributes) {
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
-        // Using orElseThrow for better error handling
         User user = userService.findByProfileId(account.getProfile().getProfileID())
-                .orElseThrow(() -> new RuntimeException("User not found for profile ID: " + account.getProfile().getProfileID()));
+                .orElseThrow(() -> new RuntimeException(
+                        "User not found for profile ID: " + account.getProfile().getProfileID()
+                ));
 
         question.setUser(user);
         question.setDateSend(LocalDateTime.now());
-        question.setStatus("Pending");
+        question.setStatus(Question.QuestionStatus.Pending);
+
+        if (file != null && !file.isEmpty()) {
+            String acceptfiles = "image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            if (!acceptfiles.contains(file.getContentType())) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Loại tệp không được hỗ trợ. Vui lòng chọn ảnh hoặc tài liệu.");
+                return "redirect:/user/questions";
+            }
+
+            String uploadDir = "src/main/resources/static/images/questions/";
+            File uploadFolder = new File(uploadDir);
+            if (!uploadFolder.exists()) {
+                uploadFolder.mkdirs();
+            }
+
+            String originalFileName = file.getOriginalFilename();
+            String extension = "";
+            if (originalFileName != null && originalFileName.contains(".")) {
+                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+            }
+
+            String fileName = "Question_" + account.getAccountID() + extension;
+            String uuid = java.util.UUID.randomUUID().toString().substring(0, 5);
+            fileName = uuid + "_" + fileName;
+
+            question.setFileAttachment("/images/questions/" + fileName);
+
+            try {
+                Files.copy(file.getInputStream(), Paths.get(uploadDir, fileName), StandardCopyOption.REPLACE_EXISTING);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi gửi câu hỏi: " + e.getMessage());
+                return "redirect:/user/questions";
+            }
+        }
 
         questionService.saveQuestion(question);
-
         redirectAttributes.addFlashAttribute("successMessage", "Câu hỏi của bạn đã được gửi thành công!");
         return "redirect:/user/questions";
     }
+
     @PostMapping("/questions/answer")
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
                                    @RequestParam("content") String content,
                                    Principal principal,
                                    RedirectAttributes redirectAttributes) {
-
         if (principal == null) {
             return "redirect:/auth/login";
         }
@@ -72,7 +129,6 @@ public class QuestionController {
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
 
-        // Ensure the user is a consultant
         if (account.getRole() != Account.Role.Consultant) {
             redirectAttributes.addFlashAttribute("errorMessage", "Chỉ có tư vấn viên mới có thể trả lời.");
             return "redirect:/consultant/questions";
@@ -82,10 +138,10 @@ public class QuestionController {
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
 
         Answer answer = new Answer();
-        Question question = new Question();
-        question.setQuestionID(questionId);
+        Question qRef = new Question();
+        qRef.setQuestionID(questionId);
 
-        answer.setQuestion(question);
+        answer.setQuestion(qRef);
         answer.setConsultant(consultant);
         answer.setContent(content);
         answer.setDateAnswered(LocalDateTime.now());

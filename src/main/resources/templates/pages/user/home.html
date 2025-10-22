@@ -2,6 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <!-- include head fragment, truyền title -->
 <th:block th:replace="~{fragments/head :: head('QAUTE - Trang chủ')}"></th:block>
+<th:block th:replace="~{fragments/userDropDown :: notificationStyles}"></th:block>
 <style>
     /* Custom styles for the user home page */
 
@@ -610,20 +611,19 @@
     }
 
     function startChatWithConsultant(button) {
-    const consultantID = button.getAttribute('data-consultant-id');
-    const profileID = button.getAttribute('data-profile-id');
-    const consultantName = button.getAttribute('data-consultant-name');
+        const consultantID = button.getAttribute('data-consultant-id');
+        const profileID = button.getAttribute('data-profile-id');
+        const consultantName = button.getAttribute('data-consultant-name');
 
-    // Mở chat window trực tiếp
-    openChatWindow(profileID, consultantName);
-    loadChatHistory(profileID);
-}
+        // Mở chat window trực tiếp
+        openChatWindow(profileID, consultantName);
+        loadChatHistory(profileID);
+    }
 </script>
-
-<!-- Include chat bubble fragment -->
-<div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
-
-<!-- Include footer fragment -->
-<div th:replace="~{fragments/footer :: footer}"></div>
+<!-- Bootstrap 5 JS (bundle có Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<th:block th:replace="~{fragments/userDropDown :: notificationScript}"></th:block>
 </body>
 </html>

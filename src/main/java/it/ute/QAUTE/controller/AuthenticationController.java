@@ -51,7 +51,7 @@ public class AuthenticationController {
             Object at = session.getAttribute("ACCESS_TOKEN");
             if (at instanceof String access && !access.isBlank()) {
                 try {
-                    var jwt = authenticationService.verifyToken(access, false); // access
+                    var jwt = authenticationService.verifyToken(access); // access
                     String role = (String) customJwtDecoder.decode(access).getClaims().get("scope");
                     if (jwt != null && role != null) {
                         return "redirect:" + resolveRedirectByRole(role);
@@ -70,7 +70,7 @@ public class AuthenticationController {
                     String refresh = c.getValue();
                     if (refresh != null && !refresh.isBlank()) {
                         try {
-                            var rjwt = authenticationService.verifyToken(refresh, true); // refresh
+                            var rjwt = authenticationService.verifyToken(refresh); // refresh
                             String username = rjwt.getJWTClaimsSet().getSubject();
                             Account acc = accountService.findUserByUsername(username);
                             if (acc != null) {
@@ -185,17 +185,7 @@ public class AuthenticationController {
         }
     }
 
-    @GetMapping("/app-error")
-    public String errorPage(@RequestParam(value = "errorCode", required = false) String errorCode,
-                            @RequestParam(value = "message", required = false) String message,
-                            Model model,
-                            HttpServletResponse response) {
-        model.addAttribute("errorCode", errorCode != null ? errorCode : "500");
-        model.addAttribute("errorTitle", errorCode != null ? errorCode.replace("_", " ") : "Internal Server Error");
-        model.addAttribute("errorMessage", message != null ? message : "Đã xảy ra lỗi không xác định");
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        return "pages/error";
-    }
+
     @PostMapping("/auth/forgotPassword")
     public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){
         System.out.println(email);
@@ -313,6 +303,8 @@ public class AuthenticationController {
                 return "/consultant/home";
             case "ROLE_Admin":
                 return "/admin/users";
+            case "ROLE_Manager":
+                return "/manager/home";
             default:
                 return "/auth/login";
         }

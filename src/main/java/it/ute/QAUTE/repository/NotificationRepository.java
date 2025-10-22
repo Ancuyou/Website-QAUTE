@@ -14,4 +14,5 @@ public interface NotificationRepository extends JpaRepository<Notification,Integ
             "JOIN FETCH n.sender s " +
             "JOIN FETCH s.profile")
     Page<Account> findAccountByUser(Account.Role role, Pageable pageable);
+    Notification findByNotificationID(Long id);
 }

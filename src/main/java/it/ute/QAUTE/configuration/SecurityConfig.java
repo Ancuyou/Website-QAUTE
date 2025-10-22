@@ -38,7 +38,7 @@ import java.time.Duration;
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**"};
+    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**"};
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AuthenticationService authenticationService;
@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/**").hasAuthority("ROLE_User") // Áp dụng cho các link /user/ còn lại
                         .requestMatchers("/consultant/**").hasAuthority("ROLE_Consultant")
                         .requestMatchers("/admin/**").hasAuthority("ROLE_Admin")
+                        .requestMatchers("/manager/**").hasAuthority("ROLE_Manager")
 
                         // 3. QUY TẮC CUỐI CÙNG:
                         .anyRequest().authenticated()
@@ -77,6 +78,11 @@ public class SecurityConfig {
                         .bearerTokenResolver(bearerTokenResolver())
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 );
+        httpSecurity
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                );
 
         return httpSecurity.build();
     }
@@ -86,6 +92,7 @@ public class SecurityConfig {
             String uri = request.getRequestURI();
             if (uri.startsWith(request.getContextPath() + "/auth")
                     || uri.startsWith(request.getContextPath() + "/oauth2")
+                    || uri.startsWith(request.getContextPath() + "/app-error")
                     || uri.startsWith(request.getContextPath() + "/auth/google/callback")) {
                 return null;
             }
@@ -178,6 +185,8 @@ public class SecurityConfig {
                 return "/consultant/home";
             case  "ROLE_Admin":
                 return "/admin/users";
+            case "ROLE_Manager":
+                return "/manager/home";
             default:
                 return "/auth/login";
         }
