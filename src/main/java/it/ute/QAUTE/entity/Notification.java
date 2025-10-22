@@ -18,7 +18,7 @@ public class Notification {
     private Account sender;
     @Enumerated(EnumType.STRING)
     @Column(name = "TargetType", nullable = false, length = 50)
-    private Account.Role targetType;
+    private NotificationTarget targetType;
     @Column(name = "Title", length = 200)
     private String title;
     @Column(name = "Content", columnDefinition = "TEXT")
@@ -28,4 +28,7 @@ public class Notification {
     @Column(name = "Status", length = 20)
     private String status; //Nháp, xuất bản,hết hiệu lực
     private boolean is_priority;
+    public enum NotificationTarget {
+        ALL, Manager, Consultant, User
+    }
 }

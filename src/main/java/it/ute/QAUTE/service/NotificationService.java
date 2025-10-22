@@ -39,11 +39,19 @@ public class NotificationService {
     public List<NotificationReceiver> findNotificationByAccountId(long receiverId){
         return notificationReceiverRepository.findByAccountId(receiverId);
     }
+    public boolean deleteNotification(Long id){
+        Notification notification=notificationRepository.findById(Math.toIntExact(id)).orElse(null);
+        if(notification==null || notification.getStatus().equals("PUBLISHED")){
+            return false;
+        }
+        notificationRepository.delete(notification);
+        return true;
+    }
     public void updateNotification(Long id,String title, String content, String targetType,String status,boolean is_priority) {
         Notification notification = notificationRepository.findByNotificationID(id);
         notification.setTitle(title);
         notification.setContent(content);
-        if (!"ALL".equalsIgnoreCase(targetType))notification.setTargetType(Account.Role.valueOf(targetType));
+        notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
         notification.setStatus(status);
         notification.set_priority(is_priority);
         Notification savedNotification = notificationRepository.save(notification);
@@ -59,15 +67,7 @@ public class NotificationService {
         notification.setSender(sender);
         notification.set_priority(is_priority);
         notification.setTitle(title);
-        if ("ALL".equalsIgnoreCase(targetType)) {
-            notification.setTargetType(Account.Role.User);
-        } else {
-            try {
-                notification.setTargetType(Account.Role.valueOf(targetType));
-            } catch (IllegalArgumentException e) {
-                throw new RuntimeException("❌ Loại đối tượng không hợp lệ: " + targetType);
-            }
-        }
+        notification.setTargetType(Notification.NotificationTarget.valueOf(targetType));
         notification.setStatus(status);
         notification.setCreatedDate(new Date());
         Notification savedNotification = notificationRepository.save(notification);
