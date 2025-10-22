@@ -98,6 +98,11 @@ public class QuestionController {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        username = principal.getName();
+        var a = accountService.findUserByUsername(username);
+        if(a.getRole().equals("Consultant")){
+            return "redirect:/consultant/questions-answer";
+        }
         return "redirect:/user/questions";
     }
 }
