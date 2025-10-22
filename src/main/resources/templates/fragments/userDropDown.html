@@ -50,7 +50,7 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center"
            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="${avatarUrl != null} ? ${avatarUrl} : '/qaute/images/default_avatar.png'"
+            <img th:src="@{${avatarUrl != null ? avatarUrl : '/images/default_avatar.png'}}"
                  class="rounded-circle me-2" alt="Avatar" width="32" height="32">
             <span class="fw-semibold" th:text="${userName} ?: 'Nguyễn Văn A'">Nguyễn Văn A</span>
         </a>

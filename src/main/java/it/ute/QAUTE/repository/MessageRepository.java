@@ -21,4 +21,8 @@ public interface MessageRepository extends JpaRepository<Messages, Long> {
            "m.SenderID = :profileID OR m.ReceiverID = :profileID " +
            "ORDER BY m.CreatedAt DESC", nativeQuery = true)
     List<Messages> findRecentChats(@Param("profileID") Integer profileID);
+
+    // Đếm số tư vấn viên đã chat cùng (phân biệt)
+    @Query("SELECT COUNT(DISTINCT m.receiverID) FROM Messages m WHERE m.senderID = :profileId")
+    long countDistinctConsultantsChattedWith(@Param("profileId") Integer profileId);
 }

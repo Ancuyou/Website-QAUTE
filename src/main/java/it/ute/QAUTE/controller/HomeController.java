@@ -9,6 +9,13 @@ import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpSession;
+import it.ute.QAUTE.entity.*;
+import it.ute.QAUTE.repository.AnswerRepository;
+import it.ute.QAUTE.repository.QuestionRepository;
+import it.ute.QAUTE.service.AccountService;
+import it.ute.QAUTE.service.ConsultantService;
+import it.ute.QAUTE.service.MessageService;
+import it.ute.QAUTE.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -22,7 +29,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
 import java.security.Principal;
 import java.text.ParseException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class HomeController {
@@ -38,13 +47,38 @@ public class HomeController {
     private FileStorageService fileStorageService;
     @Autowired
     private AuthenticationService  authenticationService;
+    private QuestionRepository questionRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
     @GetMapping("/user/home")
     public String homeUser(Model model, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
-            List<ConsultantDTO> consultants = consultantService.getAllConsultants();
+            User user = userService.findByProfileId(account.getProfile().getProfileID())
+                    .orElse(null);
             model.addAttribute("account", account);
+            if (user != null){
+                long questionsAsked = questionRepository.countByUser(user);
+                long answersReceived = answerRepository.countByQuestionUser(user);
+                long consultantsChatted = messageService.getRecentChats(account.getProfile().getProfileID())
+                        .stream()
+                        .map(m -> m.getSenderID().equals(account.getProfile().getProfileID()) ? m.getReceiverID() : m.getSenderID())
+                        .distinct()
+                        .count();
+                Map<String, Long> userStats = new HashMap<>();
+                userStats.put("questionsAsked", questionsAsked);
+                userStats.put("answersReceived", answersReceived);
+                userStats.put("consultantsChatted", consultantsChatted);
+                model.addAttribute("userStats", userStats);
+            }
+            // Lấy top 3 câu hoi của người dùng để demo
+            List<Question> recentQuestions = questionRepository.findTop3ByUserOrderByDateSendDesc(user);
+            model.addAttribute("recentActivities", recentQuestions);
+            // Lấy các câu hỏi mới nhất trong cộng đồng
+            List<Question> communityQuestions = questionRepository.findTop5ByOrderByDateSendDesc();
+            model.addAttribute("communityQuestions", communityQuestions);
+            List<ConsultantDTO> consultants = consultantService.getAllConsultants();
             model.addAttribute("consultants", consultants);
             List<Profiles> chatConsultants = messageService.getAllChatUsers(account.getProfile().getProfileID());
             List<ConsultantDTO> chatConsultantDTOs = chatConsultants.stream()

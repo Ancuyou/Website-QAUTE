@@ -51,4 +51,9 @@ public class DepartmentService {  // done clean
     public void deleteDepartment(Integer id) {
         departmentRepository.deleteById(id);
     }
+
+    public List<Department> findAllById(List<Integer> departmentIds) {
+        return departmentRepository.findAllById(departmentIds);
+    }
+
 }
