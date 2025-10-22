@@ -56,6 +56,7 @@ public class Question {
 
     public enum QuestionStatus {
         Pending,
+        Answered,
         Approved,
         Rejected
     }

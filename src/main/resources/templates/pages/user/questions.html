@@ -47,7 +47,7 @@
                 <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white py-3">
                         <div class="d-flex align-items-center">
-                            <img th:src="${question.user.profile.avatar != null ? question.user.profile.avatar : '/qaute/images/default_avatar.png'}" style="width: 40px; height: 40px;" class="rounded-circle me-3" alt="User Avatar">
+                            <img th:src="@{${question.user.profile.avatar != null ? question.user.profile.avatar : '/images/default_avatar.png'}}" style="width: 40px; height: 40px;" class="rounded-circle me-3" alt="User Avatar">
                             <div>
                                 <h6 class="mb-0" th:text="${question.user.profile.fullName}">Tên người dùng</h6>
                                 <small class="text-muted" th:text="${#temporals.format(question.dateSend, 'dd/MM/yyyy HH:mm')}"></small>
@@ -222,7 +222,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="fileAttachment" class="form-label">Chọn tệp đính kèm (ảnh hoặc tài liệu):</label>
-                        <input class="form-control" type="file" id="file" name="file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx">
+                        <input class="form-control" type="file" id="fileAttachment" name="file" accept="image/*,.pdf,.doc,.docx,.ppt,.pptx">
                     </div>
                 </div>
                 <div class="modal-footer">

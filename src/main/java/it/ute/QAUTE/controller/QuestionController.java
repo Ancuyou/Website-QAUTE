@@ -147,6 +147,12 @@ public class QuestionController {
         answer.setDateAnswered(LocalDateTime.now());
 
         answerService.saveAnswer(answer);
+        Question q = questionService.getQuestionById(questionId);
+        if (q == null) {
+            throw new IllegalStateException("Không tìm thấy câu hỏi.");
+        }
+        q.setStatus(Question.QuestionStatus.Answered);
+        questionService.saveQuestion(q);
 
         redirectAttributes.addFlashAttribute("successMessage", "Câu trả lời của bạn đã được gửi thành công!");
         return "redirect:/consultant/questions";
