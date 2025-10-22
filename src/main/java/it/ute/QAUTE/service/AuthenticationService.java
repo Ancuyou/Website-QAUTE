@@ -253,6 +253,15 @@ public class AuthenticationService {
             return hashed(otp);
         }
     }
+    public String changePassword(String email){
+        if (accountRepository.existsByEmail(email)) {
+            String otp= emailService.sendChangePassword(email);
+            System.out.println(otp);
+            return hashed(otp);
+        }else {
+            return null;
+        }
+    }
     // Func call in func Authenticated after check user, pass
     public RefreshTokenResponse refreshToken(Account account, String deviceName) throws ParseException {
         String signKey = generateSignMaxSecurity();

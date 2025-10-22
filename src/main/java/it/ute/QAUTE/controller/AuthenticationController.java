@@ -276,8 +276,6 @@ public class AuthenticationController {
         String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
         String hashedOtp= session.getAttribute("otp").toString();
         System.out.println("đăng ký tài khoản");
-        System.out.println("hasedOtp: "+hashedOtp);
-        System.out.println("inputOtp: "+inputOTP);
         if (authenticationService.check(inputOTP,hashedOtp)){
             session.removeAttribute("otp");
             session.removeAttribute("otpExpiry");

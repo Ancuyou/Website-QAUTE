@@ -1,21 +1,27 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.dto.ConsultantDTO;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Consultant;
 import it.ute.QAUTE.entity.Messages;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.ConsultantService;
-import it.ute.QAUTE.service.MessageService;
-import it.ute.QAUTE.service.UserService;
+import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
 import java.security.Principal;
+import java.text.ParseException;
 import java.util.List;
 
 @Controller
@@ -28,7 +34,10 @@ public class HomeController {
     private ConsultantService consultantService;
     @Autowired
     private MessageService messageService;
-
+    @Autowired
+    private FileStorageService fileStorageService;
+    @Autowired
+    private AuthenticationService  authenticationService;
     @GetMapping("/user/home")
     public String homeUser(Model model, Principal principal) {
         if (principal != null) {
@@ -66,7 +75,6 @@ public class HomeController {
     @GetMapping("/home/profile")
     public String profile(Model model, Principal principal) {
         String username = principal.getName();
-        System.out.println("username = " + username);
         Account account = accountService.findUserByUsername(username);
         User user = userService.findByProfileId(account.getProfile().getProfileID())
                 .orElse(null);
@@ -74,8 +82,74 @@ public class HomeController {
             user = new User();
             user.setProfile(account.getProfile());
         }
+        System.out.println(account.getProfile().getAvatar());
         model.addAttribute("account", account);
         model.addAttribute("user", user);
+        model.addAttribute("roleLabels", userService.mapRole());
         return "pages/profile";
+    }
+    @PostMapping("/home/profile/send-otp")
+    public String sendOTP (Principal principal,HttpSession session){
+        Account account = accountService.findUserByUsername(principal.getName());
+        String otp=authenticationService.changePassword(account.getEmail());
+        session.setAttribute("otp", otp);
+        session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
+        return "redirect:/home/profile";
+    }
+    @PostMapping("/home/profile/verify-otp")
+    public String verifyOTP(@RequestParam("otp") String inputOTP,RedirectAttributes ra, HttpSession session){
+        String otp=session.getAttribute("otp").toString();
+        Integer failCount=(Integer) session.getAttribute("failCount");
+        Long otpExpiry=(Long)session.getAttribute("otpExpiry");
+        if (failCount==null) failCount=0;
+        if (otpExpiry==null||otpExpiry<System.currentTimeMillis()){
+            ra.addFlashAttribute("otpModalMsg", "OTP chưa được gửi hoặc đã hết hạn. Vui lòng gửi lại OTP.");
+            ra.addFlashAttribute("otpModalError", true);
+            ra.addAttribute("otpModal", 1);
+        }else if(!authenticationService.check(inputOTP,otp)){
+            failCount++;
+            session.setAttribute("failCount", failCount);
+            if(failCount>3){
+                session.removeAttribute("otp");
+                session.removeAttribute("otpExpiry");
+                session.removeAttribute("failCount");
+                ra.addFlashAttribute("otpModalMsg", "Bạn đã nhập sai quá 3 lần. OTP đã bị huỷ. Vui lòng gửi lại.");
+            }else {
+                int remain = 3 - failCount;
+                ra.addFlashAttribute("otpModalMsg", "OTP không đúng. Bạn còn " + remain + " lần thử.");
+            }
+        }else {
+            session.removeAttribute("otp");
+            session.removeAttribute("otpExpiry");
+            session.removeAttribute("failCount");
+            ra.addAttribute("otpVerified", 1);
+        }
+        return "redirect:/home/profile";
+    }
+    @PostMapping("/home/profile/update")
+    public String update(@RequestParam String fullName,
+                         @RequestParam(required = false) String phone,
+                         @RequestParam User.Role roleName,
+                         @RequestParam(required = false) String studentCode,
+                         @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                         @RequestParam(value = "newPassword", required = false) String newPassword,
+                         @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
+                         HttpSession session) throws ParseException, JOSEException {
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+        System.out.println(id);
+        Account account = accountService.findById(id);
+        if(newPassword !=null &&!newPassword.isBlank()) account.setPassword(authenticationService.hashed(newPassword));
+        account.getProfile().setFullName(fullName);
+        account.getProfile().setPhone(phone);
+        account.getProfile().getUser().setRoleName(roleName);
+        account.getProfile().getUser().setStudentCode(studentCode);
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String oldAvatar = account.getProfile().getAvatar();
+            String newAvatarUrl = fileStorageService.storeFile(avatarFile,oldAvatar, id);
+            account.getProfile().setAvatar(newAvatarUrl);
+        }
+        accountService.save(account);
+        System.out.println("lưu thành công");
+        return "redirect:/user/home";
     }
 }

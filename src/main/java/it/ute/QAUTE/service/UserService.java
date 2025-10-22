@@ -11,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -36,5 +38,14 @@ public class UserService {
     public Profiles getProfileById(Integer profileId) {
         return profilesRepository.findById(profileId)
             .orElseThrow(() -> new RuntimeException("Profile not found with ID: " + profileId));
+    }
+    public Map<String,String> mapRole(){
+        Map<String,String> roleLabels = new LinkedHashMap<>();
+        roleLabels.put(User.Role.SinhVien.name(),   "Sinh viên");
+        roleLabels.put(User.Role.HocSinh.name(),    "Học sinh");
+        roleLabels.put(User.Role.PhuHuynh.name(),   "Phụ huynh");
+        roleLabels.put(User.Role.CuuSinhVien.name(),"Cựu sinh viên");
+        roleLabels.put(User.Role.Khac.name(),       "Khác");
+        return roleLabels;
     }
 }
