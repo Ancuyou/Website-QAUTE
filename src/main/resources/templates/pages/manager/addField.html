@@ -1,0 +1,104 @@
+<th:block th:replace="~{pages/manager/layout-manager :: layout(~{::field_form_content}, 'fields')}">
+    <th:block th:fragment="field_form_content">
+
+        <div class="container-fluid py-3">
+
+            <!-- Tiêu đề -->
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h2 class="h4 mb-0">
+                    <i class="fas fa-plus-circle me-2 text-primary"></i>Thêm lĩnh vực mới
+                </h2>
+                <a th:href="@{/manager/fields}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Quay lại
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body p-4">
+
+                            <form th:action="@{/manager/fields/save}" th:object="${field}" method="post">
+
+                                <!-- Tên lĩnh vực -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Tên lĩnh vực <span class="text-danger">*</span></label>
+                                    <input type="text" th:field="*{fieldName}" class="form-control"
+                                           placeholder="Ví dụ: Trí tuệ nhân tạo, An toàn thông tin, Kỹ thuật phần mềm..." required>
+                                    <div class="invalid-feedback" th:if="${#fields.hasErrors('fieldName')}" th:errors="*{fieldName}"></div>
+                                </div>
+
+                                <!-- Khoa/Ngành liên quan -->
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold">Khoa/Ngành liên quan <span class="text-danger">*</span></label>
+
+                                    <div class="card">
+                                        <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                                            <div th:if="${#lists.isEmpty(departments)}" class="text-center text-muted py-3">
+                                                Không có khoa/ngành nào. Vui lòng thêm khoa/ngành trước.
+                                            </div>
+
+                                            <div th:if="${!#lists.isEmpty(departments)}">
+                                                <!-- Chọn tất cả -->
+                                                <div class="form-check mb-3 border-bottom pb-2">
+                                                    <input class="form-check-input" type="checkbox" id="selectAll"
+                                                           onclick="toggleAllDepartments(this)">
+                                                    <label class="form-check-label fw-bold" for="selectAll">Chọn tất cả</label>
+                                                </div>
+
+                                                <!-- Danh sách khoa/ngành -->
+                                                <div th:each="dept : ${departments}" class="form-check mb-2">
+                                                    <input class="form-check-input department-checkbox"
+                                                           type="checkbox"
+                                                           th:id="'dept-' + ${dept.departmentID}"
+                                                           name="departmentIds"
+                                                           th:value="${dept.departmentID}">
+                                                    <label class="form-check-label" th:for="'dept-' + ${dept.departmentID}">
+                                                        <span th:text="${dept.departmentName}"></span>
+                                                        <small class="text-muted">(<span th:text="${dept.type}"></span>)</small>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="d-flex justify-content-end gap-2 mt-3">
+                                    <a th:href="@{/manager/fields}" class="btn btn-secondary">
+                                        <i class="fas fa-times me-1"></i>Hủy
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Lưu lĩnh vực
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Script: chọn tất cả checkbox -->
+        <script>
+            function toggleAllDepartments(source) {
+                const checkboxes = document.querySelectorAll('.department-checkbox');
+                checkboxes.forEach(cb => cb.checked = source.checked);
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                const checkboxes = document.querySelectorAll('.department-checkbox');
+                const selectAll = document.getElementById('selectAll');
+
+                if (selectAll && checkboxes.length > 0) {
+                    checkboxes.forEach(cb => cb.addEventListener('change', () => {
+                        selectAll.checked = Array.from(checkboxes).every(c => c.checked);
+                    }));
+                }
+            });
+        </script>
+
+    </th:block>
+</th:block>

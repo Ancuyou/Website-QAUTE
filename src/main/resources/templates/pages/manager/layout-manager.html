@@ -50,6 +50,14 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link"
+                           th:classappend="${active=='fields'} ? 'active'"
+                           th:href="@{/manager/fields}">
+                            <i class="fas fa-layer-group me-2"></i>Quản lý lĩnh vực
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link" th:classappend="${active=='badcontents'}? 'active'" th:href="@{/manager/bad-contents}">
                             <i class="fas fa-ban me-2"></i>Quản lý nội dung xấu
                         </a>

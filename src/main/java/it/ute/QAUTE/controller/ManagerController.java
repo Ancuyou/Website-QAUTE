@@ -8,6 +8,7 @@ import it.ute.QAUTE.repository.DepartmentRepository;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.repository.QuestionRepository;
 import it.ute.QAUTE.service.DepartmentService;
+import it.ute.QAUTE.service.FieldService;
 import it.ute.QAUTE.service.QuestionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Controller
@@ -34,6 +37,9 @@ public class ManagerController {
 
     @Autowired
     private DepartmentService  departmentService;
+
+    @Autowired
+    private FieldService fieldService;
 
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,
@@ -79,7 +85,7 @@ public class ManagerController {
         return "pages/manager/editQuestion";
     }
 
-    @PostMapping("questions/update/{id}")
+    @PostMapping("/questions/update/{id}")
     public String updateQuestion(
             @PathVariable Integer id,
             @ModelAttribute Question question,
@@ -113,9 +119,119 @@ public class ManagerController {
         return "redirect:/manager/questions";
     }
 
+    @GetMapping("/fields")
+    public String listFields(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) String keyword,
+            Model model) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fieldID").descending());
+        Page<Field> fieldPage = fieldService.searchField(departmentId, keyword, pageable);
+
+        List<Department> departments = departmentService.findAll();
+
+        model.addAttribute("fields", fieldPage.getContent());
+        model.addAttribute("departments", departments);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", fieldPage.getTotalPages());
+        model.addAttribute("totalElements", fieldPage.getTotalElements());
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("active", "fields");
+
+
+        return "pages/manager/fields";
+    }
+
+    @GetMapping("/fields/new")
+    public String newField(Model model) {
+        model.addAttribute("field", new Field());
+        model.addAttribute("departments", departmentService.findAll());
+        model.addAttribute("active", "fields");
+        return "pages/manager/addField";
+    }
+
+    @PostMapping("/fields/save")
+    public String saveField(
+            @ModelAttribute("field") Field field,
+            @RequestParam(value = "departmentIds", required = false) List<Integer> departmentIds,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            if (departmentIds != null && !departmentIds.isEmpty()) {
+                Set<Department> selectedDepartments = new HashSet<>(departmentService.findAllById(departmentIds));
+                field.setDepartments(selectedDepartments);
+            } else {
+                field.setDepartments(new HashSet<>());
+            }
+
+            fieldRepository.save(field);
+
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Thêm lĩnh vực thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage", "Thêm lĩnh vực thất bại: " + e.getMessage());
+        }
+
+        return "redirect:/manager/fields";
+    }
+
+    @GetMapping("/fields/edit/{id}")
+    public String editField(@PathVariable Integer id, Model model) {
+        Field field = fieldRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lĩnh vực ID: " + id));
+
+        model.addAttribute("field", field);
+        model.addAttribute("departments", departmentService.findAll());
+        model.addAttribute("active", "fields");
+
+        return "pages/manager/editField";
+    }
+
+    @PostMapping("/fields/update/{id}")
+    public String updateField(
+            @PathVariable Integer id,
+            @ModelAttribute("field") Field field,
+            @RequestParam(value = "departmentIds", required = false) List<Integer> departmentIds,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            Field existing = fieldRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy lĩnh vực ID: " + id));
+
+            existing.setFieldName(field.getFieldName());
+
+            if (departmentIds != null && !departmentIds.isEmpty()) {
+                Set<Department> selectedDepartments = new HashSet<>(departmentService.findAllById(departmentIds));
+                existing.setDepartments(selectedDepartments);
+            } else {
+                existing.setDepartments(new HashSet<>());
+            }
+
+            fieldRepository.save(existing);
+
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật lĩnh vực thành công!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + e.getMessage());
+        }
+
+        return "redirect:/manager/fields";
+    }
+
+
+
     @ResponseBody
     @GetMapping("/fields/by-department/{departmentId}")
     public List<Field> getFieldsByDepartment(@PathVariable Integer departmentId) {
         return fieldRepository.findAllByDepartments_departmentID(departmentId);  // speed run
     }
+
+
+
+
 }
