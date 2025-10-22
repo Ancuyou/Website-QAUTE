@@ -64,4 +64,12 @@ public class MessageService {
         return result;
     }
 
+    public Messages findById(Long messageId) {
+        return messageRepository.findById(messageId).orElse(null);
+    }
+
+    public Messages save(Messages message) {
+        return messageRepository.save(message);
+    }
+
 }

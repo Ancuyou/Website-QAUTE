@@ -114,6 +114,16 @@ public class QuestionController {
 
         questionService.saveQuestion(question);
         redirectAttributes.addFlashAttribute("successMessage", "Câu hỏi của bạn đã được gửi thành công!");
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        username = principal.getName();
+        var a = accountService.findUserByUsername(username);
+        if(a.getRole().equals("Consultant")){
+            return "redirect:/consultant/questions-answer";
+        }
         return "redirect:/user/questions";
     }
 
