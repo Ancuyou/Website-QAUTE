@@ -88,4 +88,7 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     JOIN u.profile p
     """)
     Page<Question> findAllWithUser(Pageable pageable);
+
+    List<Question> findByUserOrderByDateSendDesc(User user);
+    List<Question> findAllByOrderByDateSendDesc();
 }

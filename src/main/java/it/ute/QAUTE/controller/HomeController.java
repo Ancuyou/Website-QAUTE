@@ -187,4 +187,40 @@ public class HomeController {
         System.out.println("lưu thành công");
         return "redirect:/user/home";
     }
+    @GetMapping("/user/history")
+    public String userHistory(
+            @RequestParam(required = false) Integer highlightQuestionId,
+            Model model,
+            Principal principal
+    ) {
+        if (principal != null) {
+            String username = principal.getName();
+            Account account = accountService.findUserByUsername(username);
+            User user = userService.findByProfileId(account.getProfile().getProfileID())
+                    .orElse(null);
+
+            if (user != null) {
+                // Lấy tất cả câu hỏi của user, sắp xếp theo ngày mới nhất
+                List<Question> userQuestions = questionRepository
+                        .findByUserOrderByDateSendDesc(user);
+
+                // Thống kê
+                long questionsAsked = userQuestions.size();
+                long answersReceived = answerRepository.countByQuestionUser(user);
+
+                model.addAttribute("userQuestions", userQuestions);
+                model.addAttribute("questionsAsked", questionsAsked);
+                model.addAttribute("answersReceived", answersReceived);
+
+                // Nếu có questionId cần highlight
+                if (highlightQuestionId != null) {
+                    model.addAttribute("highlightQuestionId", highlightQuestionId);
+                }
+            }
+
+            model.addAttribute("account", account);
+        }
+
+        return "pages/user/history";
+    }
 }

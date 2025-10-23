@@ -6,6 +6,15 @@
         .answer-form {
             display: none; /* Ẩn theo mặc định */
         }
+        .question-card.highlight {
+            animation: highlightFade 2s ease-in-out;
+            box-shadow: 0 0 20px rgba(255, 193, 7, 0.5) !important;
+        }
+
+        @keyframes highlightFade {
+            0% { background-color: #fff3cd; }
+            100% { background-color: white; }
+        }
     </style>
 </head>
 
@@ -44,7 +53,9 @@
                     </div>
                 </div>
 
-                <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4">
+                <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4"
+                     th:data-question-id="${question.questionID}"
+                     th:classappend="${highlightQuestionId != null and highlightQuestionId == question.questionID} ? 'border-warning border-3' : ''">
                     <div class="card-header bg-white py-3">
                         <div class="d-flex align-items-center">
                             <img th:src="@{${question.user.profile.avatar != null ? question.user.profile.avatar : '/images/default_avatar.png'}}" style="width: 40px; height: 40px;" class="rounded-circle me-3" alt="User Avatar">
@@ -250,6 +261,31 @@
             answerForm.style.display = answerForm.style.display === 'none' ? 'block' : 'none';
         }
     }
+
+    // Auto scroll to highlighted question
+    document.addEventListener('DOMContentLoaded', function() {
+        const highlightId = [[${highlightQuestionId}]];
+        if (highlightId) {
+            const questionCard = document.querySelector(`[data-question-id="${highlightId}"]`);
+            if (questionCard) {
+                setTimeout(() => {
+                    questionCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    questionCard.classList.add('highlight-animation');
+                }, 300);
+            }
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+        const highlightedCard = document.querySelector('.question-card.highlight');
+        if (highlightedCard) {
+            setTimeout(() => {
+                highlightedCard.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 300);
+        }
+    });
 </script>
 </body>
 
