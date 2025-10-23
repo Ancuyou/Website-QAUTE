@@ -263,6 +263,9 @@ public class AuthenticationController {
             model.addAttribute("error", "Tài khoản đã tồn tại");
             return "pages/register";
         }
+        session.removeAttribute("otp");
+        session.removeAttribute("otpExpiry");
+        session.removeAttribute("failCount");
         session.setAttribute("otp", otp);
         session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
         model.addAttribute("showOtpForm", true);
@@ -272,18 +275,43 @@ public class AuthenticationController {
         return "pages/register";
     }
     @PostMapping("/auth/verifyRegisterOtp")
-    public String verifyRegisterOtp(@RequestParam Map<String, String> params, Model model, HttpSession session){
+    public String verifyRegisterOtp(@RequestParam Map<String, String> params, RedirectAttributes ra, HttpSession session){
         String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
-        String hashedOtp= session.getAttribute("otp").toString();
+        Object sessionOtp= session.getAttribute("otp");
+        if (sessionOtp==null) return "redirect:/auth/login";
+        String hashedOtp= sessionOtp.toString();
+        Integer failCount=(Integer) session.getAttribute("failCount");
+        Long otpExpiry=(Long)session.getAttribute("otpExpiry");
+        String username=params.get("username");
+        String email=params.get("email");
+        String password=params.get("password");
         System.out.println("đăng ký tài khoản");
+        if (failCount==null) failCount=0;
         if (authenticationService.check(inputOTP,hashedOtp)){
             session.removeAttribute("otp");
             session.removeAttribute("otpExpiry");
-            String username=params.get("username");
-            String email=params.get("email");
-            String password=params.get("password");
+            session.removeAttribute("failCount");
             accountService.createAccount(username,email,password);
             System.out.println("đăng ký thành công rồi");
+            ra.addFlashAttribute("message", "Đăng ký thành công. Vui lòng đăng nhập.");
+        }else {
+            failCount++;
+            session.setAttribute("failCount", failCount);
+            if (failCount>=3 || otpExpiry==null||otpExpiry<System.currentTimeMillis()) {
+                session.removeAttribute("otp");
+                session.removeAttribute("otpExpiry");
+                session.removeAttribute("failCount");
+                System.out.println("otp đã hết hiệu lực");
+                ra.addFlashAttribute("error", "OTP đã bị vô hiệu hoá hoặc đã hết hiệu lực. Vui lòng gửi lại mã.");
+            }else {
+                int remain = 3 - failCount;
+                System.out.println("bạn còn "+remain+" lần thử");
+                ra.addFlashAttribute("error", "OTP không đúng. Bạn còn " + (3 - failCount) + " lần thử.");
+            }
+            ra.addFlashAttribute("showOtpForm", true);
+            ra.addFlashAttribute("email", email);
+            ra.addFlashAttribute("username", username);
+            return "redirect:/auth/register";
         }
         return "redirect:/auth/login";
     }
