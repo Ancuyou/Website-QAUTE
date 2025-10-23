@@ -55,24 +55,18 @@ public class ApplicationInitConfig {
                 profile.setFullName("Consultant");
                 profile.setPhone("0000000000");
                 profile.setAvatar(null);
-                
                 Account account = new Account();
                 account.setUsername("consultant");
                 account.setPassword(passwordEncoder.encode("consultant"));
                 account.setEmail("consultant@gmail.com");
                 account.setRole(Account.Role.Consultant);
-                account.setProfile(profile);
-
-                Account savedAccount = accountRepository.save(account);  // Lưu account và cascade profile
-                
-                // Lấy profile đã được lưu (có ID)
-                Profiles savedProfile = savedAccount.getProfile();
-                
                 Consultant consultant = new Consultant();
                 consultant.setExperienceYears(1);
-                consultant.setProfile(savedProfile);  // Dùng profile đã được lưu
-                consultantRepository.save(consultant);
-                
+                consultant.setProfile(profile);
+                profile.setConsultant(consultant);
+                profile.setAccount(account);
+                account.setProfile(profile);
+                accountRepository.save(account);
                 log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
             }
             if(accountRepository.findByUsername("user") == null) {

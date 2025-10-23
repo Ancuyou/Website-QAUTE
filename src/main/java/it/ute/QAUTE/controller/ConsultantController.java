@@ -9,11 +9,7 @@ import it.ute.QAUTE.entity.Messages;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AnswerService;
-import it.ute.QAUTE.service.ConsultantService;
-import it.ute.QAUTE.service.MessageService;
-import it.ute.QAUTE.service.QuestionService;
+import it.ute.QAUTE.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -62,9 +58,12 @@ public class ConsultantController {
 
     @Autowired
     private QuestionService questionService;
- 
+
     @Autowired
     private AnswerService answerService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
     @GetMapping({"", "/"})
     public String consultantRoot() {
         return "redirect:/consultant/home";
