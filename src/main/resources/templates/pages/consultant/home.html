@@ -7,7 +7,7 @@
 <th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
 
 <!-- Main Content -->
-<main style="padding-top: 70px;">
+<main style="padding-top: 30px;">
     <!-- Dashboard Content -->
     <div class="container-fluid">
         <th:block th:replace="~{fragments/consultant/consultant-dashboard :: consultant-dashboard}"></th:block>
@@ -90,378 +90,6 @@
                 <div class="h2 text-info fw-bold">98%</div>
                 <p class="mb-0 text-muted">Mức độ hài lòng</p>
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- Your Recent Activity -->
-<section id="history" class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h3 class="fw-bold">Hoạt động gần đây của bạn</h3>
-                    <a href="#history" class="btn btn-outline-primary">Xem tất cả</a>
-                </div>
-
-                <!-- Recent Questions -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
-                                <i class="fas fa-question"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Làm thế nào để chuẩn bị CV cho thực tập?</h6>
-                                <p class="text-muted mb-2 small">Đã nhận được 3 phản hồi từ tư vấn viên</p>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-success me-2">Đã trả lời</span>
-                                    <small class="text-muted">2 ngày trước</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start">
-                            <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
-                                <i class="fas fa-comments"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Chat với ThS. Trần Văn Minh</h6>
-                                <p class="text-muted mb-2 small">Tư vấn về lộ trình phát triển sự nghiệp</p>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-warning me-2">Đang chờ phản hồi</span>
-                                    <small class="text-muted">1 ngày trước</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
-                                <i class="fas fa-check"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">Tư vấn về kỹ năng mềm trong công việc</h6>
-                                <p class="text-muted mb-2 small">Đã nhận được 5 phản hồi hữu ích</p>
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-success me-2">Hoàn thành</span>
-                                    <small class="text-muted">1 tuần trước</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <!-- Recommended for You -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Gợi ý cho bạn</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <h6 class="fw-semibold mb-1">Tham gia Workshop</h6>
-                            <p class="small text-muted mb-2">"Kỹ năng phỏng vấn hiệu quả"</p>
-                            <small class="text-primary">Thứ 7, 15/09 - 14:00</small>
-                        </div>
-                        <hr>
-                        <div class="mb-3">
-                            <h6 class="fw-semibold mb-1">Câu hỏi tương tự</h6>
-                            <p class="small text-muted mb-2">"Cách viết thư xin việc ấn tượng"</p>
-                            <small class="text-success">23 phản hồi</small>
-                        </div>
-                        <hr>
-                        <div>
-                            <h6 class="fw-semibold mb-1">Tư vấn viên phù hợp</h6>
-                            <p class="small text-muted mb-2">Dựa trên lịch sử câu hỏi của bạn</p>
-                            <div class="d-flex align-items-center">
-                                <img src="https://via.placeholder.com/25" class="rounded-circle me-2" alt="Consultant">
-                                <small>TS. Nguyễn Thị Lan - <span class="text-success">Online</span></small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Statistics Card -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Thống kê của bạn</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <div class="h4 text-primary mb-0">12</div>
-                                <small class="text-muted">Câu hỏi</small>
-                            </div>
-                            <div class="col-6">
-                                <div class="h4 text-success mb-0">28</div>
-                                <small class="text-muted">Phản hồi</small>
-                            </div>
-                        </div>
-                        <hr class="my-3">
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <div class="h4 text-warning mb-0">5</div>
-                                <small class="text-muted">Tư vấn viên</small>
-                            </div>
-                            <div class="col-6">
-                                <div class="h4 text-info mb-0">4.8</div>
-                                <small class="text-muted">Đánh giá</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-<!-- Community Section -->
-<section id="community" class="bg-white py-5">
-    <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3">Cộng đồng QAUTE</h2>
-            <p class="lead text-muted">Nơi sinh viên chia sẻ, học hỏi và hỗ trợ lẫn nhau</p>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <!-- Recent Posts -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3">
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/40" class="rounded-circle me-3" alt="User">
-                            <div>
-                                <h6 class="mb-0">Nguyễn Văn An</h6>
-                                <small class="text-muted">Sinh viên IT - 2 giờ trước</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Mình đang gặp khó khăn trong việc lựa chọn chuyên ngành cho năm cuối.
-                            Có ai có kinh nghiệm về Machine Learning vs Web Development không ạ?
-                            Cảm ơn mọi người! 🤔
-                        </p>
-                        <div class="mb-3">
-                            <span class="badge bg-primary me-2">#IT</span>
-                            <span class="badge bg-secondary me-2">#ChuyênNgành</span>
-                            <span class="badge bg-info">#TưVấn</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary me-2">
-                                    <i class="fas fa-thumbs-up me-1"></i>15
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleComments('comments1')">
-                                    <i class="fas fa-comment me-1"></i>8
-                                </button>
-                                <button class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-share me-1"></i>Chia sẻ
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Comments Section -->
-                        <div id="comments1" class="mt-3 comment-section" style="display: none;">
-                            <hr>
-                            <h6 class="mb-3">Câu trả lời từ Consultant</h6>
-
-                            <div class="d-flex mb-3">
-                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
-                                <div class="flex-grow-1">
-                                    <div class="bg-light p-3 rounded">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <strong class="me-2">Consultant - Lê Minh Tuấn</strong>
-                                            <span class="badge bg-warning text-dark">Chuyên gia IT</span>
-                                        </div>
-                                        <p class="mb-0">
-                                            Chào bạn! Mình có 5 năm kinh nghiệm trong ngành. Machine Learning sẽ phù hợp nếu bạn thích toán và nghiên cứu, lương cao nhưng đòi hỏi học tập liên tục. Web Development thì cơ hội việc làm nhiều hơn và dễ tìm việc hơn. Bạn nên cân nhắc sở thích và mục tiêu dài hạn nhé!
-                                        </p>
-                                    </div>
-                                    <small class="text-muted">1 giờ trước</small>
-                                </div>
-                            </div>
-
-                            <div class="d-flex mb-3">
-                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
-                                <div class="flex-grow-1">
-                                    <div class="bg-light p-3 rounded">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <strong class="me-2">Consultant - Nguyễn Thu Hà</strong>
-                                            <span class="badge bg-info">Senior Developer</span>
-                                        </div>
-                                        <p class="mb-0">
-                                            Thêm ý kiến: Bạn có thể thử làm vài project nhỏ ở cả 2 mảng để xem mình hợp với cái nào hơn. Mình từng chọn ML nhưng sau chuyển sang Web vì thấy phù hợp hơn 😊
-                                        </p>
-                                    </div>
-                                    <small class="text-muted">30 phút trước</small>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control mb-2" rows="3" placeholder="Viết phản hồi của bạn..."></textarea>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-sm btn-primary">
-                                        <i class="fas fa-paper-plane me-1"></i>Gửi phản hồi
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white py-3">
-                        <div class="d-flex align-items-center">
-                            <img src="https://via.placeholder.com/40" class="rounded-circle me-3" alt="User">
-                            <div>
-                                <h6 class="mb-0">Trần Thị Bình</h6>
-                                <small class="text-muted">Sinh viên Kinh tế - 4 giờ trước</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            Chia sẻ kinh nghiệm phỏng vấn thực tập tại công ty đa quốc gia.
-                            Hy vọng sẽ hữu ích cho các bạn đang tìm kiếm cơ hội thực tập! 💪
-                        </p>
-                        <div class="mb-3">
-                            <span class="badge bg-success me-2">#ThựcTập</span>
-                            <span class="badge bg-warning me-2">#KinhNghiệm</span>
-                            <span class="badge bg-danger">#PhỏngVấn</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary me-2">
-                                    <i class="fas fa-thumbs-up me-1"></i>32
-                                </button>
-                                <button class="btn btn-sm btn-outline-secondary me-2" onclick="toggleComments('comments2')">
-                                    <i class="fas fa-comment me-1"></i>12
-                                </button>
-                                <button class="btn btn-sm btn-outline-info">
-                                    <i class="fas fa-share me-1"></i>Chia sẻ
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Comments Section -->
-                        <div id="comments2" class="mt-3 comment-section" style="display: none;">
-                            <hr>
-                            <h6 class="mb-3">Câu trả lời từ Consultant</h6>
-
-                            <div class="d-flex mb-3">
-                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
-                                <div class="flex-grow-1">
-                                    <div class="bg-light p-3 rounded">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <strong class="me-2">Consultant - Trần Đức Anh</strong>
-                                            <span class="badge bg-success">HR Manager</span>
-                                        </div>
-                                        <p class="mb-0">
-                                            Kinh nghiệm rất hay! Mình bổ sung thêm: Nhớ chuẩn bị kỹ về tình huống xử lý conflict và câu hỏi về điểm mạnh/yếu. Công ty đa quốc gia thường rất quan tâm soft skills và cultural fit đó!
-                                        </p>
-                                    </div>
-                                    <small class="text-muted">2 giờ trước</small>
-                                </div>
-                            </div>
-
-                            <div class="d-flex mb-3">
-                                <img src="https://via.placeholder.com/35" class="rounded-circle me-2" alt="Consultant" style="height: 35px;">
-                                <div class="flex-grow-1">
-                                    <div class="bg-light p-3 rounded">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <strong class="me-2">Consultant - Phạm Mai Linh</strong>
-                                            <span class="badge bg-warning text-dark">Career Coach</span>
-                                        </div>
-                                        <p class="mb-0">
-                                            Đồng ý! Và nhớ chuẩn bị câu hỏi để hỏi ngược lại nhà tuyển dụng nha. Điều đó cho thấy bạn quan tâm và nghiêm túc với vị trí 👍
-                                        </p>
-                                    </div>
-                                    <small class="text-muted">1 giờ trước</small>
-                                </div>
-                            </div>
-                            <div class="mt-3">
-                                <textarea class="form-control mb-2" rows="3" placeholder="Viết phản hồi của bạn..."></textarea>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-sm btn-primary">
-                                        <i class="fas fa-paper-plane me-1"></i>Gửi phản hồi
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <!-- Trending Topics -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h6 class="mb-0"><i class="fas fa-fire me-2"></i>Chủ đề HOT</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="fw-semibold">#TìmViệcLàm</span>
-                            <span class="badge bg-primary">234 bài viết</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="fw-semibold">#HọcBổng</span>
-                            <span class="badge bg-success">189 bài viết</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="fw-semibold">#DuHọc</span>
-                            <span class="badge bg-info">156 bài viết</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="fw-semibold">#KỹNăngMềm</span>
-                            <span class="badge bg-warning">98 bài viết</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">#StressHọcTập</span>
-                            <span class="badge bg-danger">76 bài viết</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Online Users -->
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-success text-white">
-                        <h6 class="mb-0"><i class="fas fa-users me-2"></i>Đang Online (127)</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <img src="https://via.placeholder.com/25" class="rounded-circle me-2" alt="User">
-                            <small>Lê Văn Cường</small>
-                            <span class="badge bg-success ms-auto">Online</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <img src="https://via.placeholder.com/25" class="rounded-circle me-2" alt="User">
-                            <small>Phạm Thị Dung</small>
-                            <span class="badge bg-success ms-auto">Online</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <img src="https://via.placeholder.com/25" class="rounded-circle me-2" alt="User">
-                            <small>Hoàng Minh Tuấn</small>
-                            <span class="badge bg-success ms-auto">Online</span>
-                        </div>
-                        <div class="text-center">
-                            <small class="text-muted">và 124 người khác...</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center mt-5">
-            <a th:href="@{/user/questions}" class="btn btn-primary btn-lg px-4 py-2 shadow-sm">
-                <i class="fas fa-comments me-2"></i>Xem và Đặt câu hỏi
-            </a>
         </div>
     </div>
 </section>
@@ -718,5 +346,137 @@
 
 <!-- Include footer fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script th:inline="javascript">
+    // Dữ liệu gốc từ backend
+    const originalData = {
+        questionsByField: /*[[${questionsByField}]]*/ {},
+        questionsByDay: /*[[${questionsByDay}]]*/ {},
+        questionsByWeek: /*[[${questionsByWeek}]]*/ {},
+        questionsByMonth: /*[[${questionsByMonth}]]*/ {},
+        totalQuestionsAnswered: /*[[${totalQuestionsAnswered}]]*/ 0,
+        responseRate: /*[[${responseRate}]]*/ 0,
+        avgResponseTime: /*[[${avgResponseTime}]]*/ 0,
+        totalUsersAnswered: /*[[${totalUsersAnswered}]]*/ 0
+    };
+
+    let currentPieChart, currentLineChart;
+
+    // Hàm vẽ pie chart
+    function drawPieChart(data) {
+        if (currentPieChart) currentPieChart.destroy();
+        if (Object.keys(data).length > 0) {
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            currentPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': ' + percentage + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Hàm vẽ line chart
+    function drawLineChart(data) {
+        if (currentLineChart) currentLineChart.destroy();
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+        const ctx = document.getElementById('timeChart').getContext('2d');
+        currentLineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số câu hỏi đã trả lời',
+                    data: values,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true } }
+            }
+        });
+    }
+
+    // Hàm filter theo thời gian
+    function filterByTime(period) {
+        let filteredQuestionsByField = originalData.questionsByField;
+        let filteredQuestionsByTime = originalData.questionsByWeek; // Default
+        let filteredTotal = originalData.totalQuestionsAnswered;
+
+        if (period === 'hôm nay') {
+            // Giả lập filter cho hôm nay (có thể mở rộng với date logic)
+            filteredQuestionsByTime = {}; // Placeholder
+            filteredTotal = Math.floor(originalData.totalQuestionsAnswered * 0.1); // Giả lập
+        } else if (period === 'tuần này') {
+            filteredQuestionsByTime = originalData.questionsByWeek;
+        } else if (period === 'tháng này') {
+            filteredQuestionsByTime = originalData.questionsByMonth;
+        } else if (period === 'năm nay') {
+            // Giả lập cho năm
+            filteredQuestionsByTime = originalData.questionsByMonth; // Placeholder
+        } else if (period === 'tất cả') {
+            filteredQuestionsByTime = originalData.questionsByMonth; // Placeholder
+        }
+
+        // Update stats
+        document.getElementById('totalQuestionsAnswered').textContent = filteredTotal;
+        document.getElementById('responseRate').textContent = (filteredTotal / originalData.totalQuestionsAnswered * 100).toFixed(1) + '%';
+        // Update các card khác tương tự
+
+        // Update biểu đồ
+        drawPieChart(filteredQuestionsByField);
+        drawLineChart(filteredQuestionsByTime);
+    }
+
+    // Khởi tạo
+    drawPieChart(originalData.questionsByField);
+    drawLineChart(originalData.questionsByWeek);
+
+    // Event listener cho button group (giữ nguyên)
+    document.getElementById('timeButtons').addEventListener('click', function(e) {
+        if (e.target.tagName === 'BUTTON') {
+            document.querySelectorAll('#timeButtons button').forEach(btn => btn.classList.remove('active'));
+            e.target.classList.add('active');
+            const period = e.target.getAttribute('data-period');
+            if (period === 'day') drawLineChart(originalData.questionsByDay);
+            else if (period === 'week') drawLineChart(originalData.questionsByWeek);
+            else if (period === 'month') drawLineChart(originalData.questionsByMonth);
+        }
+    });
+
+    // Event listener cho dropdown
+    document.querySelector('.dropdown-menu').addEventListener('click', function(e) {
+        if (e.target.classList.contains('dropdown-item')) {
+            const period = e.target.textContent.toLowerCase();
+            document.querySelector('.dropdown-toggle').innerHTML = '<i class="fas fa-calendar-alt me-1"></i> ' + e.target.textContent;
+            filterByTime(period);
+        }
+    });
+</script>
 </body>
 </html>

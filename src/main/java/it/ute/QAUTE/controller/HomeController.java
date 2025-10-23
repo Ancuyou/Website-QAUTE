@@ -47,6 +47,7 @@ public class HomeController {
     private FileStorageService fileStorageService;
     @Autowired
     private AuthenticationService  authenticationService;
+    @Autowired
     private QuestionRepository questionRepository;
     @Autowired
     private AnswerRepository answerRepository;

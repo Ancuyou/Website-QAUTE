@@ -78,7 +78,11 @@ public class ChatController {
                 dto.setUserID(user.getUserID());
                 dto.setProfileID(profile.getProfileID());
                 dto.setFullName(profile.getFullName());
-                dto.setAvatar("/qaute" + (profile.getAvatar() != null ? profile.getAvatar() : "/qaute/images/default_avatar.png"));
+                if (profile.getAvatar().startsWith("http")) {
+                    dto.setAvatar(profile.getAvatar());
+                } else {
+                    dto.setAvatar("/qaute" + (profile.getAvatar() != null ? profile.getAvatar() : "/qaute/images/default_avatar.png"));
+                }
                 dto.setIsOnline(false);
                 return dto;
             })
@@ -102,7 +106,11 @@ public class ChatController {
                     dto.setConsultantID(consultant.getConsultantID());
                     dto.setProfileID(profile.getProfileID());
                     dto.setFullName(profile.getFullName());
-                    dto.setAvatar("/qaute" + (profile.getAvatar() != null ? profile.getAvatar() : "/qaute/images/default_avatar.png"));
+                    if( profile.getAvatar().startsWith("http")) {
+                        dto.setAvatar(profile.getAvatar());
+                    } else {
+                        dto.setAvatar("/qaute" + (profile.getAvatar() != null ? profile.getAvatar() : "/qaute/images/default_avatar.png"));
+                    }
                     dto.setExperienceYears(consultant.getExperienceYears());
                     dto.setIsOnline(false);
                     return dto;
