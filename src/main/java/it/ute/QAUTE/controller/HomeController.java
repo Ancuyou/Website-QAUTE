@@ -168,7 +168,6 @@ public class HomeController {
                          @RequestParam(required = false) String studentCode,
                          @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                          @RequestParam(value = "newPassword", required = false) String newPassword,
-                         @RequestParam(value = "confirmPassword", required = false) String confirmPassword,
                          HttpSession session) throws ParseException, JOSEException {
         int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
         System.out.println(id);
@@ -178,14 +177,18 @@ public class HomeController {
         account.getProfile().setPhone(phone);
         account.getProfile().getUser().setRoleName(roleName);
         account.getProfile().getUser().setStudentCode(studentCode);
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String oldAvatar = account.getProfile().getAvatar();
+        String oldAvatar = account.getProfile().getAvatar();
+        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+            fileStorageService.deleteFile(oldAvatar);
+            account.getProfile().setAvatar(null);
+        }
+        else if (avatarFile != null && !avatarFile.isEmpty()) {
             String newAvatarUrl = fileStorageService.storeFile(avatarFile,oldAvatar, id);
             account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.save(account);
         System.out.println("lưu thành công");
-        return "redirect:/user/home";
+        return "redirect:/home/profile";
     }
     @GetMapping("/user/history")
     public String userHistory(

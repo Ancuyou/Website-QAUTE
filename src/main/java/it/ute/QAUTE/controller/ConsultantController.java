@@ -7,12 +7,10 @@ import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
 import it.ute.QAUTE.entity.Messages;
 import it.ute.QAUTE.entity.Profiles;
+import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AnswerService;
-import it.ute.QAUTE.service.ConsultantService;
-import it.ute.QAUTE.service.MessageService;
-import it.ute.QAUTE.service.QuestionService;
+import it.ute.QAUTE.service.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +38,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Controller
@@ -57,9 +58,12 @@ public class ConsultantController {
 
     @Autowired
     private QuestionService questionService;
- 
+
     @Autowired
     private AnswerService answerService;
+
+    @Autowired
+    private FileStorageService fileStorageService;
     @GetMapping({"", "/"})
     public String consultantRoot() {
         return "redirect:/consultant/home";
@@ -69,29 +73,83 @@ public class ConsultantController {
     public String homeConsultant(Model model, Authentication authentication) {
         if (authentication != null) {
             Account account = accountService.findByUsername(authentication.getName());
-            List<Profiles> chatUsers = messageService.getAllChatUsers(account.getProfile().getProfileID());
+            Profiles profile = account.getProfile();
+            Consultant consultant = profile.getConsultant();
+            if (consultant != null) {
+                Integer consultantId = consultant.getConsultantID();
+                List<Answer> answers = answerService.getAllAnswersByConsultant(consultantId);
+                Map<String, Long> questionsByField = answers.stream()
+                    .filter(a -> a.getQuestion() != null && a.getQuestion().getField() != null)
+                    .collect(Collectors.groupingBy(
+                        a -> a.getQuestion().getField().getFieldName(),
+                        Collectors.mapping(a -> a.getQuestion().getQuestionID(), Collectors.toSet())
+                    ))
+                    .entrySet().stream()
+                    .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (long) e.getValue().size()
+                    ));
 
-            List<UserDTO> userDTOs = chatUsers.stream().map(profile -> {
-                User user = profile.getUser();
-                if(user == null) {
-                    return null; 
-                }
-                UserDTO dto = new UserDTO();
-                dto.setUserID(user.getUserID());
-                dto.setProfileID(profile.getProfileID());
-                dto.setFullName(profile.getFullName());
-                dto.setAvatar(profile.getAvatar());
-                dto.setIsOnline(false);
-                return dto;
-            }).toList();
+                // Số câu hỏi duy nhất đã trả lời bởi consultant này (đếm distinct questionID)
+                long totalQuestionsAnswered = answers.stream()
+                    .filter(a -> a.getQuestion() != null)
+                    .map(a -> a.getQuestion().getQuestionID())
+                    .distinct()
+                    .count();
+                
+                // Tổng số câu trả lời toàn hệ thống
+                List<Answer> allAnswers = answerService.getAllAnswers();
+                int totalAnswers = allAnswers.size();
+                
+                // Tổng số câu hỏi toàn hệ thống
+                List<Question> allQuestions = questionService.getAllQuestions();
+                long totalQuestions = allQuestions.size();
+                
+                // Tỷ lệ trả lời: (Số câu hỏi đã trả lời bởi consultant) / (Tổng số câu hỏi) * 100
+                double responseRate = totalQuestions > 0 ? (double) totalQuestionsAnswered / totalQuestions * 100 : 0;
+                
+                
+                
+                double avgResponseTime = answers.stream()
+                    .filter(a -> a.getQuestion() != null && a.getQuestion().getDateSend() != null)
+                    .mapToLong(a -> java.time.Duration.between(a.getQuestion().getDateSend(), a.getDateAnswered()).toMinutes())
+                    .average()
+                    .orElse(0);
+                
+                List<Answer> recentActivities = answers.stream()
+                    .sorted((a1, a2) -> a2.getDateAnswered().compareTo(a1.getDateAnswered()))
+                    .limit(5)
+                    .toList();
+               
+                Map<String, Long> questionsByDay = answers.stream()
+                .filter(a -> a.getDateAnswered() != null)
+                .collect(Collectors.groupingBy(a -> a.getDateAnswered().toLocalDate().toString(), Collectors.counting()));
 
-            model.addAttribute("chatUsers", userDTOs);
-            model.addAttribute("account", account);
+                Map<String, Long> questionsByWeek = answers.stream()
+                    .filter(a -> a.getDateAnswered() != null)
+                    .collect(Collectors.groupingBy(a -> "Tuần " + ((a.getDateAnswered().getDayOfMonth() - 1) / 7 + 1), Collectors.counting()));
 
-            if (account.getProfile() != null) {
-                List<Messages> recentChats = messageService.getRecentChats(account.getProfile().getProfileID());
-                model.addAttribute("recentChats", recentChats);
+                Map<String, Long> questionsByMonth = answers.stream()
+                    .filter(a -> a.getDateAnswered() != null)
+                    .collect(Collectors.groupingBy(a -> a.getDateAnswered().getMonth().toString(), Collectors.counting()));
+                long totalUsersAnswered = answers.stream()
+                .filter(a -> a.getQuestion() != null && a.getQuestion().getUser() != null)
+                .map(a -> a.getQuestion().getUser().getUserID())
+                .distinct()
+                .count();
+
+                model.addAttribute("totalUsersAnswered", totalUsersAnswered);
+                model.addAttribute("questionsByDay", questionsByDay);
+                model.addAttribute("questionsByWeek", questionsByWeek);
+                model.addAttribute("questionsByMonth", questionsByMonth);
+                model.addAttribute("questionsByField", questionsByField);
+                model.addAttribute("totalQuestionsAnswered", totalQuestionsAnswered);
+                model.addAttribute("totalAnswers", totalAnswers);
+                model.addAttribute("responseRate", String.format("%.1f", responseRate));
+                model.addAttribute("avgResponseTime", (int) avgResponseTime);
+                model.addAttribute("recentActivities", recentActivities);
             }
+            model.addAttribute("account", account);
         }
         return "pages/consultant/home";
     }
@@ -118,30 +176,19 @@ public class ConsultantController {
         Principal principal,
         RedirectAttributes redirectAttributes
     ) throws IOException {
-
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
-        Profiles profile = account.getProfile();
-        Consultant consultant = profile.getConsultant();
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String uploadDir = "src/main/resources/static/images/avatars/";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-            String originalFileName = avatarFile.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-            String fileName = "Consultant_" + account.getAccountID() + extension;
-            profile.setAvatar("/images/avatars/" + fileName);
-            java.nio.file.Path filePath = Paths.get(uploadDir, fileName);
-            Files.copy(avatarFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        account.getProfile().setFullName(fullName);
+        account.getProfile().setPhone(phone);
+        account.getProfile().getConsultant().setExperienceYears(experienceYears);
+        String oldAvatar = account.getProfile().getAvatar();
+        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+            fileStorageService.deleteFile(oldAvatar);
+            account.getProfile().setAvatar(null);
         }
-        profile.setFullName(fullName);
-        profile.setPhone(phone);
-        if (consultant != null && experienceYears != null) {
-            consultant.setExperienceYears(experienceYears);
-            consultantService.updateConsultant(consultant);
+        else if (avatarFile != null && !avatarFile.isEmpty()) {
+            String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
+            account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.updateAccount(account);
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully.");

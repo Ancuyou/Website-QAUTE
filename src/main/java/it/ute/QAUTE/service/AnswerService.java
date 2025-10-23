@@ -36,4 +36,8 @@ public class AnswerService {
     public List<Answer> getAnswersByQuestionId(Integer questionId) {
         return answerRepository.findByQuestion_QuestionID(questionId);
     }
+
+    public List<Answer> getAllAnswers() {
+        return answerRepository.findAll();
+    }
 }
