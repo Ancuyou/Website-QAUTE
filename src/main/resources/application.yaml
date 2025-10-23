@@ -61,3 +61,7 @@ jwt:
   refresh-duration: 864000 #in seconds : 10 day
 openweather:
   apikey: 8b62d623ee124b44cb88d85bade58e38
+cloudinary:
+  cloud_name: dob8vleac
+  api_key: 428778766855443
+  api_secret: iNu_qDEZsruYl8FvZzP0RwjjcqU
