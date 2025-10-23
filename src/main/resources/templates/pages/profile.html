@@ -5,7 +5,7 @@
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
     <div class="container">
-        <a class="navbar-brand text-primary fw-bold fs-3" href="/">
+        <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/user/home}">
             <i class="fas fa-graduation-cap me-2"></i>QAUTE
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -14,13 +14,13 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="/">Trang chủ</a>
+                    <a class="nav-link fw-semibold" th:href="@{/user/home}">Trang chủ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="/#consultants">Tư vấn viên</a>
+                    <a class="nav-link fw-semibold" href="/user/home#consultants">Tư vấn viên</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="/#community">Cộng đồng</a>
+                    <a class="nav-link fw-semibold" href="/user/home#community">Cộng đồng</a>
                 </li>
             </ul>
             <th:block th:replace="~{fragments/userDropDown :: userDropdown(
