@@ -41,11 +41,19 @@
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body text-center p-4">
                         <div class="position-relative d-inline-block mb-3">
-                            <img th:src="${account.profile.avatar != null ? account.profile.avatar : 'https://via.placeholder.com/120'}"
+                            <img th:src="@{${account.profile.avatar != null ? account.profile.avatar : '/images/default_avatar.png'}}"
                                  class="rounded-circle border border-3 border-primary" alt="Avatar" width="120" height="120" id="avatarPreview">
                             <button class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle shadow"
                                     style="width: 35px; height: 35px;" onclick="document.getElementById('avatarInput').click()" type="button">
                                 <i class="fas fa-camera"></i>
+                            </button>
+                            <button class="btn btn-sm btn-primary position-absolute bottom-0 start-0 rounded-circle shadow"
+                                    style="width: 35px; height: 35px;"
+                                    onclick="resetAvatar()"
+                                    type="button"
+                                    title="Xóa ảnh đại diện"
+                                    th:if="${account.profile.avatar != null && account.profile.avatar != '/images/default_avatar.png'}">
+                                <i class="fas fa-times fa-lg"></i>
                             </button>
                         </div>
                         <h5 class="mb-1" th:text="${account.profile.fullName}">Tên người dùng</h5>
@@ -393,6 +401,7 @@
 </style>
 
 <script th:inline="javascript">
+    const DEFAULT_AVATAR_URL = /*[[@{/images/default_avatar.png}]]*/ '/images/default_avatar.png';
     document.addEventListener('DOMContentLoaded', function(){
         var params = new URLSearchParams(window.location.search);
         var Modal  = window.bootstrap && window.bootstrap.Modal;
@@ -535,6 +544,32 @@
         const hidden = document.getElementById('otpHidden');
         if (hidden) hidden.value = otp;
         return true; // cho submit bình thường
+    }
+    function resetAvatar() {
+        if (confirm('Bạn có chắc muốn xóa ảnh đại diện và đặt về mặc định?')) {
+            // Đổi preview về ảnh mặc định
+            const img = document.getElementById('avatarPreview');
+            if (img) img.src = DEFAULT_AVATAR_URL;
+
+            // Clear file input
+            const fileInput = document.getElementById('avatarInput');
+            if (fileInput) fileInput.value = '';
+
+            // Tạo input hidden để báo controller reset avatar
+            let resetFlag = document.querySelector('input[name="resetAvatar"]');
+            if (!resetFlag) {
+                resetFlag = document.createElement('input');
+                resetFlag.type = 'hidden';
+                resetFlag.name = 'resetAvatar';
+                const form = document.querySelector('form[action$="/home/profile/update"]');
+                if (form) form.appendChild(resetFlag);
+            }
+            resetFlag.value = 'true';
+
+            // Ẩn nút X
+            const btn = event.target.closest('button');
+            if (btn) btn.style.display = 'none';
+        }
     }
     (function () {
         const form = document.querySelector('form[action$="/home/profile/update"]');

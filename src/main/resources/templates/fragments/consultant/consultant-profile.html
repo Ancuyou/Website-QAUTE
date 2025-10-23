@@ -22,7 +22,7 @@
                         <div class="card-body text-center p-4">
                            <div class="position-relative d-inline-block mb-4">
                             <img id="avatarPreview"
-                                th:src="${profile.avatar != null and !#strings.isEmpty(profile.avatar) ? '/qaute' + profile.avatar : '/qaute/images/default_avatar.png'}"
+                                th:src="${profile.avatar != null and !#strings.isEmpty(profile.avatar) ? profile.avatar : '/qaute/images/default_avatar.png'}"
                                 class="rounded-circle img-thumbnail"
                                 alt="Avatar"
                                 width="150"
@@ -33,13 +33,21 @@
                                 style="cursor: pointer;">
                                 <i class="fas fa-camera"></i>
                             </label>
-                            
+                               <button class="btn btn-sm btn-primary position-absolute bottom-0 start-0 rounded-circle shadow"
+                                       style="width: 35px; height: 35px;"
+                                       onclick="resetConsultantAvatar(event)"
+                                       type="button"
+                                       title="Xóa ảnh đại diện"
+                                       th:if="${profile.avatar != null && profile.avatar != '/qaute/images/default_avatar.png'}">
+                                   <i class="fas fa-times fa-lg"></i>
+                               </button>
                             <input type="file"
                                 id="avatarUpload"
                                 name="avatarFile"
                                 accept="image/*"
-                                style="display: none;"
+                                style="display: none;width: 35px; height: 35px;"
                                 onchange="previewAvatar(this)">
+
                         </div>
                             <h4 class="fw-bold mb-1" th:text="${profile.fullName != null ? profile.fullName : 'Chưa cập nhật'}">Nguyễn Văn Tư Vấn</h4>
                             <p class="text-muted mb-3">Tư vấn viên</p>
@@ -136,17 +144,42 @@
         </form>
     </div>
     <script>
+        const DEFAULT_CONSULTANT_AVATAR = /*[[@{/qaute/images/default_avatar.png}]]*/ '/qaute/images/default_avatar.png';
         function previewAvatar(input) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
-
         reader.onload = function(e) {
             const preview = document.getElementById('avatarPreview');
-            preview.src = e.target.result; // Gán ảnh base64 vào thẻ <img>
+            if (preview) {
+                preview.src = e.target.result;
+            }
+            const resetFlag = document.getElementById('resetAvatarFlag');
+            if (resetFlag) resetFlag.value = '';
         };
-
-        reader.readAsDataURL(input.files[0]); // Đọc file vừa chọn
+        reader.readAsDataURL(input.files[0]);
     }
+
 }
+        function resetConsultantAvatar(event) {
+            event.preventDefault(); // Ngăn form submit
+
+            if (confirm('Bạn có chắc muốn xóa ảnh đại diện và đặt về mặc định?')) {
+                // Đổi preview về ảnh mặc định
+                const img = document.getElementById('avatarPreview');
+                if (img) img.src = DEFAULT_CONSULTANT_AVATAR;
+
+                // Clear file input
+                const fileInput = document.getElementById('avatarUpload');
+                if (fileInput) fileInput.value = '';
+
+                // Đặt flag để controller biết cần reset
+                const resetFlag = document.getElementById('resetAvatarFlag');
+                if (resetFlag) resetFlag.value = 'true';
+
+                // Ẩn nút X
+                const btn = event.target.closest('button');
+                if (btn) btn.style.display = 'none';
+            }
+        }
     </script>
 </section>

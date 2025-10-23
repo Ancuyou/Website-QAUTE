@@ -176,30 +176,19 @@ public class ConsultantController {
         Principal principal,
         RedirectAttributes redirectAttributes
     ) throws IOException {
-
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
-        Profiles profile = account.getProfile();
-        Consultant consultant = profile.getConsultant();
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String uploadDir = "src/main/resources/static/images/avatars/";
-            File uploadFolder = new File(uploadDir);
-            if (!uploadFolder.exists()) uploadFolder.mkdirs();
-            String originalFileName = avatarFile.getOriginalFilename();
-            String extension = "";
-            if (originalFileName != null && originalFileName.contains(".")) {
-                extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-            }
-            String fileName = "Consultant_" + account.getAccountID() + extension;
-            profile.setAvatar("/images/avatars/" + fileName);
-            java.nio.file.Path filePath = Paths.get(uploadDir, fileName);
-            Files.copy(avatarFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        account.getProfile().setFullName(fullName);
+        account.getProfile().setPhone(phone);
+        account.getProfile().getConsultant().setExperienceYears(experienceYears);
+        String oldAvatar = account.getProfile().getAvatar();
+        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+            fileStorageService.deleteFile(oldAvatar);
+            account.getProfile().setAvatar(null);
         }
-        profile.setFullName(fullName);
-        profile.setPhone(phone);
-        if (consultant != null && experienceYears != null) {
-            consultant.setExperienceYears(experienceYears);
-            consultantService.updateConsultant(consultant);
+        else if (avatarFile != null && !avatarFile.isEmpty()) {
+            String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
+            account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.updateAccount(account);
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully.");
