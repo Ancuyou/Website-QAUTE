@@ -903,34 +903,8 @@
     </div>
 </section>
 
-<th:block th:replace="~{fragments/userDropDown :: notificationScript}"></th:block>
 <div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
 <!-- **2. Thêm Footer (quan trọng để load JS)** -->
 <div th:replace="~{fragments/footer :: footer}"></div>
-
-<script>
-    function toggleComments(commentId) {
-        const commentSection = document.getElementById(commentId);
-        if (commentSection.style.display === 'none') {
-            commentSection.style.display = 'block';
-        } else {
-            commentSection.style.display = 'none';
-        }
-    }
-
-    function startChatWithConsultant(button) {
-        const consultantID = button.getAttribute('data-consultant-id');
-        const profileID = button.getAttribute('data-profile-id');
-        const consultantName = button.getAttribute('data-consultant-name');
-
-        // Mở chat window trực tiếp
-        openChatWindow(profileID, consultantName);
-        loadChatHistory(profileID);
-    }
-</script>
-<!-- Bootstrap 5 JS (bundle có Popper) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-        crossorigin="anonymous"></script>
 </body>
 </html>
