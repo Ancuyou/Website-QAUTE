@@ -18,6 +18,8 @@ public class EmailService {
     private JavaMailSender mailSender;
     @Autowired
     private ApplicationContext context;
+    @Autowired @org.springframework.context.annotation.Lazy
+    private EmailService self;
     private String createOTP(){
         SecureRandom random = new SecureRandom();
         String DIGITS = "0123456789";
@@ -28,7 +30,7 @@ public class EmailService {
         }
         return otp.toString();
     }
-    @Async
+    @org.springframework.scheduling.annotation.Async("mailExecutor")
     public void sendEmail(String toEmail, String subject, String body){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -37,48 +39,39 @@ public class EmailService {
         mailSender.send(message);
     }
     public String sendForgetPasswordEmail(String toEmail) {
+        String otp = createOTP();
         try {
-            String otp = createOTP();
             String htmlContent = getEmailTemplate("Lấy lại mật khẩu", getForgetPasswordOTPContent(otp));
-            context.getBean(EmailService.class).sendEmailHtml(toEmail, "Lấy lại mật khẩu QAUTE", htmlContent);
-            return otp;
+            self.sendEmailHtml(toEmail, "Lấy lại mật khẩu QAUTE", htmlContent);
         } catch (MessagingException e) {
             // Fallback to plain text email if HTML fails
-            String otp = createOTP();
-            String body = "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
-            context.getBean(EmailService.class).sendEmail(toEmail, "Lấy lại mật khẩu", body);
-            return otp;
+            self.sendEmail(toEmail, "Lấy lại mật khẩu", "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.");
         }
+        return otp;
     }
     public String sendRegisterEmail(String toEmail) {
+        String otp = createOTP();
         try {
-            String otp = createOTP();
             String htmlContent = getEmailTemplate("Đăng ký tài khoản", getRegisterOTPContent(otp));
-            context.getBean(EmailService.class).sendEmailHtml(toEmail, "Xác nhận đăng ký tài khoản QAUTE", htmlContent);
-            return otp;
+            self.sendEmailHtml(toEmail, "Xác nhận đăng ký tài khoản QAUTE", htmlContent);
         } catch (MessagingException e) {
-            // Fallback to plain text email if HTML fails
-            String otp = createOTP();
-            String body = "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
-            context.getBean(EmailService.class).sendEmail(toEmail, "Đăng ký tài khoản", body);
-            return otp;
+            self.sendEmail(toEmail, "Đăng ký tài khoản", "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.");
         }
+        return otp;
     }
     public String sendChangePassword(String toEmail){
+        String otp = createOTP();
         try {
-            String otp = createOTP();
             String htmlContent = getEmailTemplate("Đổi mật khẩu", getChangePasswordOTPContent(otp));
-            context.getBean(EmailService.class).sendEmailHtml(toEmail, "Lấy lại mật khẩu QAUTE", htmlContent);
+            self.sendEmailHtml(toEmail, "Lấy lại mật khẩu QAUTE", htmlContent);
             return otp;
         } catch (MessagingException e) {
             // Fallback to plain text email if HTML fails
-            String otp = createOTP();
-            String body = "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
-            context.getBean(EmailService.class).sendEmail(toEmail, "Đổi mật khẩu", body);
-            return otp;
+            self.sendEmail(toEmail, "Đổi mật khẩu", "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.");
         }
+        return otp;
     }
-    @Async
+    @org.springframework.scheduling.annotation.Async("mailExecutor")
     public void sendEmailHtml(String toEmail, String subject, String htmlBody)
             throws MessagingException {
         MimeMessage mime = mailSender.createMimeMessage();

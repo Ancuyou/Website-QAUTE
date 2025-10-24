@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.InetAddress;
 import java.time.Duration;
 import java.util.Map;
 
@@ -135,7 +136,11 @@ public class AuthenticationController {
         response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
         return "redirect:/auth/login";
     }
-
+    @GetMapping("/auth/login/MFA")
+    public String mfa(Model model){
+        model.addAttribute("emailForm", true);
+        return "pages/mfa";
+    }
     @GetMapping("/auth/forgotPassword")
     public String forgotPasswordForm(Model model,
                                      @RequestParam(value = "email", required = false) String email,
@@ -161,7 +166,7 @@ public class AuthenticationController {
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
-            var auth = authenticationService.authentication(account, "DANGNGOCNHAN", false); // device name demo
+            var auth = authenticationService.authentication(account, InetAddress.getLocalHost().getHostName(), false); // device name demo
 
             System.out.println("Token: " + auth.getToken());
 
@@ -342,7 +347,7 @@ public class AuthenticationController {
             session.removeAttribute("otp");
             session.removeAttribute("otpExpiry");
             session.removeAttribute("failCount");
-            accountService.createAccount(username,email,password);
+            accountService.createAccount(username,password,email);
             System.out.println("đăng ký thành công rồi");
             ra.addFlashAttribute("message", "Đăng ký thành công. Vui lòng đăng nhập.");
         }else {
