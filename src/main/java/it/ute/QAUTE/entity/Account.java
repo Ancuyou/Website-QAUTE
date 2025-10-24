@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
@@ -49,6 +48,18 @@ public class Account {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate", updatable = false)
     private Date createdDate;
+
+    @Column(name="SecurityLevel")
+    private int securityLevel=0;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="LockUntil")
+    private Date lockUntil;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LevelEventAt")
+    private Date levelEventAt;
+
     public enum Role {
         Admin,
         Manager,

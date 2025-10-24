@@ -14,6 +14,7 @@ public enum ErrorCode {
     EMAIL_EXISTED(411, "Conflict: Email already exists"),
     DEPARTMENTNAME_EXISTED(412, "Conflict: Department name already exists"),
     ERROR_DELETED(413, "Error deleted"),
+    QUESTION_UNEXISTED(414, "Question Not Found"),
 
     // Authentication & Authorization Errors
     UNAUTHENTICATED(401, "Unauthorized: Authentication required"),

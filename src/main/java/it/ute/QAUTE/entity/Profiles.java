@@ -35,4 +35,7 @@ public class Profiles {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
     private User user;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    private Admin admin;
 }

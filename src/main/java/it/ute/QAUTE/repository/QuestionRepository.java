@@ -1,5 +1,6 @@
 package it.ute.QAUTE.repository;
 
+import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -88,6 +90,87 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     JOIN u.profile p
     """)
     Page<Question> findAllWithUser(Pageable pageable);
+
+    @Query("""
+        SELECT COUNT(q)
+        FROM Question q
+        WHERE q.dateSend BETWEEN :startDate AND :endDate
+    """)
+    long countAllQuestions(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+        SELECT new it.ute.QAUTE.dto.QuestionReportDTO(
+            q.field.fieldName, COUNT(q), null
+        )
+        FROM Question q
+        WHERE q.dateSend BETWEEN :startDate AND :endDate
+        GROUP BY q.field.fieldName
+    """)
+    List<QuestionReportDTO> getQuestionsByField(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT new it.ute.QAUTE.dto.QuestionReportDTO(
+        q.department.departmentName, COUNT(q), null
+    )
+    FROM Question q
+    WHERE q.dateSend BETWEEN :startDate AND :endDate
+    GROUP BY q.department.departmentName
+    """)
+    List<QuestionReportDTO> getQuestionsByDepartment(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT new it.ute.QAUTE.dto.QuestionReportDTO(
+        CAST(q.status AS string), COUNT(q), null
+    )
+    FROM Question q
+    WHERE q.dateSend BETWEEN :startDate AND :endDate
+    GROUP BY q.status
+    """)
+    List<QuestionReportDTO> getQuestionsByStatus(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT new it.ute.QAUTE.dto.QuestionReportDTO(
+        null,
+        COUNT(q),
+        CAST(q.dateSend AS LocalDate)
+    )
+    FROM Question q
+    WHERE q.dateSend BETWEEN :startDate AND :endDate
+    GROUP BY CAST(q.dateSend AS LocalDate)
+    ORDER BY CAST(q.dateSend AS LocalDate)
+    """)
+    List<QuestionReportDTO> getQuestionsByDate(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT q
+    FROM Question q
+    JOIN FETCH q.user u
+    JOIN FETCH u.profile p
+    WHERE q.isToxic = true
+      AND (:startDate IS NULL OR q.dateSend >= :startDate)
+      AND (:endDate IS NULL OR q.dateSend <= :endDate)
+    ORDER BY q.dateSend DESC
+    """)
+    Page<Question> findToxicQuestionsByDateRange(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable
+    );
 
     List<Question> findByUserOrderByDateSendDesc(User user);
     List<Question> findAllByOrderByDateSendDesc();

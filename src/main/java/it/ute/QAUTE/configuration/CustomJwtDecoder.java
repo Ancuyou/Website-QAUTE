@@ -2,12 +2,9 @@ package it.ute.QAUTE.configuration;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.nimbusds.jwt.SignedJWT;
-import it.ute.QAUTE.Exception.AppException;
-import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.entity.RefreshToken;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
 import it.ute.QAUTE.service.AuthenticationService;
@@ -22,7 +19,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
 import com.nimbusds.jose.JOSEException;
-
 
 @Slf4j
 @Component
@@ -80,7 +76,5 @@ public class CustomJwtDecoder implements JwtDecoder {
             throw new JwtException("Invalid token format");
         }
     }
-
-
 }
 
