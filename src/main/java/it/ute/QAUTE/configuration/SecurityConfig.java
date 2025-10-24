@@ -38,7 +38,7 @@ import java.time.Duration;
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**"};
+    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**", "/css/**", "/js/**", "/images/**" };
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AuthenticationService authenticationService;
