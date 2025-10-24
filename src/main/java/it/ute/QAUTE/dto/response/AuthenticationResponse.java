@@ -20,4 +20,5 @@ public class AuthenticationResponse {
     boolean authenticated;
     Account.Role role;
     boolean isBlock;
+    String message;
 }

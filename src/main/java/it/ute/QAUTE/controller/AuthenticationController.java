@@ -137,9 +137,16 @@ public class AuthenticationController {
     }
 
     @GetMapping("/auth/forgotPassword")
-    public String forgotPasswordForm(Model model){
-        model.addAttribute("showEmailForm", true);
-        return  "pages/forgotPassword";
+    public String forgotPasswordForm(Model model,
+                                     @RequestParam(value = "email", required = false) String email,
+                                     HttpSession session) {
+        if (session.getAttribute("otp") != null) {
+            model.addAttribute("showOtpForm", true);
+            model.addAttribute("email", email);
+        } else if (!model.containsAttribute("showOtpForm")) {
+            model.addAttribute("showEmailForm", true);
+        }
+        return "pages/forgotPassword";
     }
     @GetMapping("/auth/register")
     public String registerForm() {
@@ -174,7 +181,7 @@ public class AuthenticationController {
 
                 return "redirect:" + resolveRedirectByRole("ROLE_" + auth.getRole());
             }
-            redirectAttributes.addFlashAttribute("error", "Tên đăng nhập hoặc mật khẩu không đúng");
+            redirectAttributes.addFlashAttribute("error", auth.getMessage());
             redirectAttributes.addFlashAttribute("account", account);
             return "redirect:/auth/login";
         } catch (Exception e) {
@@ -184,7 +191,6 @@ public class AuthenticationController {
             return "redirect:/auth/login";
         }
     }
-
 
     @PostMapping("/auth/forgotPassword")
     public String forgotPassword(@RequestParam("email") String email,Model model,HttpSession session){
@@ -206,34 +212,63 @@ public class AuthenticationController {
         }
         return "pages/forgotPassword";
     }
+    @PostMapping("/auth/resendOtp")
+    public String resendOTP(@RequestParam("email") String email, Model model, HttpSession session) {
+        Long lastResendTime = (Long) session.getAttribute("lastResendTime");
+        long currentTime = System.currentTimeMillis();
+        if (lastResendTime != null) {
+            long timeDiff = (currentTime - lastResendTime) / 1000;
+            if (timeDiff < 30) {
+                model.addAttribute("error", "Vui lòng đợi " + (30 - timeDiff) + " giây trước khi gửi lại OTP");
+                model.addAttribute("email", email);
+                model.addAttribute("showOtpForm", true);
+                return "redirect:pages/forgotPassword";
+            }
+        }
+        String otp = authenticationService.forgetPassword(email);
+        session.setAttribute("otp", otp);
+        session.setAttribute("otpExpiry", currentTime + (3 * 60 * 1000));
+        session.setAttribute("lastResendTime", currentTime);
+        model.addAttribute("email", email);
+        model.addAttribute("showOtpForm", true);
+        return "pages/forgotPassword";
+    }
 
     @PostMapping("/auth/verifyOtp")
     public String verifyOTP(@RequestParam Map<String, String> params, Model model, HttpSession session){
         String inputOTP = params.get("otp1") + params.get("otp2") + params.get("otp3") + params.get("otp4") + params.get("otp5") + params.get("otp6");
         Integer failCount=(Integer) session.getAttribute("failCount");
-        String hashedOtp= session.getAttribute("otp").toString();
+        Object sessionOtp= session.getAttribute("otp");
+        if (sessionOtp==null) return "redirect:/auth/login";
+        String hashedOtp= sessionOtp.toString();
         Long otpExpiry = (Long) session.getAttribute("otpExpiry");
         if (failCount==null) failCount=0;
-        if (otpExpiry==null||otpExpiry<System.currentTimeMillis() ) {
-            model.addAttribute("error", "OTP đã hết hạn");
-            model.addAttribute("showOtpForm", true);
-            model.addAttribute("email", params.get("email"));
-        }else if (!authenticationService.check(inputOTP,hashedOtp)){
-            failCount++;
-            session.setAttribute("failCount", failCount);
-            if (failCount>=3) {
-                System.out.println(params.get("Tài khoản tạm thời bị khóa"));
-                return "redirect:/auth/login";
-            }
-            model.addAttribute("error", "OTP không đúng ");
-            model.addAttribute("showOtpForm", true);
-            model.addAttribute("email", params.get("email"));
-        } else {
+        if(authenticationService.check(inputOTP,hashedOtp)){
             session.removeAttribute("otp");
             session.removeAttribute("otpExpiry");
             session.removeAttribute("failCount");
+            session.removeAttribute("lastResendTime");
             model.addAttribute("showResetForm", true);
             model.addAttribute("email", params.get("email"));
+        }else {
+            failCount++;
+            session.setAttribute("failCount", failCount);
+            if (failCount>=3 || otpExpiry==null||otpExpiry<System.currentTimeMillis()) {
+                session.removeAttribute("otp");
+                session.removeAttribute("otpExpiry");
+                session.removeAttribute("failCount");
+                session.removeAttribute("lastResendTime");
+                System.out.println("otp đã hết hiệu lực");
+                model.addAttribute("error", "OTP đã bị vô hiệu hoá hoặc đã hết hiệu lực. Vui lòng gửi lại mã.");
+                model.addAttribute("showOtpForm", true);
+                model.addAttribute("email", params.get("email"));
+            }else {
+                int remain = 3 - failCount;
+                System.out.println("bạn còn "+remain+" lần thử");
+                model.addAttribute("error", "OTP không đúng. Bạn còn " + (3 - failCount) + " lần thử.");
+                model.addAttribute("showOtpForm", true);
+                model.addAttribute("email", params.get("email"));
+            }
         }
         return "pages/forgotPassword";
     }
@@ -263,6 +298,22 @@ public class AuthenticationController {
             model.addAttribute("error", "Tài khoản đã tồn tại");
             return "pages/register";
         }
+        session.removeAttribute("otp");
+        session.removeAttribute("otpExpiry");
+        session.removeAttribute("failCount");
+        session.setAttribute("otp", otp);
+        session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
+        model.addAttribute("showOtpForm", true);
+        model.addAttribute("email", email);
+        model.addAttribute("username", username);
+        model.addAttribute("password", password);
+        return "pages/register";
+    }
+    @PostMapping("/auth/register/resendOtp")
+    public String resendRegisterOTP(@RequestParam("email") String email,
+                                    @RequestParam(value = "username", required = false) String username,
+                                    @RequestParam(value = "password", required = false) String password, Model model, HttpSession session){
+        String otp=authenticationService.register(username,email);
         session.removeAttribute("otp");
         session.removeAttribute("otpExpiry");
         session.removeAttribute("failCount");

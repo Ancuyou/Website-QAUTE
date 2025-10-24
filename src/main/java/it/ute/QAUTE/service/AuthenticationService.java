@@ -55,6 +55,8 @@ public class AuthenticationService {
     RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private SecurityService securityService;
     @NonFinal
     @Value("${jwt.signerKey_access}")
     protected String SIGNER_KEY;
@@ -85,17 +87,21 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(false)
+                        .message("Tên đăng nhập hoặc mật khẩu không đúng")
                         .build();
             }
-            if (accountRep.isBlock()) {
+            String message=securityService.isAccountLocked(accountRep);
+            if (!message.isBlank()) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(true)
+                        .message(message)
                         .build();
             }
             else {
                 authenticated = check(account.getPassword(),
                         accountRep.getPassword());
+                if (!authenticated) securityService.handleFailedLogin(account.getUsername());
             }
         } else{
             accountRep = accountRepository.findByEmail(account.getEmail());
@@ -103,21 +109,24 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(false)
+                        .message("Tên đăng nhập hoặc mật khẩu không đúng")
                         .build();
             }
-            if (accountRep.isBlock()) {
+            String message=securityService.isAccountLocked(accountRep);
+            if (!message.isBlank()) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(true)
+                        .message(message)
                         .build();
-            }
-            else {
+            }else {
                 authenticated = true;
             }
         }
         if (authenticated){
             RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
             log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
+            securityService.reduceLevelSecurity(accountRep);
             return AuthenticationResponse.builder()
                     .authenticated(true)
                     .token(generateToken(accountRep, null, false))
@@ -128,6 +137,7 @@ public class AuthenticationService {
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
+                .message("Tên đăng nhập hoặc mật khẩu không đúng")
                 .build();
     }
 
