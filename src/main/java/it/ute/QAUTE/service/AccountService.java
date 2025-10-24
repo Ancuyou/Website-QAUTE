@@ -130,7 +130,7 @@ public class AccountService {
         Account acc = accountRepository.save(account);  // save lan 1
 
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile, acc.getAccountID());
+            String avatarFileName = fileStorageService.storeFile(avatarFile,acc.getProfile().getAvatar(), acc.getAccountID());
             acc.getProfile().setAvatar(avatarFileName);
         }
         return accountRepository.save(acc);
@@ -146,9 +146,8 @@ public class AccountService {
         }
 
         account.setPassword(passwordEncoder.encode(pass));
-
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile, account.getAccountID());
+            String avatarFileName = fileStorageService.storeFile(avatarFile,account.getProfile().getAvatar(), account.getAccountID());
             account.getProfile().setAvatar( avatarFileName);
         }
         return accountRepository.save(account);
@@ -159,5 +158,9 @@ public class AccountService {
         } catch (AppException e) {
             throw new AppException(ErrorCode.ERROR_DELETED);
         }
+    }
+
+    public void save(Account account) {
+        accountRepository.save(account);
     }
 }

@@ -50,7 +50,7 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center"
            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="${avatarUrl != null} ? ${'/qaute' + avatarUrl} : '/qaute/images/default_avatar.png'"
+            <img th:src="@{${avatarUrl != null ? avatarUrl : '/images/default_avatar.png'}}"
                  class="rounded-circle me-2" alt="Avatar" width="32" height="32">
             <span class="fw-semibold" th:text="${userName} ?: 'Nguyễn Văn A'">Nguyễn Văn A</span>
         </a>
@@ -111,7 +111,7 @@
 <nav th:fragment="consultantHeader(userName, avatarUrl, isConsultant)"
      class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
     <div class="container">
-        <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/}">
+        <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/consultant/home}">
             <i class="fas fa-graduation-cap me-2"></i>QAUTE
         </a>
 

@@ -1,24 +1,11 @@
-
 <section th:fragment="consultant-dashboard" id="dashboard" class="py-5">
     <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-1">
             <div>
                 <h2 class="fw-bold">Dashboard</h2>
                 <p class="text-muted">Tổng quan hoạt động tư vấn của bạn</p>
             </div>
-            <div class="dropdown">
-                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-calendar-alt me-1"></i> Thời gian
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#">Hôm nay</a></li>
-                    <li><a class="dropdown-item" href="#">Tuần này</a></li>
-                    <li><a class="dropdown-item active" href="#">Tháng này</a></li>
-                    <li><a class="dropdown-item" href="#">Năm nay</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Tất cả</a></li>
-                </ul>
-            </div>
+
         </div>
 
         <!-- Stats Cards -->
@@ -28,15 +15,12 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
-                                <i class="fas fa-question-circle text-primary fs-4"></i>
+                                <i class="fas fa-question-circle text-primary"></i>
                             </div>
-                            <h6 class="card-title mb-0 fw-bold">Tổng câu hỏi</h6>
+                            <h6 class="card-title mb-0 fw-bold">Tổng câu hỏi đã trả lời</h6>
                         </div>
-                        <h3 class="fw-bold mb-1">156</h3>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-success me-2"><i class="fas fa-arrow-up me-1"></i>12%</span>
-                            <small class="text-muted">So với tháng trước</small>
-                        </div>
+                        <h3 class="fw-bold mb-1"
+                            th:text="${totalQuestionsAnswered != null ? totalQuestionsAnswered : 0}"></h3>
                     </div>
                 </div>
             </div>
@@ -46,15 +30,11 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-success bg-opacity-10 p-3 rounded-3 me-3">
-                                <i class="fas fa-check-circle text-success fs-4"></i>
+                                <i class="fas fa-reply text-success"></i>
                             </div>
                             <h6 class="card-title mb-0 fw-bold">Tỷ lệ phản hồi</h6>
                         </div>
-                        <h3 class="fw-bold mb-1">98.2%</h3>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-success me-2"><i class="fas fa-arrow-up me-1"></i>3.5%</span>
-                            <small class="text-muted">So với tháng trước</small>
-                        </div>
+                        <h3 class="fw-bold mb-1" th:text="${responseRate != null ? responseRate + '%' : '0%'}"></h3>
                     </div>
                 </div>
             </div>
@@ -64,15 +44,12 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-warning bg-opacity-10 p-3 rounded-3 me-3">
-                                <i class="fas fa-clock text-warning fs-4"></i>
+                                <i class="fas fa-clock text-warning"></i>
                             </div>
                             <h6 class="card-title mb-0 fw-bold">Thời gian phản hồi</h6>
                         </div>
-                        <h3 class="fw-bold mb-1">15 phút</h3>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-danger me-2"><i class="fas fa-arrow-up me-1"></i>2 phút</span>
-                            <small class="text-muted">So với tháng trước</small>
-                        </div>
+                        <h3 class="fw-bold mb-1"
+                            th:text="${avgResponseTime != null ? avgResponseTime + ' phút' : '0 phút'}"></h3>
                     </div>
                 </div>
             </div>
@@ -81,51 +58,43 @@
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-3">
                             <div class="bg-info bg-opacity-10 p-3 rounded-3 me-3">
-                                <i class="fas fa-star text-info fs-4"></i>
+                                <i class="fas fa-users text-info"></i>
                             </div>
-                            <h6 class="card-title mb-0 fw-bold">Đánh giá trung bình</h6>
+                            <h6 class="card-title mb-0 fw-bold">Số user đã trả lời</h6>
                         </div>
-                        <h3 class="fw-bold mb-1">4.8/5</h3>
-                        <div class="d-flex align-items-center">
-                            <span class="badge bg-success me-2"><i class="fas fa-arrow-up me-1"></i>0.2</span>
-                            <small class="text-muted">So với tháng trước</small>
-                        </div>
+                        <h3 class="fw-bold mb-1" id="totalUsersAnswered"
+                            th:text="${totalUsersAnswered != null ? totalUsersAnswered : 0}"></h3>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row g-4 mb-5">
             <div class="col-md-8">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="card-title fw-bold">Câu hỏi theo thời gian</h5>
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary">Ngày</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary active">Tuần</button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary">Tháng</button>
+                            <div class="btn-group" role="group" id="timeButtons">
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-period="day">Ngày</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary active"
+                                    data-period="week">Tuần</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    data-period="month">Tháng</button>
                             </div>
                         </div>
                         <div class="chart-container" style="height: 250px; position: relative;">
-                            
-                            <div class="text-center text-muted p-5">
-                                <i class="fas fa-chart-line fa-3x mb-3"></i>
-                                <p>Biểu đồ câu hỏi theo thời gian sẽ hiển thị ở đây</p>
-                            </div>
+                            <canvas id="timeChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
 
+
             <div class="col-md-4">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title fw-bold mb-4">Phân loại câu hỏi</h5>
-                        <div class="chart-container" style="height: 250px; position: relative;">
-                            <div class="text-center text-muted p-5">
-                                <i class="fas fa-chart-pie fa-3x mb-3"></i>
-                                <p>Biểu đồ phân loại câu hỏi sẽ hiển thị ở đây</p>
-                            </div>
+                        <h5 class="card-title fw-bold mb-4">Phân loại câu hỏi đã trả lời theo lĩnh vực</h5>
+                        <div class="chart-container" style="height: 300px; position: relative;">
+                            <canvas id="categoryChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -136,132 +105,33 @@
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h5 class="card-title fw-bold">Hoạt động gần đây</h5>
-                    <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả <i class="fas fa-arrow-right ms-1"></i></a>
+                    <a href="#" class="btn btn-sm btn-outline-primary">Xem tất cả <i
+                            class="fas fa-arrow-right ms-1"></i></a>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead class="table-light">
                             <tr>
-                                <th>Người dùng</th>
+                                <th>STT</th>
                                 <th>Câu hỏi</th>
-                                <th>Thời gian</th>
+                                <th>Thời gian trả lời</th>
                                 <th>Trạng thái</th>
-                                <th>Đánh giá</th>
-                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                                        <span>Trần Thị B</span>
-                                    </div>
-                                </td>
-                                <td class="align-middle">Làm thế nào để đăng ký học phần?</td>
-                                <td class="align-middle"><small>Hôm nay, 10:23</small></td>
-                                <td class="align-middle"><span class="badge bg-success">Đã phản hồi</span></td>
-                                <td class="align-middle">
-                                    <div class="text-warning">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-end">
-                                    <a href="#" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                                </td>
+                            <tr th:each="activity, iterStat : ${recentActivities}"
+                                th:if="${recentActivities != null and !recentActivities.isEmpty()}">
+                                <td th:text="${iterStat.index + 1}"></td>
+                                <td th:text="${activity.question != null ? activity.question.title : 'N/A'}"></td>
+                                <td th:text="${#temporals.format(activity.dateAnswered, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td><span class="badge bg-success">Đã trả lời</span></td>
                             </tr>
-                            <tr>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                                        <span>Lê Văn C</span>
-                                    </div>
-                                </td>
-                                <td class="align-middle">Khi nào có lịch thi cuối kỳ?</td>
-                                <td class="align-middle"><small>Hôm nay, 09:15</small></td>
-                                <td class="align-middle"><span class="badge bg-success">Đã phản hồi</span></td>
-                                <td class="align-middle">
-                                    <div class="text-warning">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="far fa-star"></i>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-end">
-                                    <a href="#" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                                        <span>Nguyễn Văn D</span>
-                                    </div>
-                                </td>
-                                <td class="align-middle">Tôi cần tư vấn về chương trình trao đổi sinh viên</td>
-                                <td class="align-middle"><small>Hôm qua, 15:42</small></td>
-                                <td class="align-middle"><span class="badge bg-warning">Đang xử lý</span></td>
-                                <td class="align-middle">
-                                    <div class="text-muted">
-                                        <i class="fas fa-minus"></i>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-end">
-                                    <a href="#" class="btn btn-sm btn-primary">Trả lời</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                                        <span>Phạm Thị E</span>
-                                    </div>
-                                </td>
-                                <td class="align-middle">Làm sao để xin học bổng?</td>
-                                <td class="align-middle"><small>Hôm qua, 14:08</small></td>
-                                <td class="align-middle"><span class="badge bg-success">Đã phản hồi</span></td>
-                                <td class="align-middle">
-                                    <div class="text-warning">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="far fa-star"></i>
-                                        <i class="far fa-star"></i>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-end">
-                                    <a href="#" class="btn btn-sm btn-outline-secondary">Chi tiết</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                                        <span>Hoàng Văn F</span>
-                                    </div>
-                                </td>
-                                <td class="align-middle">Quy trình thực tập tốt nghiệp</td>
-                                <td class="align-middle"><small>03/10/2025</small></td>
-                                <td class="align-middle"><span class="badge bg-danger">Chưa phản hồi</span></td>
-                                <td class="align-middle">
-                                    <div class="text-muted">
-                                        <i class="fas fa-minus"></i>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-end">
-                                    <a href="#" class="btn btn-sm btn-primary">Trả lời</a>
-                                </td>
+                            <tr th:if="${recentActivities == null or recentActivities.isEmpty()}">
+                                <td colspan="3" class="text-center text-muted">Không có hoạt động gần đây</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
 </section>

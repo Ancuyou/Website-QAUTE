@@ -64,6 +64,20 @@ public class EmailService {
             return otp;
         }
     }
+    public String sendChangePassword(String toEmail){
+        try {
+            String otp = createOTP();
+            String htmlContent = getEmailTemplate("Đổi mật khẩu", getChangePasswordOTPContent(otp));
+            context.getBean(EmailService.class).sendEmailHtml(toEmail, "Lấy lại mật khẩu QAUTE", htmlContent);
+            return otp;
+        } catch (MessagingException e) {
+            // Fallback to plain text email if HTML fails
+            String otp = createOTP();
+            String body = "Xin chào,\n\nMã OTP của bạn là: " + otp + "\n\nMã có hiệu lực trong 3 phút.";
+            context.getBean(EmailService.class).sendEmail(toEmail, "Đổi mật khẩu", body);
+            return otp;
+        }
+    }
     @Async
     public void sendEmailHtml(String toEmail, String subject, String htmlBody)
             throws MessagingException {
@@ -178,6 +192,30 @@ public class EmailService {
                 "<p style='color: #999999; font-size: 14px; text-align: center;'>" +
                 "    <strong>Bảo mật tài khoản</strong><br>" +
                 "    Đừng chia sẻ mã OTP với bất kỳ ai, kể cả nhân viên QAUTE" +
+                "</p>";
+    }
+    private String getChangePasswordOTPContent(String otp) {
+        return "<h2>Xác nhận đổi mật khẩu</h2>" +
+                "<p>Xin chào! 👋</p>" +
+                "<p>Bạn đang thực hiện thao tác <strong>đổi mật khẩu</strong> tại <strong>QAUTE</strong>. " +
+                "Để bảo mật tài khoản, vui lòng sử dụng mã OTP bên dưới để xác nhận:</p>" +
+                "<div class='otp-box'>" +
+                "    <div class='otp-icon'>🔐</div>" +
+                "    <div class='otp-label'>Mã Xác Thực OTP</div>" +
+                "    <div class='otp-code'>" + otp + "</div>" +
+                "</div>" +
+                "<div class='warning'>" +
+                "    <p><strong>⚠️ Lưu ý quan trọng:</strong> Mã OTP này có hiệu lực trong <strong>3 phút</strong>. " +
+                "    Vui lòng không chia sẻ mã này với bất kỳ ai để bảo vệ tài khoản của bạn.</p>" +
+                "</div>" +
+                "<div class='info-box'>" +
+                "    <p>💡 Bạn không yêu cầu đổi mật khẩu? Tài khoản của bạn có thể bị xâm nhập. " +
+                "    Hãy liên hệ ngay với chúng tôi để được hỗ trợ!</p>" +
+                "</div>" +
+                "<div class='divider'></div>" +
+                "<p style='color: #999999; font-size: 14px; text-align: center;'>" +
+                "    <strong>Mẹo bảo mật</strong><br>" +
+                "    Sử dụng mật khẩu mạnh với ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt" +
                 "</p>";
     }
     public String getSystemNotificationContent(String title, String messageBody) {

@@ -31,6 +31,8 @@ public class User {
     public enum Role {
         SinhVien,
         HocSinh,
-        PhuHuynh
+        PhuHuynh,
+        CuuSinhVien,
+        Khac
     }
 }

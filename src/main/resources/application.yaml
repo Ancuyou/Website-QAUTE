@@ -15,7 +15,6 @@ spring:
     url: jdbc:mysql://localhost:3306/qaute
     username: root
     password: root
-
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -30,8 +29,8 @@ spring:
   mail:
       host: smtp.gmail.com
       port: 587
-      username: lmht312113@gmail.com
-      password: cgou vhkl hxop sedj
+      username: herothaibao99@gmail.com
+      password: nzop khsn iycb rdba
       properties:
         mail:
           smtp:
@@ -62,3 +61,7 @@ jwt:
   refresh-duration: 864000 #in seconds : 10 day
 openweather:
   apikey: 8b62d623ee124b44cb88d85bade58e38
+cloudinary:
+  cloud_name: dob8vleac
+  api_key: 428778766855443
+  api_secret: iNu_qDEZsruYl8FvZzP0RwjjcqU

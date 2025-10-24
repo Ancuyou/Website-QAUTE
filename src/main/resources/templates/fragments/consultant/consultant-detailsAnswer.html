@@ -2,12 +2,12 @@
     <div class="container">
         <!-- Back Button -->
         <div class="mb-3">
-            <a th:href="@{/consultant/questions(highlightQuestion=${question.questionID})}" 
-               class="btn btn-outline-secondary">
+            <a th:href="@{/consultant/questions(highlightQuestion=${question.questionID})}"
+                class="btn btn-outline-secondary">
                 <i class="fas me-2"></i>Bấm vào để trả lời câu hỏi này
             </a>
         </div>
-        
+
         <!-- Question Header -->
         <div class="mb-4">
             <h2 class="fw-bold text-dark mb-3" th:text="${question.title}">Tiêu đề câu hỏi</h2>
@@ -19,8 +19,8 @@
             <div class="card-body p-4">
                 <div class="d-flex align-items-start mb-3">
                     <div class="flex-shrink-0">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                             style="width: 48px; height: 48px; font-size: 20px; font-weight: bold;">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 48px; height: 48px; font-size: 20px; font-weight: bold;">
                             <span th:text="${question.user.profile.fullName.substring(0,1).toUpperCase()}">U</span>
                         </div>
                     </div>
@@ -30,6 +30,25 @@
                             <i class="bi bi-clock"></i>
                             <span th:text="${#temporals.format(question.dateSend, 'dd/MM/yyyy HH:mm')}"></span>
                         </small>
+                    </div>
+                </div>
+                <!-- Question Content File -->
+                <div th:if="${question.fileAttachment != null and question.fileAttachment != ''}" class="mt-3">
+                    <div th:if="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg') 
+                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
+                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
+                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
+                        <img th:src="@{${question.fileAttachment}}" alt="Ảnh đính kèm"
+                            style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
+                    </div>
+                    <div th:unless="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg') 
+                                            or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
+                                            or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
+                                            or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
+                        <a th:href="@{${question.fileAttachment}}" target="_blank"
+                            class="btn btn-outline-secondary btn-sm mt-2">
+                            <i class="fas fa-paperclip me-1"></i> Tải tệp đính kèm
+                        </a>
                     </div>
                 </div>
                 <div class="border-start border-3 border-primary ps-3 py-2">
@@ -44,7 +63,7 @@
         <div class="mb-4">
             <h4 class="fw-bold d-flex align-items-center">
                 <i class="bi bi-chat-left-text me-2 text-success"></i>
-                Câu trả lời 
+                Câu trả lời
                 <span class="badge bg-success ms-2" th:text="${#lists.size(answers)}">0</span>
             </h4>
         </div>
@@ -55,8 +74,8 @@
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start mb-3">
                         <div class="flex-shrink-0">
-                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                 style="width: 40px; height: 40px; font-size: 16px; font-weight: bold;">
+                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 40px; height: 40px; font-size: 16px; font-weight: bold;">
                                 <span>A</span>
                             </div>
                         </div>
