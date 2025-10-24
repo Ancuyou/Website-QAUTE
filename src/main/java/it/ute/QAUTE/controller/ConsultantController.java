@@ -206,10 +206,8 @@ public class ConsultantController {
         model.addAttribute("questions", questionService.getAllQuestions());
         model.addAttribute("departments", questionService.getAllDepartments());
         model.addAttribute("fields", questionService.getAllFields());
-        
-        // Truyền ID câu hỏi cần highlight
         if (highlightQuestion != null) {
-            model.addAttribute("highlightQuestion", highlightQuestion);
+            model.addAttribute("highlightQuestionId", highlightQuestion);
         }
         
         return "pages/consultant/questions-answer";

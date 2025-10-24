@@ -25,7 +25,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 @Controller
-@RequestMapping("/user")
 public class QuestionController {
 
     @Autowired
@@ -43,7 +42,8 @@ public class QuestionController {
     @Autowired
     private ConsultantService consultantService;
 
-    @GetMapping("/questions")
+
+    @GetMapping({"/user/questions"})
     public String showQuestionPage(@RequestParam(required = false) Integer highlightQuestionId, Model model, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
@@ -59,7 +59,7 @@ public class QuestionController {
         return "pages/user/questions";
     }
 
-    @PostMapping("/questions/ask")
+    @PostMapping({"/user/questions/ask", "/consultant/questions/ask"})
     public String handleAskQuestion(@ModelAttribute Question question,
                                     @RequestParam("file") MultipartFile file,
                                     Principal principal,
@@ -127,7 +127,7 @@ public class QuestionController {
         return "redirect:/user/questions";
     }
 
-    @PostMapping("/questions/answer")
+    @PostMapping({"/consultant/questions/answer", "/user/questions/answer"})
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
                                    @RequestParam("content") String content,
                                    Principal principal,
