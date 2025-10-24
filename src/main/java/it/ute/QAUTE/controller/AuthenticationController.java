@@ -304,7 +304,7 @@ public class AuthenticationController {
             case "ROLE_Admin":
                 return "/admin/users";
             case "ROLE_Manager":
-                return "/manager/home";
+                return "/manager/questions";
             default:
                 return "/auth/login";
         }

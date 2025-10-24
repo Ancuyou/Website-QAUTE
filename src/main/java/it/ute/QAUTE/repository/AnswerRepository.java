@@ -9,18 +9,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface AnswerRepository extends JpaRepository<Answer, Integer> {
 
-    // Lấy danh sách câu trả lời của tư vấn viên
     @Query("SELECT a FROM Answer a WHERE a.consultant.consultantID = :consultantId")
     List<Answer> findByConsultant_ConsultantID(Integer consultantId);
 
-    // Lịch sử trả lời có lọc
     @Query("""
         SELECT a FROM Answer a
         WHERE a.consultant.consultantID = :consultantId
@@ -36,12 +33,9 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
             Pageable pageable
     );
 
-    // Lấy danh sách câu trả lời theo ID câu hỏi
     List<Answer> findByQuestion_QuestionID(Integer questionId);
 
-    // -------------------- BÁO CÁO ---------------------
 
-    // Đếm tổng số câu trả lời trong khoảng thời gian
     @Query("""
         SELECT COUNT(a)
         FROM Answer a
@@ -52,7 +46,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
             @Param("endDate") LocalDateTime endDate
     );
 
-    // Thống kê số câu trả lời theo tư vấn viên
     @Query("""
         SELECT new it.ute.QAUTE.dto.AnswerReportDTO(
             a.consultant.profile.fullName,
@@ -68,7 +61,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
             @Param("endDate") LocalDateTime endDate
     );
 
-    // Thống kê số câu trả lời theo ngày
     @Query("""
     SELECT FUNCTION('DATE', a.dateAnswered) AS date, COUNT(a) AS count
     FROM Answer a
@@ -81,7 +73,6 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
             @Param("endDate") LocalDateTime endDate
     );
 
-    // Tính thời gian phản hồi trung bình (giờ)
     @Query("""
     SELECT AVG(TIMESTAMPDIFF(HOUR, q.dateSend, a.dateAnswered))
     FROM Answer a

@@ -1,6 +1,8 @@
 package it.ute.QAUTE.controller;
 
+import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.dto.AnswerReportDTO;
+import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.Department;
 import it.ute.QAUTE.entity.Field;
@@ -45,6 +47,15 @@ public class ManagerController {
 
     @Autowired
     private QuestionReportService questionReportService;
+
+    @Autowired
+    private UserReportService  userReportService;
+
+    @Autowired
+    private ConsultantReportService consultantReportService;
+
+    @Autowired
+    private ToxicContentService toxicContentService;
 
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,
@@ -318,6 +329,95 @@ public class ManagerController {
         return "pages/manager/reports/questions";
     }
 
+    @GetMapping("/reports/users")
+    public String getUserReport(@RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDateTime startDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDateTime endDate,
+            Model model)
+    {
+
+        if (startDate == null) startDate = LocalDateTime.now().minusDays(7);
+        if (endDate == null) endDate = LocalDateTime.now();
+
+
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        model.addAttribute("totalUsers", userReportService.getTotalUsers(startDate, endDate));
+        model.addAttribute("activeUsers", userReportService.getActiveUsers());
+        model.addAttribute("usersByRole", userReportService.getUsersByRole(startDate, endDate));
+        model.addAttribute("topUsers", userReportService.getTop10Users(startDate, endDate));
+        return "pages/manager/reports/users";
+    }
+
+    @GetMapping("/reports/consultants")
+    public String getConsultantReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            Model model) {
+
+        if (startDate == null) startDate = LocalDateTime.now().minusDays(30);   // 30 ngay gan nhat
+        if (endDate == null) endDate = LocalDateTime.now();
+
+        List<ConsultantReportDTO> reports = consultantReportService.getPerformance(startDate, endDate);
+        long totalConsultants = consultantReportService.getTotalConsultants();
+
+        model.addAttribute("totalConsultants", totalConsultants);
+        model.addAttribute("reports", reports);
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+
+        return "pages/manager/reports/consultants";
+    }
+
+    @GetMapping("/bad-contents")
+    public String listBadContents(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+                                  @RequestParam(value = "page", defaultValue = "0") int page,
+                                  Model model) {
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Question> toxicQuestions = toxicContentService.findToxicQuestionsByDateRange(startDate, endDate, pageable);
+        model.addAttribute("toxicPage", toxicQuestions);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", toxicQuestions.getTotalPages());
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        return "pages/manager/badContents";
+    }
+
+    @PostMapping("/bad-contents/rejected/{id}")
+    public String deleteToxicQuestion(@PathVariable Integer id,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            toxicContentService.rejectedQuestion(id);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + e.getMessage());
+            return "redirect:/manager/bad-contents";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage", "Rejected thành công!");
+        return "redirect:/manager/bad-contents";
+    }
+
+    @PostMapping("/bad-contents/approved/{id}")
+    public String markAsClean(@PathVariable Integer id,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            toxicContentService.approvedQuestion(id);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage", "Cập nhật thất bại: " + e.getMessage());
+            return "redirect:/manager/bad-contents";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage", "Approved thành công!");
+        return "redirect:/manager/bad-contents";
+    }
 
     @ResponseBody
     @GetMapping("/fields/by-department/{departmentId}")

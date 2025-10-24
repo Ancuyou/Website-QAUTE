@@ -149,4 +149,20 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
             @Param("endDate") LocalDateTime endDate
     );
 
+    @Query("""
+    SELECT q
+    FROM Question q
+    JOIN FETCH q.user u
+    JOIN FETCH u.profile p
+    WHERE q.isToxic = true
+      AND (:startDate IS NULL OR q.dateSend >= :startDate)
+      AND (:endDate IS NULL OR q.dateSend <= :endDate)
+    ORDER BY q.dateSend DESC
+    """)
+    Page<Question> findToxicQuestionsByDateRange(
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
+            Pageable pageable
+    );
+
 }

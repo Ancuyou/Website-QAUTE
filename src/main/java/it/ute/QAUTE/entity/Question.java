@@ -33,6 +33,9 @@ public class Question {
     @Column(name = "FileAttachment", length = 255)
     private String fileAttachment;
 
+    @Column(name = "IsToxic", nullable = false)
+    private boolean isToxic = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserID", nullable = false)
     private User user;
