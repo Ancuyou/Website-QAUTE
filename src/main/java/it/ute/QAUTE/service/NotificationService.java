@@ -39,6 +39,9 @@ public class NotificationService {
     public List<NotificationReceiver> findNotificationByAccountId(long receiverId){
         return notificationReceiverRepository.findByAccountId(receiverId);
     }
+    public Page<Notification> findNotificationsBySenderId(long senderId,Pageable pageable){
+        return notificationRepository.findNotificationsBySenderId(senderId,pageable);
+    }
     public boolean deleteNotification(Long id){
         Notification notification=notificationRepository.findById(Math.toIntExact(id)).orElse(null);
         if(notification==null || notification.getStatus().equals("PUBLISHED")){
@@ -55,7 +58,8 @@ public class NotificationService {
         notification.setStatus(status);
         notification.set_priority(is_priority);
         Notification savedNotification = notificationRepository.save(notification);
-        sendByRole(savedNotification,targetType,status);
+        Account account=accountRepository.findByAccountID(notification.getSender().getAccountID());
+        sendByRole(savedNotification,targetType,status,account.getRole());
         if(status.equals("DRAFT")) deleteNotificationReceiverByNotificationId(id);
     }
     public void deleteNotificationReceiverByNotificationId(Long notificationId){
@@ -71,13 +75,14 @@ public class NotificationService {
         notification.setStatus(status);
         notification.setCreatedDate(new Date());
         Notification savedNotification = notificationRepository.save(notification);
-        sendByRole(savedNotification,targetType,status);
+        sendByRole(savedNotification,targetType,status,sender.getRole());
     }
-    public void sendByRole(Notification savedNotification,String targetType,String status){
+    public void sendByRole(Notification savedNotification,String targetType,String status,Account.Role roleSender){
         if ("PUBLISHED".equalsIgnoreCase(status)) {
             List<Account> receivers;
             if ("ALL".equalsIgnoreCase(targetType)) {
-                receivers=accountRepository.findAllExcludeAdmin();
+                if(roleSender.equals(Account.Role.Admin))receivers=accountRepository.findAllExcludeAdmin();
+                else receivers=accountRepository.findUserAndConsultant();
             }else {
                 receivers=accountRepository.findByRoleExcludeAdmin(Account.Role.valueOf(targetType));
             }
@@ -102,4 +107,43 @@ public class NotificationService {
     public Notification findNotificationById(Integer id) {
         return notificationRepository.findById(id).orElse(null);
     }
+
+    public void createNotificationForSpecificUser(Account sender, Account receiver, 
+                                                   String title, String content, 
+                                                   boolean isPriority) {
+        try{
+        // Tạo notification
+        Notification notification = new Notification();
+        notification.setSender(sender);
+        notification.setTitle(title);
+        notification.setContent(content);
+        notification.setTargetType(Notification.NotificationTarget.User); // hoặc null nếu muốn
+        notification.setStatus("PUBLISHED");
+        notification.set_priority(isPriority);
+        notification.setCreatedDate(new Date());
+        
+        Notification savedNotification = notificationRepository.save(notification);
+        
+        // Tạo NotificationReceiver cho User cụ thể
+        NotificationReceiver notificationReceiver = new NotificationReceiver();
+        notificationReceiver.setReceiver(receiver);
+        notificationReceiver.setRead(false);
+        notificationReceiver.setNotification(savedNotification);
+        notificationReceiverRepository.save(notificationReceiver);
+
+        System.out.println("-------------- thông tin người nhận: " + receiver.getUsername());
+
+        // Gửi real-time notification qua WebSocket
+        messagingTemplate.convertAndSendToUser(
+            String.valueOf(receiver.getUsername()),
+            "/queue/notifications",
+            savedNotification.getTitle() + ": " + savedNotification.getContent()
+        );
+        
+        System.out.println("-------------- Đã gửi thông báo tới User: " + receiver.getUsername());
+        } catch (Exception e) {
+            System.err.println("123456- Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+    }
+    
 }

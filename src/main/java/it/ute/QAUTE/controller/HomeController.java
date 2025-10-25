@@ -196,7 +196,8 @@ public class HomeController {
                          @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                          @RequestParam(value = "newPassword", required = false) String newPassword,
                          HttpSession session) throws ParseException, JOSEException {
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
         System.out.println(id);
         Account account = accountService.findById(id);
         if(newPassword !=null &&!newPassword.isBlank()) account.setPassword(authenticationService.hashed(newPassword));

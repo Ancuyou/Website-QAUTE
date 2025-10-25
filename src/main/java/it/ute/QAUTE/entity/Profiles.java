@@ -38,4 +38,7 @@ public class Profiles {
 
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
     private Admin admin;
+
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    private Manager manager;
 }

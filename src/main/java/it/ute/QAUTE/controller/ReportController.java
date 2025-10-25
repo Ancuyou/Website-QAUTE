@@ -48,7 +48,7 @@ public class ReportController {
                     .build();
             
             reportService.save(report);
-            
+            redirectAttributes.addFlashAttribute("success", true);
             redirectAttributes.addFlashAttribute("successMessage", 
                 "Báo cáo của bạn đã được gửi. Chúng tôi sẽ xem xét trong thời gian sớm nhất.");
             
@@ -56,7 +56,7 @@ public class ReportController {
             redirectAttributes.addFlashAttribute("errorMessage", 
                 "Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại.");
         }
-        if(reporter.getRole().equals("CONSULTANT")) {
+        if(reporter.getRole().equals(Account.Role.Consultant)) {
             return "redirect:/consultant/questions";
         }
         return "redirect:/user/questions";
