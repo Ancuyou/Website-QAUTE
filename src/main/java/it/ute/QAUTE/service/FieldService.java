@@ -13,6 +13,7 @@ public class FieldService {
     @Autowired
     private FieldRepository fieldRepository;
 
+
     public Page<Field> searchField(Integer departmentId, String keyword, Pageable pageable) {
 
         if (departmentId != null && keyword != null && !keyword.trim().isEmpty()) {

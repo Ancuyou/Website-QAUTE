@@ -162,6 +162,7 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     JOIN FETCH q.user u
     JOIN FETCH u.profile p
     WHERE q.isToxic = true
+      AND q.status = it.ute.QAUTE.entity.Question.QuestionStatus.Pending
       AND (:startDate IS NULL OR q.dateSend >= :startDate)
       AND (:endDate IS NULL OR q.dateSend <= :endDate)
     ORDER BY q.dateSend DESC
@@ -174,4 +175,5 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
 
     List<Question> findByUserOrderByDateSendDesc(User user);
     List<Question> findAllByOrderByDateSendDesc();
+
 }

@@ -1,7 +1,7 @@
 package it.ute.QAUTE.service;
 
-import it.ute.QAUTE.Exception.AppException;
-import it.ute.QAUTE.Exception.ErrorCode;
+import it.ute.QAUTE.exception.AppException;
+import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.User;

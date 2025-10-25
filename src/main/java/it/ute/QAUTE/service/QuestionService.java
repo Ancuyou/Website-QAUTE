@@ -31,6 +31,10 @@ public class QuestionService {
         return questionRepository.findAll(Sort.by(Sort.Direction.DESC, "dateSend"));
     }
 
+    public void deleteQuestion(Integer id) {
+        questionRepository.deleteById(id);
+    }
+
     public List<Department> getAllDepartments() {
         return departmentRepository.findAll();
     }

@@ -1,4 +1,4 @@
-package it.ute.QAUTE.Exception;
+package it.ute.QAUTE.exception;
 
 
 import lombok.Getter;

@@ -3,6 +3,9 @@ package it.ute.QAUTE.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -45,16 +48,18 @@ public class Question {
     private Department department;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "FieldID")
+    @JoinColumn(
+            name = "FieldID"
+    )
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Field field;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)
     private QuestionStatus status = QuestionStatus.Pending;
 
-    // === THÊM MỚI: Tải danh sách câu trả lời cùng lúc với câu hỏi ===
-    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
-    @OrderBy("dateAnswered ASC") // Sắp xếp câu trả lời theo thời gian
+    @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OrderBy("dateAnswered ASC")
     private Set<Answer> answers;
 
     public enum QuestionStatus {

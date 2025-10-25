@@ -1,11 +1,10 @@
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
-import it.ute.QAUTE.Exception.AppException;
+import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.*;
 import lombok.extern.slf4j.Slf4j;
-import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -161,15 +160,11 @@ public class AdminController {
     }
 
     @GetMapping("/profile")
-    public String showAdminProfile(@CookieValue(value = "REFRESH_TOKEN", required = false) String refresh,
-                                   Model model) {
-        if (refresh == null || refresh.isBlank()) return "redirect:/auth/login";
+    public String showAdminProfile(Model model) {
+        Account acc = authenticationService.getCurrentAccount();
+        if (acc == null) return "redirect:/auth/login";
 
         try {
-            var jwt = authenticationService.verifyToken(refresh);
-            String username = jwt.getJWTClaimsSet().getSubject();
-            Account acc = accountService.findUserByUsername(username);
-
             model.addAttribute("account", acc);
             return "pages/admin/profile";
 

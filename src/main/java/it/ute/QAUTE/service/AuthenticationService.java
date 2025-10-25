@@ -7,8 +7,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import it.ute.QAUTE.Exception.AppException;
-import it.ute.QAUTE.Exception.ErrorCode;
+import it.ute.QAUTE.exception.AppException;
+import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
 import it.ute.QAUTE.dto.response.RefreshTokenResponse;
 import it.ute.QAUTE.entity.Account;
@@ -17,15 +17,18 @@ import it.ute.QAUTE.entity.RefreshToken;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -38,6 +41,7 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -344,6 +348,34 @@ public class AuthenticationService {
             if (acc != null) return acc.getAccountID();
         }
         return 0;
+    }
+    public Account getCurrentAccount() {
+        HttpServletRequest request = null;
+        try {
+            request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        } catch (IllegalStateException e) {
+            return null;
+        }
+        if (request == null || request.getCookies() == null) {
+            return null;
+        }
+        String refresh = Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equals("REFRESH_TOKEN"))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (refresh == null || refresh.isBlank()) {
+            return null;
+        }
+        try {
+            var jwt = verifyToken(refresh);
+            String username = jwt.getJWTClaimsSet().getSubject();
+            return accountRepository.findByUsername(username);
+        } catch (Exception e) {
+            log.warn("Invalid REFRESH_TOKEN: {}", e.getMessage());
+            return null;
+        }
     }
 }
 
