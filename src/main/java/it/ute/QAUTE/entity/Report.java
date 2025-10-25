@@ -53,8 +53,7 @@ public class Report {
         this.createdAt = LocalDateTime.now();
         this.status = ReportStatus.PENDING;
     }
-
-
+    
     public enum ReportReason {
         SPAM_ADS,              // Spam/Quảng cáo
         HATEFUL_LANGUAGE,      // Ngôn từ thù hận, xúc phạm

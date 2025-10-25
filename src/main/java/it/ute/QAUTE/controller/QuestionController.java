@@ -127,7 +127,7 @@ public class QuestionController {
         return "redirect:/user/questions";
     }
 
-    @PostMapping({"/consultant/questions/answer", "/user/questions/answer"})
+    @PostMapping({"/user/questions/answer"})
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
                                    @RequestParam("content") String content,
                                    Principal principal,

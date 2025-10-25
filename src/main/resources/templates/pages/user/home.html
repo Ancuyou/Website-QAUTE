@@ -353,8 +353,8 @@
                             Sẵn sàng đặt câu hỏi?
                         </h2>
                         <p class="lead mb-0 text-white-75" style="line-height: 1.8;">
-                            <span th:if="${account.createdDate != null}"
-                                  th:text="|Bạn đã tham gia QAUTE được ${#numbers.floor(#dates.diff(#dates.createNow(), account.createdDate) / 86400000)} ngày. Hãy tiếp tục kết nối với cộng đồng!|">
+                            <!-- <span th:if="${account.createdDate != null}"
+                                  th:text="|Bạn đã tham gia QAUTE được ${#numbers.floor(#dates.diff(#dates.createNow(), account.createdDate) / 86400000)} ngày. Hãy tiếp tục kết nối với cộng đồng!|"> -->
                                 Chào mừng bạn đến với cộng đồng sinh viên năng động!
                             </span>
                             <span th:if="${account.createdDate == null}">

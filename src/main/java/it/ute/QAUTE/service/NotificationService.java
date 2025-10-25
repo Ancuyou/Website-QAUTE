@@ -102,4 +102,43 @@ public class NotificationService {
     public Notification findNotificationById(Integer id) {
         return notificationRepository.findById(id).orElse(null);
     }
+
+    public void createNotificationForSpecificUser(Account sender, Account receiver, 
+                                                   String title, String content, 
+                                                   boolean isPriority) {
+        try{
+        // Tạo notification
+        Notification notification = new Notification();
+        notification.setSender(sender);
+        notification.setTitle(title);
+        notification.setContent(content);
+        notification.setTargetType(Notification.NotificationTarget.User); // hoặc null nếu muốn
+        notification.setStatus("PUBLISHED");
+        notification.set_priority(isPriority);
+        notification.setCreatedDate(new Date());
+        
+        Notification savedNotification = notificationRepository.save(notification);
+        
+        // Tạo NotificationReceiver cho User cụ thể
+        NotificationReceiver notificationReceiver = new NotificationReceiver();
+        notificationReceiver.setReceiver(receiver);
+        notificationReceiver.setRead(false);
+        notificationReceiver.setNotification(savedNotification);
+        notificationReceiverRepository.save(notificationReceiver);
+
+        System.out.println("-------------- thông tin người nhận: " + receiver.getUsername());
+
+        // Gửi real-time notification qua WebSocket
+        messagingTemplate.convertAndSendToUser(
+            String.valueOf(receiver.getUsername()),
+            "/queue/notifications",
+            savedNotification.getTitle() + ": " + savedNotification.getContent()
+        );
+        
+        System.out.println("-------------- Đã gửi thông báo tới User: " + receiver.getUsername());
+        } catch (Exception e) {
+            System.err.println("123456- Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+    }
+    
 }
