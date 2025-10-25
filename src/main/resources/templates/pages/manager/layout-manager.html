@@ -92,6 +92,11 @@
                             <i class="fas fa-book-open me-2"></i>Thư viện FAQ
                         </a>
                     </li>
+                     <li class="nav-item">
+                        <a class="nav-link" th:classappend="${active=='events'}? 'active'" th:href="@{/manager/events}">
+                            <i class="fas fa-calendar-alt me-2"></i>Quản lý sự kiện
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
