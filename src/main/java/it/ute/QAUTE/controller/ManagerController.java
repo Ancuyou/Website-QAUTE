@@ -1,14 +1,14 @@
 package it.ute.QAUTE.controller;
 
+import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.dto.AnswerReportDTO;
 import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
-import it.ute.QAUTE.entity.Department;
-import it.ute.QAUTE.entity.Field;
-import it.ute.QAUTE.entity.Question;
+import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
@@ -56,6 +57,15 @@ public class ManagerController {
 
     @Autowired
     private ToxicContentService toxicContentService;
+
+    @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,
@@ -424,8 +434,61 @@ public class ManagerController {
     public List<Field> getFieldsByDepartment(@PathVariable Integer departmentId) {
         return fieldRepository.findAllByDepartments_departmentID(departmentId);  // speed run
     }
-
-
-
-
+    @GetMapping("/notifications")
+    public String notifications(@RequestParam(defaultValue = "") String q,
+                                @RequestParam(defaultValue = "") String status,
+                                @RequestParam(defaultValue = "1") int page,
+                                @RequestParam(defaultValue = "10") int size,
+                                Model model, HttpSession session) throws ParseException, JOSEException {
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
+        Page<Notification> notifications=notificationService.findNotificationsBySenderId(id,pageable);
+        model.addAttribute("notifications", notifications.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", notifications.getTotalPages());
+        model.addAttribute("q", q);
+        model.addAttribute("selectedStatus", status);
+        return "pages/manager/notifications";
+    }
+    @GetMapping("/notifications/new")
+    public String addNotification(Model model){
+        model.addAttribute("notification", new Notification());
+        return "pages/manager/addNotification";
+    }
+    @GetMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Integer id, Model model){
+        model.addAttribute("notification", notificationService.findNotificationById(id));
+        return "pages/manager/addNotification";
+    }
+    @PostMapping("/notifications/add")
+    public String addNotifications(@RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("priority") Boolean priority,
+                                   @RequestParam("status") String status,
+                                   HttpSession session) throws ParseException, JOSEException {
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        Account account = accountService.findById(id);
+        notificationService.createNotification(account, title, content, targetType, status,priority);
+        return "redirect:/manager/notifications";
+    }
+    @PostMapping("/notifications/edit/{id}")
+    public String editNotification(@PathVariable("id") Long id,
+                                   @RequestParam("title") String title,
+                                   @RequestParam("content") String content,
+                                   @RequestParam("priority") Boolean priority,
+                                   @RequestParam("targetType") String targetType,
+                                   @RequestParam("status") String status){
+        notificationService.updateNotification(id,title,content,targetType,status,priority);
+        return "redirect:/manager/notifications";
+    }
+    @PostMapping("/notifications/delete/{id}")
+    public String deleteNotification(@PathVariable("id") Long id,RedirectAttributes ra){
+        boolean result=notificationService.deleteNotification(id);
+        if(result) ra.addFlashAttribute("success", "Xóa thông báo thành công.");
+        else ra.addFlashAttribute("error", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
+        return "redirect:/manager/notifications";
+    }
 }

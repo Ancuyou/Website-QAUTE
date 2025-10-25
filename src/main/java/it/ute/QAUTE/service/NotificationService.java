@@ -39,6 +39,9 @@ public class NotificationService {
     public List<NotificationReceiver> findNotificationByAccountId(long receiverId){
         return notificationReceiverRepository.findByAccountId(receiverId);
     }
+    public Page<Notification> findNotificationsBySenderId(long senderId,Pageable pageable){
+        return notificationRepository.findNotificationsBySenderId(senderId,pageable);
+    }
     public boolean deleteNotification(Long id){
         Notification notification=notificationRepository.findById(Math.toIntExact(id)).orElse(null);
         if(notification==null || notification.getStatus().equals("PUBLISHED")){
@@ -55,7 +58,8 @@ public class NotificationService {
         notification.setStatus(status);
         notification.set_priority(is_priority);
         Notification savedNotification = notificationRepository.save(notification);
-        sendByRole(savedNotification,targetType,status);
+        Account account=accountRepository.findByAccountID(notification.getSender().getAccountID());
+        sendByRole(savedNotification,targetType,status,account.getRole());
         if(status.equals("DRAFT")) deleteNotificationReceiverByNotificationId(id);
     }
     public void deleteNotificationReceiverByNotificationId(Long notificationId){
@@ -71,13 +75,14 @@ public class NotificationService {
         notification.setStatus(status);
         notification.setCreatedDate(new Date());
         Notification savedNotification = notificationRepository.save(notification);
-        sendByRole(savedNotification,targetType,status);
+        sendByRole(savedNotification,targetType,status,sender.getRole());
     }
-    public void sendByRole(Notification savedNotification,String targetType,String status){
+    public void sendByRole(Notification savedNotification,String targetType,String status,Account.Role roleSender){
         if ("PUBLISHED".equalsIgnoreCase(status)) {
             List<Account> receivers;
             if ("ALL".equalsIgnoreCase(targetType)) {
-                receivers=accountRepository.findAllExcludeAdmin();
+                if(roleSender.equals(Account.Role.Admin))receivers=accountRepository.findAllExcludeAdmin();
+                else receivers=accountRepository.findUserAndConsultant();
             }else {
                 receivers=accountRepository.findByRoleExcludeAdmin(Account.Role.valueOf(targetType));
             }

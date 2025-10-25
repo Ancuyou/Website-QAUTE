@@ -73,7 +73,6 @@
                             <span><i class="fas fa-chart-bar me-2"></i>Báo cáo thống kê</span>
                             <i class="fas fa-chevron-right small"></i>
                         </a>
-
                         <div class="collapse ps-3" id="collapseReports" th:classappend="${active == 'report' ? 'show' : ''}">
                             <ul class="nav flex-column ms-2 border-start border-2 border-light-subtle ps-2">
                                 <li><a class="nav-link py-1" th:href="@{/manager/reports/questions}"><i class="fas fa-question-circle me-2"></i>Câu hỏi</a></li>
@@ -82,6 +81,11 @@
                                 <li><a class="nav-link py-1" th:href="@{/manager/reports/users}"><i class="fas fa-users me-2"></i>Người dùng</a></li>
                             </ul>
                         </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${active=='notifications'}? 'active'" th:href="@{/manager/notifications}">
+                            <i class="fas fa-bell me-2"></i>Quản lý thông báo
+                        </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:classappend="${active=='faq'}? 'active'" th:href="@{/manager/faq}">
