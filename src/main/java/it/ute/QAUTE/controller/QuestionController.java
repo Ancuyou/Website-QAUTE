@@ -1,18 +1,22 @@
 package it.ute.QAUTE.controller;
 
-import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.entity.Answer;
-import it.ute.QAUTE.entity.Consultant;
-import it.ute.QAUTE.entity.Question;
-import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.dto.FieldDTO;
+import it.ute.QAUTE.dto.HotTopicDTO;
+import it.ute.QAUTE.dto.QuestionDTO;
+import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AnswerService;
 import it.ute.QAUTE.service.ConsultantService;
 import it.ute.QAUTE.service.QuestionService;
 import it.ute.QAUTE.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -23,6 +27,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 public class QuestionController {
@@ -44,28 +49,66 @@ public class QuestionController {
 
 
     @GetMapping({"/user/questions"})
-    public String showQuestionPage(@RequestParam(required = false) Integer highlightQuestionId, Model model, Principal principal) {
+    public String showQuestionPage(
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer fieldId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) Integer highlightQuestionId,
+            Model model,
+            Principal principal) {
+
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
             model.addAttribute("account", account);
         }
-        model.addAttribute("questions", questionService.getAllQuestions());
+
+        Pageable pageable = PageRequest.of(page, 10); // 10 câu hỏi mỗi trang
+        Page<Question> questionPage = questionService.searchAndFilterQuestions(
+                departmentId, fieldId, keyword, sortBy, pageable);
+
+        model.addAttribute("questionDTO", new QuestionDTO());
+        model.addAttribute("questions", questionPage.getContent());
+        model.addAttribute("totalPages", questionPage.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("departments", questionService.getAllDepartments());
         model.addAttribute("fields", questionService.getAllFields());
+
+        // Giữ trạng thái filter
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("selectedFieldId", fieldId);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sortBy", sortBy);
+
         if (highlightQuestionId != null) {
             model.addAttribute("highlightQuestionId", highlightQuestionId);
         }
+        List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
+        model.addAttribute("hotTopics", hotTopics);
+
         return "pages/user/questions";
     }
 
-    @PostMapping({"/user/questions/ask", "/consultant/questions/ask"})
-    public String handleAskQuestion(@ModelAttribute Question question,
-                                    @RequestParam("file") MultipartFile file,
+    @PostMapping({"/user/questions/ask"})
+    public String handleAskQuestion(@Valid @ModelAttribute("questionDTO") QuestionDTO questionDTO,
+                                    BindingResult bindingResult,
                                     Principal principal,
-                                    RedirectAttributes redirectAttributes) {
+                                    RedirectAttributes redirectAttributes,
+                                    Model model) {
         if (principal == null) {
             return "redirect:/auth/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("departments", questionService.getAllDepartments());
+            model.addAttribute("fields", questionService.getAllFields());
+            String username = principal.getName();
+            Account account = accountService.findUserByUsername(username);
+            model.addAttribute("account", account);
+            model.addAttribute("questions", questionService.getAllQuestions());
+            return "pages/user/questions";
         }
 
         String username = principal.getName();
@@ -75,10 +118,28 @@ public class QuestionController {
                         "User not found for profile ID: " + account.getProfile().getProfileID()
                 ));
 
+        // Tạo Question entity từ DTO
+        Question question = new Question();
+        question.setTitle(questionDTO.getTitle());
+        question.setContent(questionDTO.getContent());
         question.setUser(user);
         question.setDateSend(LocalDateTime.now());
         question.setStatus(Question.QuestionStatus.Pending);
 
+        // Set Department
+        Department department = new Department();
+        department.setDepartmentID(questionDTO.getDepartmentId());
+        question.setDepartment(department);
+
+        // Set Field (nếu có)
+        if (questionDTO.getFieldId() != null) {
+            Field field = new Field();
+            field.setFieldID(questionDTO.getFieldId());
+            question.setField(field);
+        }
+
+        // Xử lý file đính kèm
+        MultipartFile file = questionDTO.getFile();
         if (file != null && !file.isEmpty()) {
             String acceptfiles = "image/png,image/jpeg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation";
             if (!acceptfiles.contains(file.getContentType())) {
@@ -114,18 +175,19 @@ public class QuestionController {
 
         questionService.saveQuestion(question);
         redirectAttributes.addFlashAttribute("successMessage", "Câu hỏi của bạn đã được gửi thành công!");
+
         try {
             Thread.sleep(500);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        username = principal.getName();
-        var a = accountService.findUserByUsername(username);
-        if(a.getRole().equals("Consultant")){
+
+        if (account.getRole().equals(Account.Role.Consultant)) {
             return "redirect:/consultant/questions-answer";
         }
         return "redirect:/user/questions";
     }
+
 
     @PostMapping({"/consultant/questions/answer", "/user/questions/answer"})
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
@@ -166,5 +228,22 @@ public class QuestionController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Câu trả lời của bạn đã được gửi thành công!");
         return "redirect:/consultant/questions";
+    }
+
+    @GetMapping("/api/fields/{departmentId}")
+    @ResponseBody
+    public java.util.List<FieldDTO> getFieldsByDepartment(@PathVariable Integer departmentId) {
+        java.util.List<Field> fields = questionService.getFieldsByDepartmentId(departmentId);
+        return fields.stream()
+                .map(f -> new FieldDTO(f.getFieldID(), f.getFieldName()))
+                .toList();
+    }
+
+    @GetMapping("/api/fields/all")
+    @ResponseBody
+    public java.util.List<FieldDTO> getAllFields() {
+        return questionService.getAllFields().stream()
+                .map(f -> new FieldDTO(f.getFieldID(), f.getFieldName()))
+                .toList();
     }
 }

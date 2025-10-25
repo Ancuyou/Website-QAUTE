@@ -40,4 +40,7 @@ public class AnswerService {
     public List<Answer> getAllAnswers() {
         return answerRepository.findAll();
     }
+    public long countAnswersForUser(it.ute.QAUTE.entity.User user) {
+        return answerRepository.countByQuestionUser(user);
+    }
 }
