@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.NotificationReceiver;
 import it.ute.QAUTE.service.AuthenticationService;
 import it.ute.QAUTE.service.NotificationService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,10 +24,10 @@ public class NotificationController {
     @Autowired
     private AuthenticationService authenticationService;
     @GetMapping("/user")
-    public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request)
+    public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request, HttpServletResponse response)
             throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int accountId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        int accountId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         List<NotificationReceiver> notifications = notificationService.findNotificationByAccountId(accountId);
         long unreadCount = notifications.stream()
                 .filter(n -> !n.isRead())

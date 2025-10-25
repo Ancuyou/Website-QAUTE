@@ -152,7 +152,8 @@ public class SecurityConfig {
             if (auth != null) {
                 HttpSession session = request.getSession(true);
                 session.setAttribute("ACCESS_TOKEN", auth.getToken());
-
+                String role = (String) customJwtDecoder.decode(auth.getToken()).getClaims().get("scope");
+                session.setAttribute("SCOPE", role);
                 ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", auth.getRefreshtoken())
                         .httpOnly(true)
                         .secure(false)

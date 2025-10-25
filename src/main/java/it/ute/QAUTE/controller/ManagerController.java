@@ -8,6 +8,8 @@ import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -439,9 +441,9 @@ public class ManagerController {
                                 @RequestParam(defaultValue = "") String status,
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "10") int size,
-                                Model model, HttpSession session) throws ParseException, JOSEException {
+                                Model model, HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
         Page<Notification> notifications=notificationService.findNotificationsBySenderId(id,pageable);
         model.addAttribute("notifications", notifications.getContent());
@@ -467,9 +469,9 @@ public class ManagerController {
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("priority") Boolean priority,
                                    @RequestParam("status") String status,
-                                   HttpSession session) throws ParseException, JOSEException {
+                                   HttpSession session,HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         Account account = accountService.findById(id);
         notificationService.createNotification(account, title, content, targetType, status,priority);
         return "redirect:/manager/notifications";

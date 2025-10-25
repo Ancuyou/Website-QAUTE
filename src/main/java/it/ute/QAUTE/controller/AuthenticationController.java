@@ -45,64 +45,7 @@ public class AuthenticationController {
     //Post
     @GetMapping("/auth/login")
     public String loginForm(@ModelAttribute("account") Account account,
-                            Model model,
-                            HttpServletRequest request,
-                            HttpServletResponse response) {
-        final String COOKIE_PATH = "/";
-
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            Object at = session.getAttribute("ACCESS_TOKEN");
-            if (at instanceof String access && !access.isBlank()) {
-                try {
-                    var jwt = authenticationService.verifyToken(access); // access
-                    String role = (String) customJwtDecoder.decode(access).getClaims().get("scope");
-                    if (jwt != null && role != null) {
-                        return "redirect:" + resolveRedirectByRole(role);
-                    }
-                } catch (Exception ex) {
-                    session.removeAttribute("ACCESS_TOKEN");
-                    session.invalidate();
-                }
-            }
-        }
-
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
-                if ("REFRESH_TOKEN".equals(c.getName())) {
-                    String refresh = c.getValue();
-                    if (refresh != null && !refresh.isBlank()) {
-                        try {
-                            var rjwt = authenticationService.verifyToken(refresh); // refresh
-                            String username = rjwt.getJWTClaimsSet().getSubject();
-                            Account acc = accountService.findUserByUsername(username);
-                            if (acc != null) {
-                                String newAccess = authenticationService.generateToken(acc, null, false);
-                                request.getSession(true).setAttribute("ACCESS_TOKEN", newAccess);
-
-                                String role = (String) customJwtDecoder.decode(newAccess).getClaims().get("scope");
-                                if (role != null) {
-                                    return "redirect:" + resolveRedirectByRole(role);
-                                }
-                            } else {
-                                ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
-                                        .httpOnly(true).secure(false).sameSite("Lax")
-                                        .path(COOKIE_PATH).maxAge(0).build();
-                                response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
-                            }
-                        } catch (Exception ex) {
-                            ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
-                                    .httpOnly(true).secure(false).sameSite("Lax")
-                                    .path(COOKIE_PATH).maxAge(0).build();
-                            response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
+                            Model model) {
         if (account == null) account = new Account();
         if (!model.containsAttribute("account")) model.addAttribute("account", account);
         return "pages/login";
@@ -149,9 +92,9 @@ public class AuthenticationController {
         return "pages/mfa";
     }
     @PostMapping("/auth/login/MFA/resendOTP")
-    public String resendMFAOTP(@RequestParam String cid,HttpSession session,Model model) throws ParseException, JOSEException {
+    public String resendMFAOTP(@RequestParam String cid,HttpSession session,Model model,HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         MFAResponse ch = authenticationService.get(cid);
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(ch.getAccesstoken()));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(ch.getAccesstoken(),request,response));
         Account account=accountService.findById(id);
         String otp=authenticationService.MFA(account.getEmail());
         if (otp!=null) {
@@ -206,7 +149,7 @@ public class AuthenticationController {
     @PostMapping("/auth/login/MFA/verifyPin")
     public String verifyMfaPin(@RequestParam String cid,@RequestParam String code,HttpServletRequest request,HttpServletResponse response) throws ParseException, JOSEException {
         MFAResponse ch = authenticationService.get(cid);
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(ch.getAccesstoken()));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(ch.getAccesstoken(),request,response));
         Account account=accountService.findById(id);
         String secretPin;
         if (account.getRole()==Account.Role.Admin) secretPin=account.getProfile().getAdmin().getSecretPin();
@@ -217,6 +160,8 @@ public class AuthenticationController {
         }
         HttpSession session = request.getSession(true);
         session.setAttribute("ACCESS_TOKEN", ch.getAccesstoken());
+        String role = (String) customJwtDecoder.decode(ch.getAccesstoken()).getClaims().get("scope");
+        session.setAttribute("SCOPE", role);
         ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", ch.getRefreshtoken())
                 .httpOnly(true)
                 .secure(false)
@@ -261,7 +206,8 @@ public class AuthenticationController {
                 if (!auth.isSpecialAccount()) {
                     HttpSession session = request.getSession(true);
                     session.setAttribute("ACCESS_TOKEN", auth.getToken());
-
+                    String role = (String) customJwtDecoder.decode(auth.getToken()).getClaims().get("scope");
+                    session.setAttribute("SCOPE", role);
                     ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", auth.getRefreshtoken())
                             .httpOnly(true)
                             .secure(false)
