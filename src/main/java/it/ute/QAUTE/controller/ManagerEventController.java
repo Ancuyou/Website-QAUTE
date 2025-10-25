@@ -5,6 +5,8 @@ import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.http.HttpRequest;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -177,10 +180,12 @@ public class ManagerEventController {
     public String approveEvent(
             @PathVariable Integer id,
             HttpSession session,
-            RedirectAttributes ra) {
+            RedirectAttributes ra,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         try {
             Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj, request, response));
 
             eventService.approveEvent(id, managerId);
 
@@ -200,10 +205,12 @@ public class ManagerEventController {
             @PathVariable Integer id,
             @RequestParam String reason,
             HttpSession session,
-            RedirectAttributes ra) {
+            RedirectAttributes ra,
+            HttpServletRequest request,
+            HttpServletResponse response) {
         try {
             Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj, request, response));
 
             if (reason == null || reason.trim().isEmpty()) {
                 throw new AppException(ErrorCode.INVALID_REQUEST);
