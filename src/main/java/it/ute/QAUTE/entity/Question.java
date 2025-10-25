@@ -3,6 +3,8 @@ package it.ute.QAUTE.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Formula;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -56,6 +58,9 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER)
     @OrderBy("dateAnswered ASC") // Sắp xếp câu trả lời theo thời gian
     private Set<Answer> answers;
+
+    @Formula("(SELECT COUNT(*) FROM Answer a WHERE a.QuestionID = QuestionID)")
+    private int answerCount;
 
     public enum QuestionStatus {
         Pending,
