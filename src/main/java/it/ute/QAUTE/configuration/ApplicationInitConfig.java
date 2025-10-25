@@ -1,9 +1,6 @@
 package it.ute.QAUTE.configuration;
 
-import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.entity.Consultant;
-import it.ute.QAUTE.entity.Profiles;
-import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.ConsultantRepository;
 import it.ute.QAUTE.repository.ProfilesRepository;
@@ -35,6 +32,7 @@ public class ApplicationInitConfig {
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
+            // tạo admin
             if(accountRepository.findByUsername("admin") == null){
                 Profiles profile = new Profiles();
                 profile.setFullName("Administrator");
@@ -45,9 +43,34 @@ public class ApplicationInitConfig {
                 account.setPassword(passwordEncoder.encode("admin"));
                 account.setEmail("admin@gmail.com");
                 account.setRole(Account.Role.Admin);
+                Admin admin=new Admin();
+                admin.setSecretPin(passwordEncoder.encode("123456"));
+                admin.setProfile(profile);
+                profile.setAdmin(admin);
+                profile.setAccount(account);
                 account.setProfile(profile);
                 accountRepository.save(account);
                 log.warn("Admin account created: username=admin, password=admin. Please change it!");
+            }
+            // tạo manager
+            if(accountRepository.findByUsername("manager") == null){
+                Profiles profile = new Profiles();
+                profile.setFullName("Manager");
+                profile.setPhone("0000000000");
+                profile.setAvatar(null);
+                Account account = new Account();
+                account.setUsername("manager");
+                account.setPassword(passwordEncoder.encode("manager"));
+                account.setEmail("manager@gmail.com");
+                account.setRole(Account.Role.Manager);
+                Manager manager=new Manager();
+                manager.setSecretPin(passwordEncoder.encode("123456"));
+                manager.setProfile(profile);
+                profile.setManager(manager);
+                profile.setAccount(account);
+                account.setProfile(profile);
+                accountRepository.save(account);
+                log.warn("Manager account created: username=manager, password=manager. Please change it!");
             }
             // tạo consultant
             if(accountRepository.findByUsername("consultant") == null){

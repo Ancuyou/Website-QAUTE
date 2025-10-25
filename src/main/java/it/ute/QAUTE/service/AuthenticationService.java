@@ -2,6 +2,7 @@ package it.ute.QAUTE.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -10,6 +11,7 @@ import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.Exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
+import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.dto.response.RefreshTokenResponse;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.InvalidatedToken;
@@ -45,6 +47,8 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class AuthenticationService {
+    @Autowired
+    private Cache<String, MFAResponse> temporaryMFACache;
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
@@ -127,13 +131,18 @@ public class AuthenticationService {
             RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
             log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
             securityService.reduceLevelSecurity(accountRep);
-            return AuthenticationResponse.builder()
+            AuthenticationResponse result=AuthenticationResponse.builder()
                     .authenticated(true)
                     .token(generateToken(accountRep, null, false))
                     .RefreshID(refreshToken.getRefreshID())
                     .Refreshtoken(refreshToken.getRefreshtoken())
                     .role(accountRep.getRole())
                     .build();
+            if (accountRep.getRole()== Account.Role.Admin || accountRep.getRole()== Account.Role.Manager) {
+                result.setSpecialAccount(true);
+                result.setEmail(accountRep.getEmail());
+            }
+            return result;
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
@@ -272,6 +281,15 @@ public class AuthenticationService {
             return null;
         }
     }
+    public String MFA(String email){
+        if (accountRepository.existsByEmail(email)) {
+            String otp= emailService.sendMFAOTP(email);
+            System.out.println(otp);
+            return hashed(otp);
+        }else {
+            return null;
+        }
+    }
     // Func call in func Authenticated after check user, pass
     public RefreshTokenResponse refreshToken(Account account, String deviceName) throws ParseException {
         String signKey = generateSignMaxSecurity();
@@ -345,8 +363,7 @@ public class AuthenticationService {
         for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
-    public int getCurrentUserId(HttpSession session) throws ParseException, JOSEException {
-        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+    public int getCurrentUserId(Object tokenObj) throws ParseException, JOSEException {
         if (tokenObj instanceof String token && !token.isBlank()) {
             SignedJWT signedJWT = verifyToken(token);
             String username = signedJWT.getJWTClaimsSet().getSubject();
@@ -355,5 +372,11 @@ public class AuthenticationService {
         }
         return 0;
     }
+    public String createMFACache(MFAResponse mfaResponse) {
+        String cid=java.util.UUID.randomUUID().toString();
+        temporaryMFACache.put(cid, mfaResponse);
+        return cid;
+    }
+    public MFAResponse get(String cid) { return temporaryMFACache.getIfPresent(cid); }
 }
 

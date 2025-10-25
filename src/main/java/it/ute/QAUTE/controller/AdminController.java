@@ -626,7 +626,8 @@ public class AdminController {
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("status") String status,
                                    HttpSession session) throws ParseException, JOSEException {
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
         Account account = accountService.findById(id);
         notificationService.createNotification(account, title, content, targetType, status,true);
         return "redirect:/admin/notifications";

@@ -25,7 +25,8 @@ public class NotificationController {
     @GetMapping("/user")
     public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request)
             throws ParseException, JOSEException {
-        int accountId = Math.toIntExact(authenticationService.getCurrentUserId(session));
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int accountId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
         List<NotificationReceiver> notifications = notificationService.findNotificationByAccountId(accountId);
         long unreadCount = notifications.stream()
                 .filter(n -> !n.isRead())
