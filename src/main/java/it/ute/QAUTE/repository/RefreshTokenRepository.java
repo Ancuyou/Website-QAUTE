@@ -60,7 +60,6 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken,Strin
             @Param("keyword") String keyword,
             @Param("now") Date now,
             Pageable pageable);
-
     long countByExpiresAtAfter(Date date);
     long countByExpiresAtBefore(Date date);
 

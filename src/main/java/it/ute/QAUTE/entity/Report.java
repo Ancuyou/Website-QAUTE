@@ -67,6 +67,5 @@ public class Report {
     public enum ReportStatus {
         PENDING,
         PROCESSED,
-
     }
 }

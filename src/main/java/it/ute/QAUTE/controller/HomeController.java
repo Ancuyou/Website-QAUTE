@@ -1,26 +1,18 @@
+// src/main/java/it/ute/QAUTE/controller/HomeController.java
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.dto.ConsultantDTO;
-import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.entity.Consultant;
-import it.ute.QAUTE.entity.Messages;
-import it.ute.QAUTE.entity.Profiles;
-import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.service.*;
-import jakarta.servlet.http.HttpSession;
+import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.repository.AnswerRepository;
-import it.ute.QAUTE.repository.QuestionRepository;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.ConsultantService;
-import it.ute.QAUTE.service.MessageService;
-import it.ute.QAUTE.service.UserService;
+import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,22 +38,23 @@ public class HomeController {
     @Autowired
     private FileStorageService fileStorageService;
     @Autowired
-    private AuthenticationService  authenticationService;
+    private AuthenticationService authenticationService;
     @Autowired
-    private QuestionRepository questionRepository;
+    private QuestionService questionService;
     @Autowired
-    private AnswerRepository answerRepository;
+    private AnswerService answerService;
+
     @GetMapping("/user/home")
     public String homeUser(Model model, Principal principal) {
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
-            User user = userService.findByProfileId(account.getProfile().getProfileID())
-                    .orElse(null);
+            User user = userService.findByProfileId(account.getProfile().getProfileID()).orElse(null);
             model.addAttribute("account", account);
-            if (user != null){
-                long questionsAsked = questionRepository.countByUser(user);
-                long answersReceived = answerRepository.countByQuestionUser(user);
+
+            if (user != null) {
+                long questionsAsked = questionService.countQuestionsByUser(user);
+                long answersReceived = answerService.countAnswersForUser(user);
                 long consultantsChatted = messageService.getRecentChats(account.getProfile().getProfileID())
                         .stream()
                         .map(m -> m.getSenderID().equals(account.getProfile().getProfileID()) ? m.getReceiverID() : m.getSenderID())
@@ -72,15 +65,17 @@ public class HomeController {
                 userStats.put("answersReceived", answersReceived);
                 userStats.put("consultantsChatted", consultantsChatted);
                 model.addAttribute("userStats", userStats);
+
+                List<Question> recentQuestions = questionService.getTop3RecentQuestionsByUser(user);
+                model.addAttribute("recentActivities", recentQuestions);
             }
-            // Lấy top 3 câu hoi của người dùng để demo
-            List<Question> recentQuestions = questionRepository.findTop3ByUserOrderByDateSendDesc(user);
-            model.addAttribute("recentActivities", recentQuestions);
-            // Lấy các câu hỏi mới nhất trong cộng đồng
-            List<Question> communityQuestions = questionRepository.findTop5ByOrderByDateSendDesc();
+
+            List<Question> communityQuestions = questionService.getTop5RecentCommunityQuestions();
             model.addAttribute("communityQuestions", communityQuestions);
+
             List<ConsultantDTO> consultants = consultantService.getAllConsultants();
             model.addAttribute("consultants", consultants);
+
             List<Profiles> chatConsultants = messageService.getAllChatUsers(account.getProfile().getProfileID());
             List<ConsultantDTO> chatConsultantDTOs = chatConsultants.stream()
                     .map(profile -> {
@@ -99,14 +94,48 @@ public class HomeController {
                     })
                     .toList();
             model.addAttribute("chatConsultants", chatConsultantDTOs);
+
             if (account.getProfile() != null) {
                 List<Messages> recentChats = messageService.getRecentChats(account.getProfile().getProfileID());
                 model.addAttribute("recentChats", recentChats);
             }
+
+            List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
+            model.addAttribute("hotTopics", hotTopics);
         }
         return "pages/user/home";
     }
 
+    @GetMapping("/user/history")
+    public String userHistory(
+            @RequestParam(required = false) Integer highlightQuestionId,
+            Model model,
+            Principal principal
+    ) {
+        if (principal != null) {
+            String username = principal.getName();
+            Account account = accountService.findUserByUsername(username);
+            User user = userService.findByProfileId(account.getProfile().getProfileID()).orElse(null);
+
+            if (user != null) {
+                List<Question> userQuestions = questionService.getAllQuestionsByUserSortedByDate(user);
+                long questionsAsked = userQuestions.size();
+                long answersReceived = answerService.countAnswersForUser(user);
+
+                model.addAttribute("userQuestions", userQuestions);
+                model.addAttribute("questionsAsked", questionsAsked);
+                model.addAttribute("answersReceived", answersReceived);
+
+                if (highlightQuestionId != null) {
+                    model.addAttribute("highlightQuestionId", highlightQuestionId);
+                }
+            }
+            model.addAttribute("account", account);
+        }
+        return "pages/user/history";
+    }
+
+    // ... các phương thức POST và profile không thay đổi
     @GetMapping("/home/profile")
     public String profile(Model model, Principal principal) {
         String username = principal.getName();
@@ -168,8 +197,9 @@ public class HomeController {
                          @RequestParam(required = false) String studentCode,
                          @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                          @RequestParam(value = "newPassword", required = false) String newPassword,
-                         HttpSession session) throws ParseException, JOSEException {
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+                         HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         System.out.println(id);
         Account account = accountService.findById(id);
         if(newPassword !=null &&!newPassword.isBlank()) account.setPassword(authenticationService.hashed(newPassword));
@@ -189,41 +219,5 @@ public class HomeController {
         accountService.save(account);
         System.out.println("lưu thành công");
         return "redirect:/home/profile";
-    }
-    @GetMapping("/user/history")
-    public String userHistory(
-            @RequestParam(required = false) Integer highlightQuestionId,
-            Model model,
-            Principal principal
-    ) {
-        if (principal != null) {
-            String username = principal.getName();
-            Account account = accountService.findUserByUsername(username);
-            User user = userService.findByProfileId(account.getProfile().getProfileID())
-                    .orElse(null);
-
-            if (user != null) {
-                // Lấy tất cả câu hỏi của user, sắp xếp theo ngày mới nhất
-                List<Question> userQuestions = questionRepository
-                        .findByUserOrderByDateSendDesc(user);
-
-                // Thống kê
-                long questionsAsked = userQuestions.size();
-                long answersReceived = answerRepository.countByQuestionUser(user);
-
-                model.addAttribute("userQuestions", userQuestions);
-                model.addAttribute("questionsAsked", questionsAsked);
-                model.addAttribute("answersReceived", answersReceived);
-
-                // Nếu có questionId cần highlight
-                if (highlightQuestionId != null) {
-                    model.addAttribute("highlightQuestionId", highlightQuestionId);
-                }
-            }
-
-            model.addAttribute("account", account);
-        }
-
-        return "pages/user/history";
     }
 }

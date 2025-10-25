@@ -48,6 +48,18 @@ public class Account {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CreatedDate", updatable = false)
     private Date createdDate;
+
+    @Column(name="SecurityLevel")
+    private int securityLevel=0;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name="LockUntil")
+    private Date lockUntil;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "LevelEventAt")
+    private Date levelEventAt;
+
     public enum Role {
         Admin,
         Manager,

@@ -20,4 +20,7 @@ public class AuthenticationResponse {
     boolean authenticated;
     Account.Role role;
     boolean isBlock;
+    String message;
+    String email;
+    boolean isSpecialAccount;
 }

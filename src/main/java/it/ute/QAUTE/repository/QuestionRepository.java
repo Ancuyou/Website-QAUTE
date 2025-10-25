@@ -1,11 +1,13 @@
 package it.ute.QAUTE.repository;
 
+import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface QuestionRepository extends JpaRepository<Question, Integer> {
+public interface QuestionRepository extends JpaRepository<Question, Integer>, JpaSpecificationExecutor<Question> {
     // Đếm số câu hỏi của một user
     long countByUser(User user);
     // Lấy 3 câu hỏi gần nhất của một user
@@ -176,4 +178,13 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
     List<Question> findByUserOrderByDateSendDesc(User user);
     List<Question> findAllByOrderByDateSendDesc();
 
+    @Query("SELECT new it.ute.QAUTE.dto.HotTopicDTO(d.departmentID, d.departmentName, 'department', COUNT(q.questionID)) " +
+            "FROM Question q JOIN q.department d " +
+            "GROUP BY d.departmentID, d.departmentName ORDER BY COUNT(q.questionID) DESC")
+    List<HotTopicDTO> findTopDepartments(Pageable pageable);
+
+    @Query("SELECT new it.ute.QAUTE.dto.HotTopicDTO(f.fieldID, f.fieldName, 'field', COUNT(q.questionID)) " +
+            "FROM Question q JOIN q.field f " +
+            "GROUP BY f.fieldID, f.fieldName ORDER BY COUNT(q.questionID) DESC")
+    List<HotTopicDTO> findTopFields(Pageable pageable);
 }

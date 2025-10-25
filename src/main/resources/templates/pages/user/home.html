@@ -353,8 +353,8 @@
                             Sẵn sàng đặt câu hỏi?
                         </h2>
                         <p class="lead mb-0 text-white-75" style="line-height: 1.8;">
-                            <span th:if="${account.createdDate != null}"
-                                  th:text="|Bạn đã tham gia QAUTE được ${#numbers.floor(#dates.diff(#dates.createNow(), account.createdDate) / 86400000)} ngày. Hãy tiếp tục kết nối với cộng đồng!|">
+                            <!-- <span th:if="${account.createdDate != null}"
+                                  th:text="|Bạn đã tham gia QAUTE được ${#numbers.floor(#dates.diff(#dates.createNow(), account.createdDate) / 86400000)} ngày. Hãy tiếp tục kết nối với cộng đồng!|"> -->
                                 Chào mừng bạn đến với cộng đồng sinh viên năng động!
                             </span>
                             <span th:if="${account.createdDate == null}">
@@ -365,7 +365,7 @@
 
                     <!-- CTA Buttons -->
                     <div class="d-flex flex-wrap gap-3 mb-5 animate__animated animate__fadeInUp animate__delay-2s">
-                        <a href="#ask-question" class="btn btn-warning btn-lg px-4 py-3 shadow-lg hero-btn">
+                        <a th:href="@{/user/questions}" class="btn btn-warning btn-lg px-4 py-3 shadow-lg hero-btn">
                             <i class="fas fa-question-circle me-2"></i>Đặt câu hỏi ngay
                         </a>
                         <a href="#community" class="btn btn-outline-light btn-lg px-4 py-3 hero-btn">
@@ -507,30 +507,6 @@
     </div>
 </section>
 
-<!-- Stats Section -->
-<section class="bg-white py-5">
-    <div class="container">
-        <div class="row text-center">
-            <div class="col-md-3 mb-4">
-                <div class="h2 text-primary fw-bold">5,000+</div>
-                <p class="mb-0 text-muted">Sinh viên tham gia</p>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="h2 text-success fw-bold">50+</div>
-                <p class="mb-0 text-muted">Tư vấn viên chuyên nghiệp</p>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="h2 text-warning fw-bold">24/7</div>
-                <p class="mb-0 text-muted">Hỗ trợ trực tuyến</p>
-            </div>
-            <div class="col-md-3 mb-4">
-                <div class="h2 text-info fw-bold">98%</div>
-                <p class="mb-0 text-muted">Mức độ hài lòng</p>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Your Recent Activity -->
 <section id="history" class="py-5 position-relative overflow-hidden">
     <!-- Gradient Background -->
@@ -637,7 +613,7 @@
                         </div>
                         <h5 class="text-muted mb-2">Chưa có hoạt động nào</h5>
                         <p class="text-muted mb-4">Bắt đầu đặt câu hỏi để nhận được tư vấn từ chuyên gia</p>
-                        <a href="#ask-question" class="btn btn-primary rounded-pill px-4">
+                        <a th:href="@{/user/questions}" class="btn btn-primary px-4 rounded-pill">
                             <i class="fas fa-plus-circle me-2"></i>Đặt câu hỏi ngay
                         </a>
                     </div>
@@ -1024,41 +1000,18 @@
                     </div>
                     <div class="card-body p-0">
                         <div class="list-group list-group-flush">
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
+                            <a th:each="topic : ${hotTopics}"
+                               th:href="@{/user/questions(departmentId=${topic.type == 'department' ? topic.id : null}, fieldId=${topic.type == 'field' ? topic.id : null})}"
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
                                 <div class="d-flex align-items-center">
                                     <span class="badge bg-danger rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                    <span class="fw-medium">#HọcBổng</span>
+                                    <span class="fw-medium" th:text="'#' + ${topic.name}">#Chủ đề</span>
                                 </div>
-                                <span class="badge bg-danger rounded-pill px-3 py-2">142</span>
+                                <span class="badge bg-danger rounded-pill px-3 py-2" th:text="${topic.count}">0</span>
                             </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-warning rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                    <span class="fw-medium">#ThựcTập</span>
-                                </div>
-                                <span class="badge bg-warning rounded-pill px-3 py-2">128</span>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-info rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                    <span class="fw-medium">#ĐăngKýHọcPhần</span>
-                                </div>
-                                <span class="badge bg-info rounded-pill px-3 py-2">95</span>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-success rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                    <span class="fw-medium">#TuyểnDụng</span>
-                                </div>
-                                <span class="badge bg-success rounded-pill px-3 py-2">73</span>
-                            </a>
-                            <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-primary rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                    <span class="fw-medium">#SựKiện</span>
-                                </div>
-                                <span class="badge bg-primary rounded-pill px-3 py-2">56</span>
-                            </a>
+                            <div th:if="${hotTopics == null or #lists.isEmpty(hotTopics)}" class="list-group-item text-center text-muted p-4">
+                                Chưa có chủ đề nào nổi bật.
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ package it.ute.QAUTE.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.benmanes.caffeine.cache.Cache;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -10,6 +11,7 @@ import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
+import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.dto.response.RefreshTokenResponse;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.InvalidatedToken;
@@ -19,14 +21,16 @@ import it.ute.QAUTE.repository.InvalidatedTokenRepository;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -50,6 +54,8 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationService {
     @Autowired
+    private Cache<String, MFAResponse> temporaryMFACache;
+    @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
     private AccountRepository accountRepository;
@@ -59,6 +65,8 @@ public class AuthenticationService {
     RefreshTokenRepository refreshTokenRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private SecurityService securityService;
     @NonFinal
     @Value("${jwt.signerKey_access}")
     protected String SIGNER_KEY;
@@ -89,17 +97,21 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(false)
+                        .message("Tên đăng nhập hoặc mật khẩu không đúng")
                         .build();
             }
-            if (accountRep.isBlock()) {
+            String message=securityService.isAccountLocked(accountRep);
+            if (!message.isBlank()) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(true)
+                        .message(message)
                         .build();
             }
             else {
                 authenticated = check(account.getPassword(),
                         accountRep.getPassword());
+                if (!authenticated) securityService.handleFailedLogin(account.getUsername());
             }
         } else{
             accountRep = accountRepository.findByEmail(account.getEmail());
@@ -107,31 +119,40 @@ public class AuthenticationService {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(false)
+                        .message("Tên đăng nhập hoặc mật khẩu không đúng")
                         .build();
             }
-            if (accountRep.isBlock()) {
+            String message=securityService.isAccountLocked(accountRep);
+            if (!message.isBlank()) {
                 return AuthenticationResponse.builder()
                         .authenticated(false)
                         .isBlock(true)
+                        .message(message)
                         .build();
-            }
-            else {
+            }else {
                 authenticated = true;
             }
         }
         if (authenticated){
             RefreshTokenResponse refreshToken = refreshToken(accountRep, name_device);
             log.info("Tao Refresh thanh cong voi token: " + refreshToken.getRefreshtoken());
-            return AuthenticationResponse.builder()
+            securityService.reduceLevelSecurity(accountRep);
+            AuthenticationResponse result=AuthenticationResponse.builder()
                     .authenticated(true)
                     .token(generateToken(accountRep, null, false))
                     .RefreshID(refreshToken.getRefreshID())
                     .Refreshtoken(refreshToken.getRefreshtoken())
                     .role(accountRep.getRole())
                     .build();
+            if (accountRep.getRole()== Account.Role.Admin || accountRep.getRole()== Account.Role.Manager) {
+                result.setSpecialAccount(true);
+                result.setEmail(accountRep.getEmail());
+            }
+            return result;
         }
         return AuthenticationResponse.builder()
                 .authenticated(false)
+                .message("Tên đăng nhập hoặc mật khẩu không đúng")
                 .build();
     }
 
@@ -266,6 +287,15 @@ public class AuthenticationService {
             return null;
         }
     }
+    public String MFA(String email){
+        if (accountRepository.existsByEmail(email)) {
+            String otp= emailService.sendMFAOTP(email);
+            System.out.println(otp);
+            return hashed(otp);
+        }else {
+            return null;
+        }
+    }
     // Func call in func Authenticated after check user, pass
     public RefreshTokenResponse refreshToken(Account account, String deviceName) throws ParseException {
         String signKey = generateSignMaxSecurity();
@@ -339,13 +369,49 @@ public class AuthenticationService {
         for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
-    public int getCurrentUserId(HttpSession session) throws ParseException, JOSEException {
-        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+    public int getCurrentUserId(Object tokenObj, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         if (tokenObj instanceof String token && !token.isBlank()) {
-            SignedJWT signedJWT = verifyToken(token);
-            String username = signedJWT.getJWTClaimsSet().getSubject();
-            Account acc = accountRepository.findByUsername(username);
-            if (acc != null) return acc.getAccountID();
+            try {
+                //nếu còn hạn accessToken
+                SignedJWT signedJWT = verifyToken(token);
+                String username = signedJWT.getJWTClaimsSet().getSubject();
+                Account acc = accountRepository.findByUsername(username);
+                if (acc != null) return acc.getAccountID();
+            }catch (AppException e){
+                // nếu hết hạn accessToken
+                if (request.getCookies() != null) {
+                    for(Cookie cookie : request.getCookies()) {
+                        if(cookie.getName().equals("REFRESH_TOKEN")) {
+                            String refresh = cookie.getValue();
+                            if (refresh != null && !refresh.isBlank()) {
+                                try {
+                                    var rjwt = verifyToken(refresh);
+                                    String username = rjwt.getJWTClaimsSet().getSubject();
+                                    Account acc = accountRepository.findByUsername(username);
+                                    if (acc != null) {
+                                        String newAccess = generateToken(acc, null, false);
+                                        HttpSession newSession = request.getSession(true);
+                                        newSession.removeAttribute("ACCESS_TOKEN");
+                                        newSession.setAttribute("ACCESS_TOKEN", newAccess);
+                                        return acc.getAccountID();
+                                    }else {
+                                        ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                                                .httpOnly(true).secure(false).sameSite("Lax")
+                                                .path("/").maxAge(0).build();
+                                        response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                                    }
+                                }catch (Exception ex) {
+                                    ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                                            .httpOnly(true).secure(false).sameSite("Lax")
+                                            .path("/").maxAge(0).build();
+                                    response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
         return 0;
     }
@@ -377,5 +443,12 @@ public class AuthenticationService {
             return null;
         }
     }
+
+    public String createMFACache(MFAResponse mfaResponse) {
+        String cid=java.util.UUID.randomUUID().toString();
+        temporaryMFACache.put(cid, mfaResponse);
+        return cid;
+    }
+    public MFAResponse get(String cid) { return temporaryMFACache.getIfPresent(cid); }
 }
 

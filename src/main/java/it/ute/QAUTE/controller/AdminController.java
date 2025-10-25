@@ -4,6 +4,8 @@ import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -620,8 +622,9 @@ public class AdminController {
                                    @RequestParam("content") String content,
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("status") String status,
-                                   HttpSession session) throws ParseException, JOSEException {
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(session));
+                                   HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         Account account = accountService.findById(id);
         notificationService.createNotification(account, title, content, targetType, status,true);
         return "redirect:/admin/notifications";

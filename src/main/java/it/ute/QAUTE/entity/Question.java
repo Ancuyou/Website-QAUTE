@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -61,6 +62,9 @@ public class Question {
     @OneToMany(mappedBy = "question", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @OrderBy("dateAnswered ASC")
     private Set<Answer> answers;
+
+    @Formula("(SELECT COUNT(*) FROM Answer a WHERE a.QuestionID = QuestionID)")
+    private int answerCount;
 
     public enum QuestionStatus {
         Pending,

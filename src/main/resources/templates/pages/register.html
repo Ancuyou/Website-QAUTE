@@ -141,8 +141,14 @@
                                 Xác nhận OTP
                             </button>
 
-                            <button type="button" class="btn btn-link w-100 mt-2" id="resendBtn" disabled>
-                                Gửi lại mã OTP
+                            <button type="submit"
+                                    class="btn btn-link w-100 mt-2"
+                                    id="resendBtn"
+                                    th:formaction="@{/auth/register/resendOtp}"
+                                    formmethod="post"
+                                    formnovalidate
+                            disabled>
+                            Gửi lại mã OTP
                             </button>
 
                             <div class="alert alert-warning mt-2" id="otpExpiredMsg" style="display: none;">
@@ -166,9 +172,11 @@
 <!-- ✅ JS Validate + OTP Auto Focus -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // ===== Validate Register Form =====
-        const form = document.getElementById("registerForm");
-        if (form) {
+        /* ===========================
+           1) VALIDATE REGISTER FORM
+           =========================== */
+        const registerForm = document.getElementById("registerForm");
+        if (registerForm) {
             const usernameInput = document.getElementById("username");
             const passwordInput = document.getElementById("password");
 
@@ -180,46 +188,190 @@
             passwordError.className = "text-danger small mt-1";
             passwordInput.insertAdjacentElement("afterend", passwordError);
 
-            form.addEventListener("submit", function (e) {
+            registerForm.addEventListener("submit", function (e) {
                 let valid = true;
                 usernameError.textContent = "";
                 passwordError.textContent = "";
 
-                if (usernameInput.value.length < 6) {
+                if (usernameInput.value.trim().length < 6) {
                     usernameError.textContent = "Username phải có ít nhất 6 ký tự.";
                     valid = false;
                 }
 
-                const password = passwordInput.value;
-                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-                if (!regex.test(password)) {
+                const pwd = passwordInput.value;
+                // ≥8 ký tự, có hoa, thường, số, ký tự đặc biệt
+                const regex =
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+                if (!regex.test(pwd)) {
                     passwordError.textContent =
                         "Mật khẩu phải ≥ 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt.";
                     valid = false;
                 }
 
-                if (!valid) {
+                if (!valid) e.preventDefault();
+            });
+        }
+
+        /* ===========================
+           2) OTP FORM + COUNTDOWN
+           =========================== */
+        const otpForm       = document.getElementById("otpForm");
+        const otpInputs     = document.querySelectorAll(".otp-input");
+        const otpSubmitBtn  = document.getElementById("otpSubmitBtn");
+        const resendBtn     = document.getElementById("resendBtn");
+        const countdownEl   = document.getElementById("countdown");
+        const expiredMsg    = document.getElementById("otpExpiredMsg");
+
+        // Các hằng số thời gian
+        const OTP_TTL_SEC      = 180; // OTP hết hạn sau 180s
+        const RESEND_LOCK_SEC  = 30;  // Khoá nút resend 30s
+
+        // Khóa sessionStorage để giữ đồng hồ khi reload trang
+        const SS_KEY_OTP_START     = "qaute_reg_otp_start";
+        const SS_KEY_RESEND_START  = "qaute_reg_resend_start";
+
+        // Utilities
+        function nowMs() { return Date.now(); }
+
+        function startCountdown(totalSec, onTick, onEnd) {
+            let secLeft = totalSec;
+            onTick(secLeft);
+            const timer = setInterval(() => {
+                secLeft--;
+                onTick(Math.max(secLeft, 0));
+                if (secLeft <= 0) {
+                    clearInterval(timer);
+                    onEnd && onEnd();
+                }
+            }, 1000);
+            return timer;
+        }
+
+        // Chỉ cho nhập số + auto move + backspace lùi
+        if (otpInputs.length) {
+            otpInputs.forEach((input, idx, arr) => {
+                input.addEventListener("input", () => {
+                    // Chỉ giữ số
+                    input.value = input.value.replace(/\D/g, "");
+                    if (input.value.length === 1 && idx < arr.length - 1) {
+                        arr[idx + 1].focus();
+                    }
+                });
+
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && !input.value && idx > 0) {
+                        arr[idx - 1].focus();
+                    }
+                });
+            });
+
+            // Paste trực tiếp 6 số
+            otpInputs[0].addEventListener("paste", (e) => {
+                const text = (e.clipboardData || window.clipboardData).getData("text");
+                if (/^\d{6}$/.test(text)) {
                     e.preventDefault();
+                    for (let i = 0; i < 6; i++) {
+                        otpInputs[i].value = text[i];
+                    }
+                    otpInputs[5].focus();
                 }
             });
         }
 
-        // ===== OTP Input Auto Move =====
-        const inputs = document.querySelectorAll(".otp-input");
-        inputs.forEach((input, index) => {
-            input.addEventListener("input", () => {
-                if (input.value.length === 1 && index < inputs.length - 1) {
-                    inputs[index + 1].focus();
-                }
-            });
+        // Đếm ngược OTP 180s
+        function initOtpCountdown() {
+            if (!otpForm || !countdownEl) return;
 
-            input.addEventListener("keydown", (e) => {
-                if (e.key === "Backspace" && !input.value && index > 0) {
-                    inputs[index - 1].focus();
+            // Nếu có thời điểm bắt đầu trong sessionStorage thì tiếp tục
+            const stored = sessionStorage.getItem(SS_KEY_OTP_START);
+            let startTime = stored ? parseInt(stored, 10) : null;
+            const now = nowMs();
+
+            // Nếu không có (hoặc lưu sai), set mới
+            if (!startTime || isNaN(startTime) || now - startTime >= OTP_TTL_SEC * 1000) {
+                startTime = now;
+                sessionStorage.setItem(SS_KEY_OTP_START, String(startTime));
+            }
+
+            // Tính thời gian còn lại
+            const elapsed = Math.floor((now - startTime) / 1000);
+            let remain = OTP_TTL_SEC - elapsed;
+            if (remain < 0) remain = 0;
+
+            // Cấu hình nút
+            if (expiredMsg)    expiredMsg.style.display = "none";
+            if (otpSubmitBtn)  otpSubmitBtn.disabled = remain <= 0;
+
+            startCountdown(
+                remain,
+                (sec) => {
+                    countdownEl.textContent = sec;
+                },
+                () => {
+                    countdownEl.textContent = "0";
+                    if (otpSubmitBtn) otpSubmitBtn.disabled = true;
+                    if (expiredMsg)    expiredMsg.style.display = "block";
+                    if (resendBtn)     resendBtn.disabled = false;
                 }
+            );
+        }
+
+        // Khoá nút resend 30s
+        function initResendLock() {
+            if (!resendBtn) return;
+
+            const stored = sessionStorage.getItem(SS_KEY_RESEND_START);
+            const now = nowMs();
+            let startTime = stored ? parseInt(stored, 10) : null;
+
+            // Nếu chưa từng bấm resend thì khoá 30s từ lúc vào trang
+            if (!startTime || isNaN(startTime) || now - startTime >= RESEND_LOCK_SEC * 1000) {
+                startTime = now;
+                sessionStorage.setItem(SS_KEY_RESEND_START, String(startTime));
+            }
+
+            const elapsed = Math.floor((now - startTime) / 1000);
+            let left = RESEND_LOCK_SEC - elapsed;
+
+            if (left <= 0) {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = "Gửi lại mã OTP";
+                return;
+            }
+
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = `Gửi lại mã OTP <span class="text-muted">(${left}s)</span>`;
+            startCountdown(
+                left,
+                (sec) => {
+                    resendBtn.innerHTML = `Gửi lại mã OTP <span class="text-muted">(${sec}s)</span>`;
+                },
+                () => {
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = "Gửi lại mã OTP";
+                }
+            );
+        }
+
+        // Khi bấm “Gửi lại OTP”: vì là submit sang @{/auth/register},
+        // ta lưu lại mốc thời gian để trang load lại vẫn khoá 30s,
+        // đồng thời reset mốc OTP để bắt đầu 180s mới.
+        if (resendBtn) {
+            resendBtn.addEventListener("click", () => {
+                sessionStorage.setItem(SS_KEY_RESEND_START, String(nowMs()));
+                sessionStorage.removeItem(SS_KEY_OTP_START); // force OTP 180s mới sau reload
             });
-        });
+        }
+
+        // Khởi chạy khi có form OTP
+        if (otpForm) {
+            // Tự focus vào ô đầu tiên nếu trống
+            if (otpInputs.length && !otpInputs[0].value) {
+                otpInputs[0].focus();
+            }
+            initOtpCountdown();
+            initResendLock();
+        }
     });
 </script>
 </body>
