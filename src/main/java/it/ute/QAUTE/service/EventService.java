@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -499,5 +500,15 @@ public class EventService {
         // Dùng Repository để kiểm tra trực tiếp, loại trừ trạng thái Cancelled
         return registrationRepository.existsByEventAndUserAndStatusNot(
                 event, user, EventRegistration.RegistrationStatus.Cancelled);
+    }
+
+    public List<Event> findUpcomingEventsByConsultant(Consultant consultant) {
+        LocalDateTime now = LocalDateTime.now();
+        List<Event> events = eventRepository.findByConsultant(consultant, Pageable.unpaged()).getContent();
+        return events.stream()
+                .filter(event -> event.getStartTime().isAfter(now) && 
+                        (event.getStatus() == Event.EventStatus.Approved || event.getStatus() == Event.EventStatus.Ongoing))
+                .collect(Collectors.toList());
+                
     }
 }
