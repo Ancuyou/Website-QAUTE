@@ -34,6 +34,8 @@ public class NotificationController {
                 .count();
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("accountId", accountId);
+        System.out.println("accountId: "+accountId);
         return "fragments/userDropDown :: notificationItems";
     }
     @GetMapping("/detail")
