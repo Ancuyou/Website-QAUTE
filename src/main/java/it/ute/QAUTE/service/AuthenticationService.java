@@ -8,8 +8,8 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import it.ute.QAUTE.Exception.AppException;
-import it.ute.QAUTE.Exception.ErrorCode;
+import it.ute.QAUTE.exception.AppException;
+import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
 import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.dto.response.RefreshTokenResponse;
@@ -19,15 +19,20 @@ import it.ute.QAUTE.entity.RefreshToken;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
 import java.net.URLEncoder;
@@ -40,6 +45,7 @@ import java.security.SecureRandom;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -363,15 +369,81 @@ public class AuthenticationService {
         for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
-    public int getCurrentUserId(Object tokenObj) throws ParseException, JOSEException {
+    public int getCurrentUserId(Object tokenObj, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         if (tokenObj instanceof String token && !token.isBlank()) {
-            SignedJWT signedJWT = verifyToken(token);
-            String username = signedJWT.getJWTClaimsSet().getSubject();
-            Account acc = accountRepository.findByUsername(username);
-            if (acc != null) return acc.getAccountID();
+            try {
+                //nếu còn hạn accessToken
+                SignedJWT signedJWT = verifyToken(token);
+                String username = signedJWT.getJWTClaimsSet().getSubject();
+                Account acc = accountRepository.findByUsername(username);
+                if (acc != null) return acc.getAccountID();
+            }catch (AppException e){
+                // nếu hết hạn accessToken
+                if (request.getCookies() != null) {
+                    for(Cookie cookie : request.getCookies()) {
+                        if(cookie.getName().equals("REFRESH_TOKEN")) {
+                            String refresh = cookie.getValue();
+                            if (refresh != null && !refresh.isBlank()) {
+                                try {
+                                    var rjwt = verifyToken(refresh);
+                                    String username = rjwt.getJWTClaimsSet().getSubject();
+                                    Account acc = accountRepository.findByUsername(username);
+                                    if (acc != null) {
+                                        String newAccess = generateToken(acc, null, false);
+                                        HttpSession newSession = request.getSession(true);
+                                        newSession.removeAttribute("ACCESS_TOKEN");
+                                        newSession.setAttribute("ACCESS_TOKEN", newAccess);
+                                        return acc.getAccountID();
+                                    }else {
+                                        ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                                                .httpOnly(true).secure(false).sameSite("Lax")
+                                                .path("/").maxAge(0).build();
+                                        response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                                    }
+                                }catch (Exception ex) {
+                                    ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                                            .httpOnly(true).secure(false).sameSite("Lax")
+                                            .path("/").maxAge(0).build();
+                                    response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
         }
         return 0;
     }
+    public Account getCurrentAccount() {
+        HttpServletRequest request = null;
+        try {
+            request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        } catch (IllegalStateException e) {
+            return null;
+        }
+        if (request == null || request.getCookies() == null) {
+            return null;
+        }
+        String refresh = Arrays.stream(request.getCookies())
+                .filter(c -> c.getName().equals("REFRESH_TOKEN"))
+                .map(Cookie::getValue)
+                .findFirst()
+                .orElse(null);
+
+        if (refresh == null || refresh.isBlank()) {
+            return null;
+        }
+        try {
+            var jwt = verifyToken(refresh);
+            String username = jwt.getJWTClaimsSet().getSubject();
+            return accountRepository.findByUsername(username);
+        } catch (Exception e) {
+            log.warn("Invalid REFRESH_TOKEN: {}", e.getMessage());
+            return null;
+        }
+    }
+
     public String createMFACache(MFAResponse mfaResponse) {
         String cid=java.util.UUID.randomUUID().toString();
         temporaryMFACache.put(cid, mfaResponse);

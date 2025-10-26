@@ -1,13 +1,16 @@
 package it.ute.QAUTE.controller;
 
+import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.exception.AppException;
 import com.nimbusds.jose.JOSEException;
-import it.ute.QAUTE.Exception.AppException;
 import it.ute.QAUTE.dto.AnswerReportDTO;
 import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.service.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
@@ -145,6 +149,19 @@ public class ManagerController {
         return "redirect:/manager/questions";
     }
 
+    @PostMapping("/questions/delete/{id}")
+    public String deleteQuestion(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            questionService.deleteQuestion(id);
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Question deleted successfully!");
+        }catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage", "Xóa thất bại" + e.getMessage());
+        }
+        return  "redirect:/manager/questions";
+    }
+
     @GetMapping("/fields")
     public String listFields(
             @RequestParam(defaultValue = "0") int page,
@@ -177,6 +194,19 @@ public class ManagerController {
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("active", "fields");
         return "pages/manager/addField";
+    }
+
+    @PostMapping("/fields/delete/{id}")
+    public String deleteField(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try{
+            fieldRepository.deleteById(id);
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Field deleted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessages", "Xóa thất bại" + e.getMessage());
+        }
+        return  "redirect:/manager/fields";
     }
 
     @PostMapping("/fields/save")
@@ -398,6 +428,44 @@ public class ManagerController {
         model.addAttribute("endDate", endDate);
         return "pages/manager/badContents";
     }
+    @GetMapping("/profile")
+    public String showAdminProfile(Model model) {
+        Account acc = authenticationService.getCurrentAccount();
+        if (acc == null) return "redirect:/auth/login";
+
+        try {
+            model.addAttribute("account", acc);
+            return "pages/manager/profile";
+
+        } catch (Exception e) {
+            return "redirect:/auth/login";
+        }
+    }
+
+    @PostMapping("/profile")
+    public String ProfileUpdate(
+            @ModelAttribute("account") Account form,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+            RedirectAttributes redirectAttributes){
+        try {
+            accountService.editManagerOrConsultant(form, newPassword, avatarFile);
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/manager/profile";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Sửa thất bại: " + e.getMessage());
+            return "redirect:/manager/profile";
+        }
+        redirectAttributes.addFlashAttribute("success", true);
+        redirectAttributes.addFlashAttribute("successMessage",
+                "Sửa thành công! Manager " + form.getProfile().getFullName());
+        return "redirect:/manager/profile";
+    }
 
     @PostMapping("/bad-contents/rejected/{id}")
     public String deleteToxicQuestion(@PathVariable Integer id,
@@ -429,6 +497,8 @@ public class ManagerController {
         return "redirect:/manager/bad-contents";
     }
 
+
+
     @ResponseBody
     @GetMapping("/fields/by-department/{departmentId}")
     public List<Field> getFieldsByDepartment(@PathVariable Integer departmentId) {
@@ -439,9 +509,9 @@ public class ManagerController {
                                 @RequestParam(defaultValue = "") String status,
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "10") int size,
-                                Model model, HttpSession session) throws ParseException, JOSEException {
+                                Model model, HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
         Page<Notification> notifications=notificationService.findNotificationsBySenderId(id,pageable);
         model.addAttribute("notifications", notifications.getContent());
@@ -467,9 +537,9 @@ public class ManagerController {
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("priority") Boolean priority,
                                    @RequestParam("status") String status,
-                                   HttpSession session) throws ParseException, JOSEException {
+                                   HttpSession session,HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj));
+        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
         Account account = accountService.findById(id);
         notificationService.createNotification(account, title, content, targetType, status,priority);
         return "redirect:/manager/notifications";

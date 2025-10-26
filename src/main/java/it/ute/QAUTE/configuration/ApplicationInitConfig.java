@@ -2,9 +2,6 @@ package it.ute.QAUTE.configuration;
 
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.AccountRepository;
-import it.ute.QAUTE.repository.ConsultantRepository;
-import it.ute.QAUTE.repository.ProfilesRepository;
-import it.ute.QAUTE.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +12,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Date;
+
 
 @Configuration
 @RequiredArgsConstructor
@@ -23,12 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class ApplicationInitConfig {
     @Autowired
     PasswordEncoder passwordEncoder;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    ConsultantRepository consultantRepository;
-    @Autowired
-    ProfilesRepository profilesRepository;
     @Bean
     ApplicationRunner applicationRunner(AccountRepository accountRepository){
         return args -> {
@@ -42,6 +35,7 @@ public class ApplicationInitConfig {
                 account.setUsername("admin");
                 account.setPassword(passwordEncoder.encode("admin"));
                 account.setEmail("admin@gmail.com");
+                account.setCreatedDate(new Date());
                 account.setRole(Account.Role.Admin);
                 Admin admin=new Admin();
                 admin.setSecretPin(passwordEncoder.encode("123456"));
@@ -62,6 +56,7 @@ public class ApplicationInitConfig {
                 account.setUsername("manager");
                 account.setPassword(passwordEncoder.encode("manager"));
                 account.setEmail("manager@gmail.com");
+                account.setCreatedDate(new Date());
                 account.setRole(Account.Role.Manager);
                 Manager manager=new Manager();
                 manager.setSecretPin(passwordEncoder.encode("123456"));
@@ -82,6 +77,7 @@ public class ApplicationInitConfig {
                 account.setUsername("consultant");
                 account.setPassword(passwordEncoder.encode("consultant"));
                 account.setEmail("consultant@gmail.com");
+                account.setCreatedDate(new Date());
                 account.setRole(Account.Role.Consultant);
                 Consultant consultant = new Consultant();
                 consultant.setExperienceYears(1);
@@ -102,6 +98,7 @@ public class ApplicationInitConfig {
                 account.setPassword(passwordEncoder.encode("user"));
                 account.setEmail("23112074@student.hcmute.edu.vn");
                 account.setRole(Account.Role.User);
+                account.setCreatedDate(new Date());
                 account.setProfile(profile);
                 User user = new User();
                 user.setStudentCode("23112074");
