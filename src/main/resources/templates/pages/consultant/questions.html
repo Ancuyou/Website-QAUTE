@@ -1,20 +1,12 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<!-- include head fragment, truyền title -->
-<th:block th:replace="~{fragments/head :: head('QAUTE - Câu hỏi Tư vấn')}"></th:block>
-<body>
-<!-- Navigation - Using consultant-navbar fragment -->
-<th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
+<th:block th:replace="~{pages/consultant/layout-consultant :: layout(~{::content}, 'questions')}">
 
-<!-- Main Content -->
-<main style="padding-top: 70px;">
-    <!-- Questions Content -->
+<th:block th:fragment="content">
     <div class="container-fluid">
         <th:block th:replace="~{fragments/consultant/consultant-questions :: consultant-questions}"></th:block>
     </div>
-</main>
+</th:block>
 
-<!-- Footer -->
-<th:block th:replace="~{fragments/footer :: footer}"></th:block>
-</body>
+</th:block>
 </html>

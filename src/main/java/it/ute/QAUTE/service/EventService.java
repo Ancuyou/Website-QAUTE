@@ -505,6 +505,9 @@ public class EventService {
     public List<Event> findUpcomingEventsByConsultant(Consultant consultant) {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findByConsultant(consultant, Pageable.unpaged()).getContent();
+        events.forEach(event -> {
+            System.out.println("event title: " + event.getTitle() + ", start time: " + event.getStartTime());
+        });
         return events.stream()
                 .filter(event -> event.getStartTime().isAfter(now) && 
                         (event.getStatus() == Event.EventStatus.Approved || event.getStatus() == Event.EventStatus.Ongoing))

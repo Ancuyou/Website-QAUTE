@@ -162,7 +162,11 @@ public class ConsultantController {
                         PageRequest.of(0, 5, Sort.by("createdAt").descending())
                 );
                 List<Event> recentEvents = recentEventsPage.getContent();
-                
+                List<Event> upcomingEvents = eventService.findUpcomingEventsByConsultant(consultant);
+                upcomingEvents.forEach(event -> {
+                    System.out.println("upcoming event title: " + event.getTitle() + ", start time: " + event.getStartTime());
+                });
+                model.addAttribute("upcomingEvents", upcomingEvents.size());
                 model.addAttribute("totalEvents", totalEvents);
                 model.addAttribute("pendingEvents", pendingEvents);
                 model.addAttribute("completedEvents", completedEvents);
@@ -201,11 +205,7 @@ public class ConsultantController {
         account.getProfile().setPhone(phone);
         account.getProfile().getConsultant().setExperienceYears(experienceYears);
         String oldAvatar = account.getProfile().getAvatar();
-        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
-            fileStorageService.deleteFile(oldAvatar);
-            account.getProfile().setAvatar(null);
-        }
-        else if (avatarFile != null && !avatarFile.isEmpty()) {
+        if (avatarFile != null && !avatarFile.isEmpty()) {
             String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
             account.getProfile().setAvatar(newAvatarUrl);
         }
@@ -213,24 +213,6 @@ public class ConsultantController {
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully.");
         return "redirect:/consultant/profile";
     }
-
-    // @GetMapping("/questions")
-    // public String questionsConsultant(Principal principal, 
-    //                                  Model model,
-    //                                  @RequestParam(required = false) Integer highlightQuestion) {
-    //     String username = principal.getName();
-    //     Account account = accountService.findUserByUsername(username);
-
-    //     model.addAttribute("account", account);
-    //     model.addAttribute("questions", questionService.getAllQuestions());
-    //     model.addAttribute("departments", questionService.getAllDepartments());
-    //     model.addAttribute("fields", questionService.getAllFields());
-    //     if (highlightQuestion != null) {
-    //         model.addAttribute("highlightQuestionId", highlightQuestion);
-    //     }
-        
-    //     return "pages/consultant/questions-answer";
-    // }
 
     @GetMapping("/history")
     public String historyConsultant(

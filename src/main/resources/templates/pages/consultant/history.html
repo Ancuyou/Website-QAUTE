@@ -1,174 +1,224 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/head :: head('QAUTE - Lịch sử tư vấn')}"></head>
+<th:block th:replace="~{pages/consultant/layout-consultant :: layout(~{::content}, 'history')}">
+    <th:block th:fragment="content">
+        <main style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
+            <div class="container py-5">
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3">
+                            <h1 class="fw-bold mb-0 text-white" style="font-size: 2.5rem;">
+                                <i class="fas fa-history me-3" style="color: #ffd700;"></i>Lịch sử tư vấn
+                            </h1>
+                            <a th:href="@{/consultant/questions}" class="btn btn-light btn-lg shadow-sm">
+                                <i class="fas fa-plus me-2"></i>Trả lời câu hỏi mới
+                            </a>
+                        </div>
 
-<body>
-<th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
-
-<main class="bg-light" style="padding-top: 70px; min-height: 100vh;">
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-12">
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                    <h2 class="fw-bold mb-0">
-                        <i class="fas fa-history text-primary me-2"></i>Lịch sử tư vấn
-                    </h2>
-                    <a th:href="@{/consultant/questions}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i>Trả lời câu hỏi mới
-                    </a>
-                </div>
-
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-body">
-                        <form th:action="@{/consultant/history}" method="get">
-                            <div class="row g-3 align-items-end">
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-semibold">Loại hoạt động</label>
-                                    <select class="form-select" name="type">
-                                        <option value="" selected>Tất cả</option>
-                                        <option value="question">Câu hỏi</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-semibold">Thời gian</label>
-                                    <select class="form-select" name="timeRange">
-                                        <option value="" selected>Tất cả</option>
-                                        <option value="7">7 ngày qua</option>
-                                        <option value="30">30 ngày qua</option>
-                                        <option value="90">3 tháng qua</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-semibold">Từ khóa</label>
-                                    <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm theo tiêu đề...">
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-filter me-1"></i>Lọc
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card border-primary border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-primary mb-1" th:text="${totalAnswers}">0</h3>
-                                <p class="mb-0 text-muted small fw-semibold">Tổng số câu trả lời</p>
+                        <!-- Filter Card -->
+                        <div class="card border-0 shadow-lg mb-4" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                            <div class="card-body p-4">
+                                <form th:action="@{/consultant/history}" method="get">
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold" style="color: #667eea;">Loại hoạt động</label>
+                                            <select class="form-select form-select-lg" name="type">
+                                                <option value="" selected>Tất cả</option>
+                                                <option value="question">Câu hỏi</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold" style="color: #667eea;">Thời gian</label>
+                                            <select class="form-select form-select-lg" name="timeRange">
+                                                <option value="" selected>Tất cả</option>
+                                                <option value="7">7 ngày qua</option>
+                                                <option value="30">30 ngày qua</option>
+                                                <option value="90">3 tháng qua</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold" style="color: #667eea;">Từ khóa</label>
+                                            <input type="text" class="form-control form-control-lg" name="keyword"
+                                                placeholder="Tìm kiếm theo tiêu đề...">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="btn btn-lg w-100 text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                                <i class="fas fa-filter me-2"></i>Lọc
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-success border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-success mb-1" th:text="${uniqueQuestions}">0</h3>
-                                <p class="mb-0 text-muted small fw-semibold">Số câu hỏi đã tư vấn</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card border-info border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
-                            <div class="card-body text-center p-3">
-                                <h3 class="fw-bold text-info mb-1" th:text="${uniqueUsers}">0</h3>
-                                <p class="mb-0 text-muted small fw-semibold">Số người được tư vấn</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <div th:if="${#lists.isEmpty(answersHistory)}" class="card shadow-sm border-0">
-                    <div class="card-body p-5 text-center">
-                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
-                        <h4 class="text-muted">Không tìm thấy hoạt động</h4>
-                        <p class="text-muted mb-0">Chưa có lịch sử tư vấn nào khớp với bộ lọc của bạn.</p>
-                    </div>
-                </div>
-                
-                <div th:unless="${#lists.isEmpty(answersHistory)}">
-                    <div th:each="answer : ${answersHistory}" class="card border-0 shadow-sm mb-3">
-                        <div class="card-body p-4">
-                            <div class="row g-3">
-                                <div class="col-auto d-none d-md-block">
-                                    <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                        <i class="fas fa-check-double fa-lg"></i>
+                        <!-- Statistics Cards -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-comments fa-2x text-white mb-3"></i>
+                                        <h2 class="fw-bold text-white mb-2" style="font-size: 2.5rem;" th:text="${totalAnswers}">0</h2>
+                                        <p class="mb-0 text-white fw-bold" style="font-size: 1.1rem;">Tổng số câu trả lời</p>
                                     </div>
                                 </div>
-                                
-                                <div class="col-md">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div>
-                                            <h5 class="fw-bold mb-1">
-                                                <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}" class="text-decoration-none">
-                                                    <span th:text="${answer.title}">Tiêu đề câu hỏi</span>
-                                                </a>
-                                            </h5>
-                                            <div class="small text-muted mb-3">
-                                                <span>Hỏi bởi: <strong class="text-dark" th:text="${answer.userName}">Tên người hỏi</strong></span>
-                                                <span class="mx-2">|</span>
-                                                <i class="fas fa-calendar-alt me-1"></i>
-                                                <span th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy')}">Thời gian</span>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-question-circle fa-2x text-white mb-3"></i>
+                                        <h2 class="fw-bold text-white mb-2" style="font-size: 2.5rem;" th:text="${uniqueQuestions}">0</h2>
+                                        <p class="mb-0 text-white fw-bold" style="font-size: 1.1rem;">Số câu hỏi đã tư vấn</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-lg h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-users fa-2x text-white mb-3"></i>
+                                        <h2 class="fw-bold text-white mb-2" style="font-size: 2.5rem;" th:text="${uniqueUsers}">0</h2>
+                                        <p class="mb-0 text-white fw-bold" style="font-size: 1.1rem;">Số người được tư vấn</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Empty State -->
+                        <div th:if="${#lists.isEmpty(answersHistory)}" class="card shadow-lg border-0" style="background: rgba(255,255,255,0.95);">
+                            <div class="card-body p-5 text-center">
+                                <i class="fas fa-inbox fa-4x mb-4" style="color: #667eea;"></i>
+                                <h3 class="fw-bold mb-3" style="color: #667eea;">Không tìm thấy hoạt động</h3>
+                                <p class="text-muted mb-0" style="font-size: 1.1rem;">Chưa có lịch sử tư vấn nào khớp với bộ lọc của bạn.</p>
+                            </div>
+                        </div>
+
+                        <!-- History List -->
+                        <div th:unless="${#lists.isEmpty(answersHistory)}">
+                            <div th:each="answer : ${answersHistory}" class="card border-0 shadow-lg mb-4" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                                <div class="card-body p-4">
+                                    <div class="row g-3">
+                                        <div class="col-auto d-none d-md-block">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                                style="width: 60px; height: 60px; background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                                <i class="fas fa-check-double fa-lg text-white"></i>
                                             </div>
                                         </div>
-                                        <div class="ms-3 flex-shrink-0 d-print-none">
-                                             <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye me-1"></i>Xem
-                                            </a>
+
+                                        <div class="col-md">
+                                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                                <div>
+                                                    <h4 class="fw-bold mb-2" style="font-size: 1.5rem;">
+                                                        <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}"
+                                                            class="text-decoration-none" style="color: #667eea;">
+                                                            <!-- chữ đen -->
+                                                            <p class="fw-bold text-dark">Tiêu đề câu hỏi:</p>
+                                                            <span th:text="${answer.title}">Tiêu đề câu hỏi</span>
+                                                        </a>
+                                                    </h4>
+                                                    <div class="text-muted mb-2" style="font-size: 1rem;">
+                                                        <span>Hỏi bởi: <strong class="text-dark" th:text="${answer.userName}">Tên người hỏi</strong></span>
+                                                        <span class="mx-2">|</span>
+                                                        <i class="fas fa-calendar-alt me-1"></i>
+                                                        <span th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy')}">Thời gian</span>
+                                                    </div>
+                                                </div>
+                                                <!-- Nội dung -->
+                                                <div class="ms-3 flex-shrink-0 d-print-none">
+                                                    <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}"
+                                                        class="btn btn-outline-primary btn-lg">
+                                                        <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <blockquote class="border-start border-4 ps-4 py-3 mb-3" style="border-color: #e5e7eb !important; background: #f9fafb; border-radius: 8px;">
+                                            
+                                                <p class="mb-0 fst-italic text-muted" style="font-size: 2rem;"
+                                                    th:text="${#strings.abbreviate(answer.contentQuestion, 200)}">
+                                                    Nội dung câu hỏi...
+                                                </p>
+
+
+                                            </blockquote>
+
+                                            <blockquote class="border-start border-4 ps-4 py-3" style="border-color: #43e97b !important; background: linear-gradient(135deg, rgba(67, 233, 123, 0.1) 0%, rgba(56, 249, 215, 0.1) 100%); border-radius: 8px;">
+                                                <p class="mb-2" style="font-size: 1rem;"
+                                                    th:text="${#strings.abbreviate(answer.contentAnswer, 200)}">
+                                                    Nội dung câu trả lời...
+                                                </p>
+                                                <footer class="text-muted mt-2 mb-0">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Bạn đã trả lời lúc <cite class="fw-semibold"
+                                                        th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời gian trả lời</cite>
+                                                </footer>
+                                            </blockquote>
                                         </div>
                                     </div>
-                                    
-                                    <blockquote class="blockquote small border-start border-3 border-secondary-subtle ps-3 py-2 bg-light rounded mb-3">
-                                        <p class="mb-0 fst-italic" th:text="${#strings.abbreviate(answer.contentQuestion, 200)}">
-                                            Nội dung câu hỏi...
-                                        </p>
-                                    </blockquote>
-                                    
-                                    <blockquote class="blockquote small border-start border-3 border-success-subtle ps-3 py-2 bg-success-subtle rounded">
-                                        <p class="mb-0" th:text="${#strings.abbreviate(answer.contentAnswer, 200)}">
-                                            Nội dung câu trả lời...
-                                        </p>
-                                        <footer class="blockquote-footer mt-2 mb-0 fs-sm">
-                                            Bạn đã trả lời lúc <cite th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời gian trả lời</cite>
-                                        </footer>
-                                    </blockquote>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Pagination -->
+                        <nav class="mt-4" th:if="${totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                        th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                        th:href="@{/consultant/history(page=${i}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}"
+                                        th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                    <a class="page-link"
+                                        th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                
-                <nav class="mt-4" th:if="${totalPages > 1}">
-                    <ul class="pagination justify-content-center">
-                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
-                                <i class="fas fa-chevron-left small"></i>
-                            </a>
-                        </li>
-                        <li class="page-item"
-                            th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${i == currentPage} ? 'active'">
-                            <a class="page-link"
-                               th:href="@{/consultant/history(page=${i}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}"
-                               th:text="${i + 1}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
-                            <a class="page-link"
-                               th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
-                                <i class="fas fa-chevron-right small"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </nav>
             </div>
-        </div>
-    </div>
-</main>
+        </main>
 
-<th:block th:replace="~{fragments/footer :: footer}"></th:block>
-<div th:replace="~{fragments/toast :: toast}"></div>
-</body>
+        <style>
+            .card {
+                transition: all 0.3s ease;
+            }
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
+            }
+            .btn {
+                transition: all 0.3s ease;
+            }
+            .btn:hover {
+                transform: translateY(-2px);
+            }
+            .form-select, .form-control {
+                border: 2px solid #e5e7eb;
+                transition: all 0.3s ease;
+            }
+            .form-select:focus, .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+            }
+            .pagination .page-link {
+                color: #667eea;
+                border: none;
+                margin: 0 5px;
+                border-radius: 8px;
+            }
+            .pagination .page-item.active .page-link {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+            }
+        </style>
+    </th:block>
+</th:block>
 </html>

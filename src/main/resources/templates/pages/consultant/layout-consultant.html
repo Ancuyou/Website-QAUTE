@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, active)">
+<head th:replace="~{fragments/head :: head('QAUTE - Consultant Dashboard')}"></head>
+<th:block th:replace="~{fragments/userDropDown :: notificationStyles}"></th:block>
+
+<body>
+    <th:block th:replace="~{fragments/userDropDown :: consultantHeader(
+        ${account?.profile?.fullName},
+        ${account?.profile?.avatar},
+        true,
+        ${active} 
+    )}"></th:block>
+
+    <main style="padding-top: 40px; background-color: #f8f9fa; min-height: 100vh;">
+        <th:block th:replace="${content}"></th:block>
+    </main>
+
+    <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+    
+    <div th:replace="~{fragments/toast :: toast}"></div>
+</body>
+</html>

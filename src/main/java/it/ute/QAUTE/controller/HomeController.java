@@ -1,4 +1,4 @@
-// src/main/java/it/ute/QAUTE/controller/HomeController.java
+
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
