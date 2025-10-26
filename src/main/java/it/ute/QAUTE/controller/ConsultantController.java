@@ -213,19 +213,19 @@ public class ConsultantController {
         return "pages/consultant/questions-answer";
     }
     
-    @GetMapping("/chats")
-    public String chatsConsultant(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        Profiles profile = accountService.getProfileByUsername(username);
+    // @GetMapping("/chats")
+    // public String chatsConsultant(Model model) {
+    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    //     String username = auth.getName();
+    //     Profiles profile = accountService.getProfileByUsername(username);
         
-        if (profile != null) {
-            List<Messages> recentMessages = messageService.getRecentChats(profile.getProfileID());
-            model.addAttribute("recentMessages", recentMessages);
-        }
+    //     if (profile != null) {
+    //         List<Messages> recentMessages = messageService.getRecentChats(profile.getProfileID());
+    //         model.addAttribute("recentMessages", recentMessages);
+    //     }
         
-        return "pages/consultant/chats";
-    }
+    //     return "pages/consultant/chats";
+    // }
     
 
     @GetMapping("/history")

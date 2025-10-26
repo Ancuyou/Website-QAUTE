@@ -66,7 +66,6 @@ public class ConsultantEventController {
             
             events = eventService.findEventsByConsultantAndFilters(consultant, eventType, eventStatus, pageable);
         } else {
-            // Không có filter, gọi hàm gốc
             events = eventService.findEventsByConsultant(consultant, pageable);
         }
         
@@ -82,7 +81,7 @@ public class ConsultantEventController {
         );
         long approvedEvents = eventService.countConsultantEventsByStatusIn(consultant, approvedStatuses);
 
-        // 4. Gửi dữ liệu (Phần này đã đúng)
+     
         model.addAttribute("account", account);
         model.addAttribute("events", events.getContent());
         model.addAttribute("currentPage", page);
