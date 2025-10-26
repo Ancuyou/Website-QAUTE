@@ -9,6 +9,7 @@ import it.ute.QAUTE.service.AnswerService;
 import it.ute.QAUTE.service.ConsultantService;
 import it.ute.QAUTE.service.QuestionService;
 import it.ute.QAUTE.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -57,7 +58,8 @@ public class QuestionController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(required = false) Integer highlightQuestionId,
             Model model,
-            Principal principal) {
+            Principal principal,
+            HttpServletRequest request) {
 
         if (principal != null) {
             String username = principal.getName();
@@ -65,7 +67,7 @@ public class QuestionController {
             model.addAttribute("account", account);
         }
 
-        Pageable pageable = PageRequest.of(page, 10); // 10 câu hỏi mỗi trang
+        Pageable pageable = PageRequest.of(page, 2); // 2 câu hỏi mỗi trang
         Page<Question> questionPage = questionService.searchAndFilterQuestions(
                 departmentId, fieldId, keyword, sortBy, pageable);
 
@@ -88,6 +90,11 @@ public class QuestionController {
         List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
         model.addAttribute("hotTopics", hotTopics);
 
+        String requestedWithHeader = request.getHeader("X-Requested-With");
+        if ("fetch".equals(requestedWithHeader)) {
+            // Nếu là yêu cầu AJAX, chỉ trả về fragment nội dung
+            return "pages/user/questions :: contentFragment";
+        }
         return "pages/user/questions";
     }
 
