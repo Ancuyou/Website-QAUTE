@@ -129,16 +129,41 @@ public class NotificationService {
         return notificationRepository.findById(id).orElse(null);
     }
 
+    private Account getSystemSender() {
+        // Cố gắng tìm Manager đầu tiên
+        List<Account> managers = accountRepository.findAll().stream()
+                .filter(acc -> acc.getRole() == Account.Role.Manager)
+                .toList();
+        if (!managers.isEmpty()) {
+            return managers.get(0);
+        }
+        // Nếu không có, tìm Admin đầu tiên
+        List<Account> admins = accountRepository.findAll().stream()
+                .filter(acc -> acc.getRole() == Account.Role.Admin)
+                .toList();
+        if (!admins.isEmpty()) {
+            return admins.get(0);
+        }
+        throw new RuntimeException("Không tìm thấy tài khoản Admin/Manager để gửi thông báo hệ thống.");
+    }
+
     public void createNotificationForSpecificUser(Account sender, Account receiver,
             String title, String content,
             boolean isPriority) {
+
+        // Thêm kiểm tra null để đảm bảo an toàn
+        if (sender == null || receiver == null) {
+            System.err.println("123456- Lỗi khi gửi thông báo: Người gửi hoặc Người nhận là null.");
+            return;
+        }
+
         try {
             // Tạo notification
             Notification notification = new Notification();
             notification.setSender(sender);
             notification.setTitle(title);
             notification.setContent(content);
-            notification.setTargetType(Notification.NotificationTarget.User); // hoặc null nếu muốn
+            notification.setTargetType(Notification.NotificationTarget.User); // Gửi 1-1
             notification.setStatus("PUBLISHED");
             notification.set_priority(isPriority);
             notification.setCreatedDate(new Date());
@@ -160,7 +185,8 @@ public class NotificationService {
                     "/queue/notifications",
                     savedNotification.getTitle() + ": " + savedNotification.getContent());
 
-            System.out.println("-------------- Đã gửi thông báo tới User: " + receiver.getUsername());
+            System.out.println("-------------- Đã gửi thông báo từ " + sender.getUsername() + " tới User: "
+                    + receiver.getUsername());
         } catch (Exception e) {
             System.err.println("123456- Lỗi khi gửi thông báo: " + e.getMessage());
         }
@@ -177,15 +203,16 @@ public class NotificationService {
                 event.getConsultant().getProfile().getFullName(),
                 event.getTitle());
 
-        for (Account manager : managers) {
-            createNotification(
-                    manager,
+        // Người gửi là Tư vấn viên (người tạo sự kiện)
+        Account sender = event.getConsultant().getProfile().getAccount();
+
+        for (Account managerReceiver : managers) {
+            createNotificationForSpecificUser(
+                    sender, // Người gửi là Consultant
+                    managerReceiver, // Người nhận là Manager
                     title,
                     content,
-                    "Manager",
-                    "PUBLISHED",
-                    true 
-            );
+                    true);
         }
     }
 
@@ -200,19 +227,24 @@ public class NotificationService {
                 event.getConsultant().getProfile().getFullName(),
                 event.getTitle());
 
-        for (Account manager : managers) {
-            createNotification(
-                    manager,
+        // Người gửi là Tư vấn viên (người cập nhật)
+        Account sender = event.getConsultant().getProfile().getAccount();
+
+        for (Account managerReceiver : managers) {
+            createNotificationForSpecificUser(
+                    sender, // Người gửi là Consultant
+                    managerReceiver, // Người nhận là Manager
                     title,
                     content,
-                    "Manager",
-                    "PUBLISHED",
                     false);
         }
     }
 
     public void notifyConsultantEventApproved(Event event) {
-        Account consultant = event.getConsultant().getProfile().getAccount();
+        // Người nhận là Tư vấn viên
+        Account consultantReceiver = event.getConsultant().getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Sự kiện đã được phê duyệt";
         String content = String.format(
@@ -220,17 +252,19 @@ public class NotificationService {
                         "Người dùng giờ đây có thể đăng ký tham gia.",
                 event.getTitle());
 
-        createNotification(
-                consultant,
+        createNotificationForSpecificUser(
+                systemSender,
+                consultantReceiver,
                 title,
                 content,
-                "Consultant",
-                "PUBLISHED",
                 true);
     }
 
     public void notifyConsultantEventRejected(Event event, String reason) {
-        Account consultant = event.getConsultant().getProfile().getAccount();
+        // Người nhận là Tư vấn viên
+        Account consultantReceiver = event.getConsultant().getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Sự kiện bị từ chối";
         String content = String.format(
@@ -239,17 +273,19 @@ public class NotificationService {
                 event.getTitle(),
                 reason);
 
-        createNotification(
-                consultant,
+        createNotificationForSpecificUser(
+                systemSender,
+                consultantReceiver,
                 title,
                 content,
-                "Consultant",
-                "PUBLISHED",
                 true);
     }
 
     public void notifyConsultantNewRegistration(Event event, User user) {
-        Account consultant = event.getConsultant().getProfile().getAccount();
+        // Người nhận là Tư vấn viên
+        Account consultantReceiver = event.getConsultant().getProfile().getAccount();
+        // Người gửi là User (người vừa đăng ký)
+        Account userSender = user.getProfile().getAccount();
 
         String title = "Có người đăng ký sự kiện";
         String content = String.format(
@@ -260,17 +296,19 @@ public class NotificationService {
                 event.getCurrentParticipants(),
                 event.getMaxParticipants() != null ? event.getMaxParticipants().toString() : "không giới hạn");
 
-        createNotification(
-                consultant,
+        createNotificationForSpecificUser(
+                userSender,
+                consultantReceiver,
                 title,
                 content,
-                "Consultant",
-                "PUBLISHED",
                 false);
     }
 
     public void notifyUserRegistrationSuccess(User user, Event event) {
-        Account account = user.getProfile().getAccount();
+        // Người nhận là User
+        Account userReceiver = user.getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Đăng ký sự kiện thành công";
         String content = String.format(
@@ -279,17 +317,19 @@ public class NotificationService {
                 event.getTitle(),
                 event.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
 
-        createNotification(
-                account,
+        createNotificationForSpecificUser(
+                systemSender,
+                userReceiver,
                 title,
                 content,
-                "User",
-                "PUBLISHED",
                 false);
     }
 
     public void notifyUserEventCancelled(User user, Event event, String reason) {
-        Account account = user.getProfile().getAccount();
+        // Người nhận là User
+        Account userReceiver = user.getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Sự kiện đã bị hủy";
         String content = String.format(
@@ -298,17 +338,19 @@ public class NotificationService {
                 event.getTitle(),
                 reason);
 
-        createNotification(
-                account,
+        createNotificationForSpecificUser(
+                systemSender,
+                userReceiver,
                 title,
                 content,
-                "User",
-                "PUBLISHED",
                 true);
     }
 
     public void notifyUserEventReminder(User user, Event event) {
-        Account account = user.getProfile().getAccount();
+        // Người nhận là User
+        Account userReceiver = user.getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Nhắc nhở sự kiện";
         String content = String.format(
@@ -317,17 +359,18 @@ public class NotificationService {
                 event.getTitle(),
                 event.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
 
-        createNotification(
-                account,
+        createNotificationForSpecificUser(
+                systemSender,
+                userReceiver,
                 title,
                 content,
-                "User",
-                "PUBLISHED",
                 true);
     }
 
     public void notifyUsersEventStartingSoon(Event event) {
         List<EventRegistration> registrations = eventRegistrationRepository.findActiveRegistrations(event);
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
 
         String title = "Sự kiện sắp bắt đầu";
         String content = String.format(
@@ -337,14 +380,35 @@ public class NotificationService {
                         : event.getLocation() != null ? "Địa điểm: " + event.getLocation() : "");
 
         for (EventRegistration registration : registrations) {
-            Account account = registration.getUser().getProfile().getAccount();
-            createNotification(
-                    account,
+            // Người nhận là User
+            Account userReceiver = registration.getUser().getProfile().getAccount();
+            createNotificationForSpecificUser(
+                    systemSender,
+                    userReceiver,
                     title,
                     content,
-                    "User",
-                    "PUBLISHED",
                     true);
         }
+    }
+
+    public void notifyUserRegistrationConfirmed(User user, Event event) {
+        // Người nhận là User
+        Account userReceiver = user.getProfile().getAccount();
+        // Người gửi là Hệ thống (Admin/Manager)
+        Account systemSender = getSystemSender();
+
+        String title = "Đăng ký sự kiện đã được xác nhận";
+        String content = String.format(
+                "Chúc mừng! Đăng ký của bạn cho sự kiện '%s' đã được xác nhận. " +
+                        "Thời gian: %s.",
+                event.getTitle(),
+                event.getStartTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+
+        createNotificationForSpecificUser(
+                systemSender,
+                userReceiver,
+                title,
+                content,
+                false);
     }
 }

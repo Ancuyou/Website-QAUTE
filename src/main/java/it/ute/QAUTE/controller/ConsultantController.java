@@ -28,9 +28,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import org.springframework.data.domain.Sort;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-
+import java.util.Arrays;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import it.ute.QAUTE.entity.Event;
 @Controller
 @RequestMapping("/consultant")
 public class ConsultantController {
@@ -61,6 +61,9 @@ public class ConsultantController {
 
     @Autowired
     private AnswerService answerService;
+
+    @Autowired
+    private EventService eventService;
 
     @Autowired
     private FileStorageService fileStorageService;
@@ -148,6 +151,22 @@ public class ConsultantController {
                 model.addAttribute("responseRate", String.format("%.1f", responseRate));
                 model.addAttribute("avgResponseTime", (int) avgResponseTime);
                 model.addAttribute("recentActivities", recentActivities);
+
+                long totalEvents = eventService.countConsultantEvents(consultant);
+                long pendingEvents = eventService.countConsultantEventsByStatus(consultant, Event.EventStatus.Pending);
+                long completedEvents = eventService.countConsultantEventsByStatus(consultant, Event.EventStatus.Completed);
+                
+            
+                Page<Event> recentEventsPage = eventService.findEventsByConsultant(
+                        consultant, 
+                        PageRequest.of(0, 5, Sort.by("createdAt").descending())
+                );
+                List<Event> recentEvents = recentEventsPage.getContent();
+                
+                model.addAttribute("totalEvents", totalEvents);
+                model.addAttribute("pendingEvents", pendingEvents);
+                model.addAttribute("completedEvents", completedEvents);
+                model.addAttribute("recentEvents", recentEvents);
             }
             model.addAttribute("account", account);
         }
@@ -195,38 +214,23 @@ public class ConsultantController {
         return "redirect:/consultant/profile";
     }
 
-    @GetMapping("/questions")
-    public String questionsConsultant(Principal principal, 
-                                     Model model,
-                                     @RequestParam(required = false) Integer highlightQuestion) {
-        String username = principal.getName();
-        Account account = accountService.findUserByUsername(username);
+    // @GetMapping("/questions")
+    // public String questionsConsultant(Principal principal, 
+    //                                  Model model,
+    //                                  @RequestParam(required = false) Integer highlightQuestion) {
+    //     String username = principal.getName();
+    //     Account account = accountService.findUserByUsername(username);
 
-        model.addAttribute("account", account);
-        model.addAttribute("questions", questionService.getAllQuestions());
-        model.addAttribute("departments", questionService.getAllDepartments());
-        model.addAttribute("fields", questionService.getAllFields());
-        if (highlightQuestion != null) {
-            model.addAttribute("highlightQuestionId", highlightQuestion);
-        }
-        
-        return "pages/consultant/questions-answer";
-    }
-    
-    // @GetMapping("/chats")
-    // public String chatsConsultant(Model model) {
-    //     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    //     String username = auth.getName();
-    //     Profiles profile = accountService.getProfileByUsername(username);
-        
-    //     if (profile != null) {
-    //         List<Messages> recentMessages = messageService.getRecentChats(profile.getProfileID());
-    //         model.addAttribute("recentMessages", recentMessages);
+    //     model.addAttribute("account", account);
+    //     model.addAttribute("questions", questionService.getAllQuestions());
+    //     model.addAttribute("departments", questionService.getAllDepartments());
+    //     model.addAttribute("fields", questionService.getAllFields());
+    //     if (highlightQuestion != null) {
+    //         model.addAttribute("highlightQuestionId", highlightQuestion);
     //     }
         
-    //     return "pages/consultant/chats";
+    //     return "pages/consultant/questions-answer";
     // }
-    
 
     @GetMapping("/history")
     public String historyConsultant(
@@ -243,7 +247,6 @@ public class ConsultantController {
         Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
 
-        // Gọi service lấy Page<Answer>
         Page<Answer> answerPage = answerService.getAnswersHistoryByConsultant(
                 consultant.getConsultantID(), timeRange, keyword, PageRequest.of(page, size));
 

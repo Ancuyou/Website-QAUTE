@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments/head :: head('Danh sách Người đăng ký - QAUTE')}"></head>
+
+<body>
+    <th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
+
+    <div class="container-fluid mt-5 pt-3">
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="mb-4">
+                    <div class="d-flex align-items-center">
+                        <a th:href="@{/consultant/events/details/{id}(id=${event.eventID})}"
+                            class="btn btn-outline-secondary me-3">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div class="flex-grow-1">
+                            <h2 class="fw-bold mb-1">
+                                <i class="fas fa-users text-primary me-2"></i>Danh sách người đăng ký
+                            </h2>
+                            <p class="text-muted mb-0">
+                                Sự kiện: <span class="fw-semibold" th:text="${event.title}">Tiêu đề sự kiện</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4 g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card border-0 shadow-sm bg-primary text-white h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 mb-1">Tổng đăng ký</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${#lists.size(participants)}">0</h2>
+                                    </div>
+                                    <i class="fas fa-users fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card border-0 shadow-sm bg-success text-white h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 mb-1">Đã xác nhận</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${confirmedCount ?: 0}">0</h2>
+                                    </div>
+                                    <i class="fas fa-check-circle fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card border-0 shadow-sm bg-info text-white h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 mb-1">Đã tham dự</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${attendedCount ?: 0}">0</h2>
+                                    </div>
+                                    <i class="fas fa-user-check fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card border-0 shadow-sm bg-warning text-white h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="text-white-50 mb-1">Vắng mặt</h6>
+                                        <h2 class="mb-0 fw-bold" th:text="${absentCount ?: 0}">0</h2>
+                                    </div>
+                                    <i class="fas fa-user-times fa-3x opacity-25"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4" id="participantsTableCard">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+                        <h5 class="mb-0 fw-semibold">
+                            Danh sách chi tiết (<span th:text="${#lists.size(participants)}">0</span> người)
+                        </h5>
+                        <div class="btn-group btn-group-sm d-print-none"> <button type="button"
+                                class="btn btn-outline-primary" onclick="exportToExcel()">
+                                <i class="fas fa-file-excel me-1"></i>Xuất Excel
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="exportToPDF()">
+                                <i class="fas fa-print me-1"></i>In
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div th:if="${not #lists.isEmpty(participants)}">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" id="participantsTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="py-3 px-3" style="width: 5%;">#</th>
+                                            <th class="py-3 px-3" style="width: 25%;">Người tham gia</th>
+                                            <th class="py-3 px-3" style="width: 25%;">MSSV/Email</th>
+                                            <th class="py-3 px-3" style="width: 15%;">Thời gian đăng ký</th>
+                                            <th class="py-3 px-3" style="width: 10%;">Trạng thái</th>
+                                            <th class="py-3 px-3" style="width: 20%;">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="reg, iterStat : ${participants}">
+                                            <td class="px-3" th:text="${iterStat.count}">1</td>
+                                            <td class="px-3">
+                                                <div class="d-flex align-items-center py-2"> <img
+                                                        th:src="${reg.user?.profile?.avatar ?: '/images/default-avatar.jpg'}"
+                                                        class="rounded-circle me-3 flex-shrink-0" alt="Avatar"
+                                                        width="40" height="40" style="object-fit: cover;">
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-semibold"
+                                                            th:text="${reg.user?.profile?.fullName}">Nguyễn Văn A</div>
+                                                        <small class="text-muted" th:if="${reg.user?.roleName}"
+                                                            th:text="${reg.user.roleName}">Sinh viên</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-3">
+                                                <div th:if="${reg.user?.studentCode}">
+                                                    <span class="fw-semibold text-break"
+                                                        th:text="${reg.user.studentCode}">21110XXX</span>
+                                                </div>
+                                                <small class="text-muted d-block text-break"
+                                                    th:text="${reg.user?.profile?.account?.email}">email@example.com</small>
+                                            </td>
+                                            <td class="px-3">
+                                                <small
+                                                    th:text="${#temporals.format(reg.registeredAt, 'dd/MM/yyyy HH:mm')}">
+                                                    01/01/2025 10:00
+                                                </small>
+                                            </td>
+                                            <td class="px-3">
+                                                <th:block th:switch="${reg.status?.toString()}">
+                                                    <span th:case="'Registered'" class="badge text-bg-info"> <i
+                                                            class="fas fa-clock me-1"></i>Đã đăng ký
+                                                    </span>
+                                                    <span th:case="'Confirmed'" class="badge text-bg-success">
+                                                        <i class="fas fa-check me-1"></i>Đã xác nhận
+                                                    </span>
+                                                    <span th:case="'Attended'" class="badge text-bg-primary">
+                                                        <i class="fas fa-user-check me-1"></i>Đã tham dự
+                                                    </span>
+                                                    <span th:case="'Absent'" class="badge text-bg-warning">
+                                                        <i class="fas fa-user-times me-1"></i>Vắng mặt
+                                                    </span>
+                                                    <span th:case="'Cancelled'" class="badge text-bg-danger">
+                                                        <i class="fas fa-ban me-1"></i>Đã hủy
+                                                    </span>
+                                                    <span th:case="*" class="badge text-bg-secondary"
+                                                        th:text="${reg.status}">Status</span>
+                                                </th:block>
+                                            </td>
+                                            <td class="px-3">
+                                                <div class="btn-group btn-group-sm d-print-none"> <button type="button"
+                                                        class="btn btn-outline-primary" data-bs-toggle="modal"
+                                                        th:data-bs-target="'#detailModal' + ${reg.registrationID}"
+                                                        title="Xem chi tiết">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                                <form
+                                                    th:if="${reg.status.toString() != 'Cancelled' and reg.status.toString() != 'Attended' and event.startTime.isBefore(#temporals.createNow())}"
+                                                    th:action="@{/consultant/events/participants/update-status/{eventId}(eventId=${event.eventID})}"
+                                                    method="post" class="d-inline">
+                                                    <input type="hidden" name="registrationId"
+                                                        th:value="${reg.registrationID}" />
+                                                    <input type="hidden" name="status" value="Attended" />
+                                                    <button type="submit" class="btn btn-outline-success"
+                                                        title="Đánh dấu Đã tham dự">
+                                                        <i class="fas fa-user-check"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form
+                                                    th:if="${reg.status.toString() != 'Cancelled' and reg.status.toString() != 'Attended' and reg.status.toString() != 'Absent' and event.endTime.isBefore(#temporals.createNow())}"
+                                                    th:action="@{/consultant/events/participants/update-status/{eventId}(eventId=${event.eventID})}"
+                                                    method="post" class="d-inline">
+                                                    <input type="hidden" name="registrationId"
+                                                        th:value="${reg.registrationID}" />
+                                                    <input type="hidden" name="status" value="Absent" />
+                                                    <button type="submit" class="btn btn-outline-warning"
+                                                        title="Đánh dấu Vắng mặt">
+                                                        <i class="fas fa-user-times"></i>
+                                                    </button>
+                                                </form>
+
+                                                <form
+                                                    th:if="${reg.status.toString() == 'Attended' or reg.status.toString() == 'Absent'}"
+                                                    th:action="@{/consultant/events/participants/update-status/{eventId}(eventId=${event.eventID})}"
+                                                    method="post" class="d-inline">
+                                                    <input type="hidden" name="registrationId"
+                                                        th:value="${reg.registrationID}" />
+                                                    <input type="hidden" name="status" value="Registered" /> <button
+                                                        type="submit" class="btn btn-outline-secondary"
+                                                        title="Hoàn tác điểm danh">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                </form>
+
+                                                <div class="modal fade" th:id="'detailModal' + ${reg.registrationID}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="'detailModalLabel' + ${reg.registrationID}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title text-start"
+                                                                    th:id="'detailModalLabel' + ${reg.registrationID}">
+                                                                    <i class="fas fa-user-circle text-primary me-2"></i>
+                                                                    Thông tin chi tiết
+                                                                </h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body text-start">
+                                                                <div class="row">
+                                                                    <div class="col-md-4 text-center mb-3 mb-md-0"> <img
+                                                                            th:src="${reg.user?.profile?.avatar ?: '/images/default-avatar.jpg'}"
+                                                                            class="rounded-circle border mb-3"
+                                                                            alt="Avatar" width="120" height="120"
+                                                                            style="object-fit: cover;">
+                                                                        <h5 class="fw-bold"
+                                                                            th:text="${reg.user?.profile?.fullName}">
+                                                                            Nguyễn Văn A</h5>
+                                                                        <th:block th:switch="${reg.status?.toString()}">
+                                                                            <span th:case="'Registered'"
+                                                                                class="badge text-bg-info">Đã đăng
+                                                                                ký</span>
+                                                                            <span th:case="'Confirmed'"
+                                                                                class="badge text-bg-success">Đã xác
+                                                                                nhận</span>
+                                                                            <span th:case="'Attended'"
+                                                                                class="badge text-bg-primary">Đã tham
+                                                                                dự</span>
+                                                                            <span th:case="'Absent'"
+                                                                                class="badge text-bg-warning">Vắng
+                                                                                mặt</span>
+                                                                            <span th:case="'Cancelled'"
+                                                                                class="badge text-bg-danger">Đã
+                                                                                hủy</span>
+                                                                            <span th:case="*"
+                                                                                class="badge text-bg-secondary"
+                                                                                th:text="${reg.status}">Status</span>
+                                                                        </th:block>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <h6
+                                                                            class="fw-bold mb-3 text-primary border-bottom pb-2">
+                                                                            <i class="fas fa-info-circle me-2"></i>Thông
+                                                                            tin cá nhân
+                                                                        </h6>
+                                                                        <dl class="row mb-0">
+                                                                            <dt class="col-sm-4 text-muted">MSSV:</dt>
+                                                                            <dd class="col-sm-8 fw-semibold"
+                                                                                th:text="${reg.user?.studentCode ?: '--'}">
+                                                                                N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted">Email:</dt>
+                                                                            <dd class="col-sm-8 text-break"
+                                                                                th:text="${reg.user?.profile?.account?.email ?: '--'}">
+                                                                                N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.user?.roleName}">Vai trò:
+                                                                            </dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:if="${reg.user?.roleName}"
+                                                                                th:text="${reg.user.roleName}">N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.user?.profile?.phone}">Điện
+                                                                                thoại:</dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:if="${reg.user?.profile?.phone}"
+                                                                                th:text="${reg.user.profile.phone}">N/A
+                                                                            </dd>
+                                                                        </dl>
+
+                                                                        <h6
+                                                                            class="fw-bold mb-3 mt-4 text-primary border-bottom pb-2">
+                                                                            <i class="fas fa-calendar me-2"></i>Thông
+                                                                            tin đăng ký
+                                                                        </h6>
+                                                                        <dl class="row mb-0">
+                                                                            <dt class="col-sm-4 text-muted">Thời gian
+                                                                                ĐK:</dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:text="${#temporals.format(reg.registeredAt, 'dd/MM/yyyy HH:mm')}">
+                                                                                N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.attendedAt}">Tham dự lúc:
+                                                                            </dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:if="${reg.attendedAt}"
+                                                                                th:text="${#temporals.format(reg.attendedAt, 'dd/MM/yyyy HH:mm')}">
+                                                                                N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.cancelledAt}">Hủy lúc:</dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:if="${reg.cancelledAt}"
+                                                                                th:text="${#temporals.format(reg.cancelledAt, 'dd/MM/yyyy HH:mm')}">
+                                                                                N/A</dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.cancellationReason}">Lý do
+                                                                                hủy:</dt>
+                                                                            <dd class="col-sm-8"
+                                                                                th:if="${reg.cancellationReason}"
+                                                                                th:text="${reg.cancellationReason}">N/A
+                                                                            </dd>
+
+                                                                            <dt class="col-sm-4 text-muted"
+                                                                                th:if="${reg.note}">Ghi chú:</dt>
+                                                                            <dd class="col-sm-8" th:if="${reg.note}"
+                                                                                th:text="${reg.note}">N/A</dd>
+                                                                        </dl>
+
+                                                                        <div th:if="${(reg.feedback != null and !#strings.isEmpty(reg.feedback)) or reg.rating != null}"
+                                                                            class="mt-4">
+                                                                            <h6 class="fw-bold mb-3 text-primary">
+                                                                                <i class="fas fa-comment me-2"></i>Đánh
+                                                                                giá
+                                                                            </h6>
+                                                                            <div th:if="${reg.rating}" class="mb-2">
+                                                                                <span
+                                                                                    th:each="i : ${#numbers.sequence(1, 5)}">
+                                                                                    <i
+                                                                                        th:class="${i <= reg.rating ? 'fas fa-star text-warning' : 'far fa-star text-muted'}"></i>
+                                                                                </span>
+                                                                                <span class="ms-2"
+                                                                                    th:text="${reg.rating + '/5'}">N/A</span>
+                                                                            </div>
+                                                                            <p class="text-muted mb-0 fst-italic"
+                                                                                th:if="${reg.feedback}"
+                                                                                th:text="${reg.feedback}">N/A</p>
+                                                                            <p class="text-muted mb-0 fst-italic"
+                                                                                th:unless="${reg.feedback}">(Không có
+                                                                                nhận xét)</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Đóng</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(participants)}" class="text-center py-5">
+                            <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+                            <h5 class="text-muted">Chưa có người đăng ký</h5>
+                            <p class="text-muted">Người dùng sẽ xuất hiện ở đây khi họ đăng ký sự kiện</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4 g-3">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-calendar-alt text-primary me-2"></i>Thông tin sự kiện
+                                </h6>
+                                <dl class="row mb-0">
+                                    <dt class="col-sm-4 text-muted">Thời gian:</dt>
+                                    <dd class="col-sm-8 fw-semibold"
+                                        th:text="${#temporals.format(event?.startTime, 'dd/MM/yyyy HH:mm')}">Date Time
+                                    </dd>
+
+                                    <dt class="col-sm-4 text-muted">Hình thức:</dt>
+                                    <dd class="col-sm-8" th:text="${event?.mode}">Mode</dd>
+
+                                    <dt class="col-sm-4 text-muted" th:if="${event?.location}">Địa điểm:</dt>
+                                    <dd class="col-sm-8" th:if="${event?.location}" th:text="${event.location}">Location
+                                    </dd>
+
+                                    <dt class="col-sm-4 text-muted" th:if="${event?.meetingLink}">Link Online:</dt>
+                                    <dd class="col-sm-8" th:if="${event?.meetingLink}">
+                                        <a th:href="${event.meetingLink}" target="_blank" class="text-break">Link</a>
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">
+                                    <i class="fas fa-download text-primary me-2"></i>Xuất dữ liệu
+                                </h6>
+                                <p class="text-muted small mb-3">
+                                    Tải xuống danh sách người đăng ký để sử dụng offline hoặc báo cáo
+                                </p>
+                                <div class="d-grid gap-2 d-print-none"> <button class="btn btn-outline-success"
+                                        onclick="exportToExcel()">
+                                        <i class="fas fa-file-excel me-2"></i>Xuất Excel
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="exportToPDF()">
+                                        <i class="fas fa-print me-2"></i>In danh sách
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function exportToExcel() {
+            const table = document.getElementById('participantsTable');
+            let html = '<table>';
+
+            // Headers for Excel
+            html += '<thead><tr>';
+            html += '<th>STT</th>';
+            html += '<th>Họ và tên</th>';
+            html += '<th>Vai trò</th>';
+            html += '<th>MSSV</th>';
+            html += '<th>Email</th>';
+            html += '<th>Thời gian đăng ký</th>';
+            html += '<th>Trạng thái</th>';
+            html += '</tr></thead>';
+
+            html += '<tbody>';
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 6) {
+                    html += '<tr>';
+                    html += `<td>${index + 1}</td>`; // STT
+                    html += `<td>${cells[1]?.querySelector('.fw-semibold')?.textContent?.trim() || ''}</td>`; // Ho ten
+                    html += `<td>${cells[1]?.querySelector('.text-muted')?.textContent?.trim() || ''}</td>`;    // Vai tro
+                    html += `<td>${cells[2]?.querySelector('.fw-semibold')?.textContent?.trim() || ''}</td>`; // MSSV
+                    html += `<td>${cells[2]?.querySelector('.text-muted')?.textContent?.trim() || ''}</td>`; // Email
+                    html += `<td>${cells[3]?.textContent?.trim() || ''}</td>`; // Thoi gian DK
+                    html += `<td>${cells[4]?.querySelector('.badge')?.textContent?.trim() || ''}</td>`; // Trang thai
+                    html += '</tr>';
+                }
+            });
+            html += '</tbody></table>';
+
+            const uri = 'data:application/vnd.ms-excel;charset=utf-8;base64,'; // Added charset
+            // Added BOM for UTF-8 Excel compatibility
+            const bom = '\uFEFF';
+            const template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body>' + bom + html + '</body></html>';
+
+            const base64 = (s) => window.btoa(unescape(encodeURIComponent(s)));
+            const link = document.createElement('a');
+            link.href = uri + base64(template);
+            const eventTitleElement = document.querySelector('p.text-muted span.fw-semibold');
+            const eventTitle = eventTitleElement ? eventTitleElement.textContent.trim() : 'su-kien';
+            const safeTitle = eventTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            link.download = `danh-sach-${safeTitle}-${new Date().toISOString().slice(0, 10)}.xls`;
+            link.click();
+        }
+
+        function exportToPDF() {
+            window.print();
+        }
+
+        // Removed the print style injection from JS
+    </script>
+    <div th:replace="~{fragments/toast :: toast}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+
+</html>

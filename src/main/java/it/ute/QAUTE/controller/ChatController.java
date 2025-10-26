@@ -52,6 +52,7 @@ public class ChatController {
     public List<Messages> getChatHistory(
             @RequestParam("senderId") Integer senderId,
             @RequestParam("receiverId") Integer receiverId) {
+        System.out.println("API /api/chat/history called with senderId: " + senderId + ", receiverId: " + receiverId);
         return messageService.getChatHistory(senderId, receiverId);
     }
     

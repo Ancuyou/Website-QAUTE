@@ -49,7 +49,7 @@ public class QuestionController {
     private ConsultantService consultantService;
 
 
-    @GetMapping({"/user/questions"})
+    @GetMapping({"/user/questions", "/consultant/questions"})
     public String showQuestionPage(
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer fieldId,
@@ -61,9 +61,11 @@ public class QuestionController {
             Principal principal,
             HttpServletRequest request) {
 
+        String roleString = "";
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
+            roleString = account.getRole().name();
             model.addAttribute("account", account);
         }
 
@@ -91,6 +93,11 @@ public class QuestionController {
         model.addAttribute("hotTopics", hotTopics);
 
         String requestedWithHeader = request.getHeader("X-Requested-With");
+
+        if(roleString.equals(Account.Role.Consultant.name())){
+            return "pages/consultant/questions-answer";
+        }   
+
         if ("fetch".equals(requestedWithHeader)) {
             // Nếu là yêu cầu AJAX, chỉ trả về fragment nội dung
             return "pages/user/questions :: contentFragment";

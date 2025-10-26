@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<!-- include head fragment, truyền title -->
-<th:block th:replace="~{fragments/head :: head('QAUTE - Lịch sử tư vấn')}"></th:block>
+<head th:replace="~{fragments/head :: head('QAUTE - Lịch sử tư vấn')}"></head>
+
 <body>
-<!-- Navigation - Using consultant-navbar fragment -->
 <th:block th:replace="~{fragments/consultant/consultant-navbar :: consultant-navbar}"></th:block>
 
-<!-- Main Content -->
-<main style="padding-top: 70px;">
-    <!-- History Content -->
-    <div class="container">
-        <div class="row my-4">
+<main class="bg-light" style="padding-top: 70px; min-height: 100vh;">
+    <div class="container py-5">
+        <div class="row">
             <div class="col-12">
-                <h2 class="mb-4">Lịch sử tư vấn</h2>
-                
-                <!-- Filter options -->
-                <div class="card shadow-sm mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <h2 class="fw-bold mb-0">
+                        <i class="fas fa-history text-primary me-2"></i>Lịch sử tư vấn
+                    </h2>
+                    <a th:href="@{/consultant/questions}" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Trả lời câu hỏi mới
+                    </a>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <form th:action="@{/consultant/history}" method="get">
-                            <div class="row g-3">
+                            <div class="row g-3 align-items-end">
                                 <div class="col-md-3">
-                                    <label class="form-label">Loại hoạt động</label>
+                                    <label class="form-label small fw-semibold">Loại hoạt động</label>
                                     <select class="form-select" name="type">
                                         <option value="" selected>Tất cả</option>
                                         <option value="question">Câu hỏi</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <label class="form-label">Thời gian</label>
+                                    <label class="form-label small fw-semibold">Thời gian</label>
                                     <select class="form-select" name="timeRange">
                                         <option value="" selected>Tất cả</option>
                                         <option value="7">7 ngày qua</option>
@@ -36,138 +39,126 @@
                                     </select>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">Từ khóa</label>
-                                    <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm theo tiêu đề hoặc nội dung...">
+                                    <label class="form-label small fw-semibold">Từ khóa</label>
+                                    <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm theo tiêu đề...">
                                 </div>
-                                <div class="col-md-2 d-flex align-items-end">
+                                <div class="col-md-2">
                                     <button type="submit" class="btn btn-primary w-100">
-                                        <i class="fas fa-search me-2"></i>Lọc
+                                        <i class="fas fa-filter me-1"></i>Lọc
                                     </button>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
-                
-                <!-- Statistics Summary -->
-                <div class="row mb-4">
+
+                <div class="row g-3 mb-4">
                     <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <h5 class="text-primary" th:text="${totalAnswers}">0</h5>
-                                <p class="mb-0 text-muted">Tổng số câu trả lời</p>
+                        <div class="card border-primary border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-primary mb-1" th:text="${totalAnswers}">0</h3>
+                                <p class="mb-0 text-muted small fw-semibold">Tổng số câu trả lời</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <h5 class="text-success" th:text="${uniqueQuestions}">0</h5>
-                                <p class="mb-0 text-muted">Số câu hỏi đã tư vấn</p>
+                        <div class="card border-success border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-success mb-1" th:text="${uniqueQuestions}">0</h3>
+                                <p class="mb-0 text-muted small fw-semibold">Số câu hỏi đã tư vấn</p>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="card shadow-sm text-center">
-                            <div class="card-body">
-                                <h5 class="text-info" th:text="${uniqueUsers}">0</h5>
-                                <p class="mb-0 text-muted">Số người được tư vấn</p>
+                        <div class="card border-info border-2 border-start-0 border-top-0 border-end-0 shadow-sm h-100">
+                            <div class="card-body text-center p-3">
+                                <h3 class="fw-bold text-info mb-1" th:text="${uniqueUsers}">0</h3>
+                                <p class="mb-0 text-muted small fw-semibold">Số người được tư vấn</p>
                             </div>
                         </div>
                     </div>
                 </div>
-                
-                <!-- History List -->
-                <div class="card shadow-sm">
-                    <div class="card-header bg-light">
-                        <h6 class="mb-0">Danh sách câu trả lời</h6>
+
+                <div th:if="${#lists.isEmpty(answersHistory)}" class="card shadow-sm border-0">
+                    <div class="card-body p-5 text-center">
+                        <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">Không tìm thấy hoạt động</h4>
+                        <p class="text-muted mb-0">Chưa có lịch sử tư vấn nào khớp với bộ lọc của bạn.</p>
                     </div>
-                    <div class="list-group list-group-flush">
-                        <!-- Check if list is empty -->
-                        <div th:if="${#lists.isEmpty(answersHistory)}" class="list-group-item p-4 text-center">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted mb-0">Chưa có lịch sử tư vấn nào.</p>
-                        </div>
-                        
-                        <!-- Loop through answers -->
-                        <div th:each="answer : ${answersHistory}" class="list-group-item p-3 hover-item">
-                            <div class="row">
-                                <div class="col-md-9">
-                                    <h6 class="mb-2">
-                                        <i class="fas fa-question-circle text-primary me-2"></i>
-                                        <span th:text="${answer.title}">Tiêu đề câu hỏi</span>
-                                    </h6>
-                                    <p class="mb-2 text-muted small">
-                                        <i class="fas fa-user me-1"></i> 
-                                        <span th:text="${answer.userName}">Tên người hỏi</span>
-                                        <span class="mx-2">|</span>
-                                        <i class="fas fa-calendar me-1"></i>
-                                        Hỏi: <span th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy HH:mm')}">Thời gian</span>
-                                    </p>
-                                    
-                                    <!-- Question Content Preview -->
-                                    <div class="bg-light p-2 rounded mb-2">
-                                        <p class="mb-0 small">
-                                            <strong>Câu hỏi:</strong> 
-                                            <span th:text="${#strings.length(answer.contentQuestion) > 150 ? #strings.substring(answer.contentQuestion, 0, 150) + '...' : answer.contentQuestion}">Nội dung câu hỏi...</span>
-                                        </p>
-                                    </div>
-                                    
-                                    <!-- Answer Content Preview -->
-                                    <div class="bg-success bg-opacity-10 p-2 rounded">
-                                        <p class="mb-0 small">
-                                            <strong class="text-success">Câu trả lời của bạn:</strong> 
-                                            <span th:text="${#strings.length(answer.contentAnswer) > 150 ? #strings.substring(answer.contentAnswer, 0, 150) + '...' : answer.contentAnswer}">Nội dung câu trả lời...</span>
-                                        </p>
+                </div>
+                
+                <div th:unless="${#lists.isEmpty(answersHistory)}">
+                    <div th:each="answer : ${answersHistory}" class="card border-0 shadow-sm mb-3">
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-auto d-none d-md-block">
+                                    <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-check-double fa-lg"></i>
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-3 text-end d-flex flex-column justify-content-between">
-                                    <div>
-                                        <span class="badge bg-success mb-2">
-                                            <i class="fas fa-check me-1"></i>Đã trả lời
-                                        </span>
-                                        <p class="mb-1 text-muted small">
-                                            <i class="fas fa-clock me-1"></i>
-                                            <span th:text="${#temporals.format(answer.answerAt, 'dd/MM/yyyy HH:mm')}">Thời gian trả lời</span>
-                                        </p>
+                                <div class="col-md">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="fw-bold mb-1">
+                                                <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}" class="text-decoration-none">
+                                                    <span th:text="${answer.title}">Tiêu đề câu hỏi</span>
+                                                </a>
+                                            </h5>
+                                            <div class="small text-muted mb-3">
+                                                <span>Hỏi bởi: <strong class="text-dark" th:text="${answer.userName}">Tên người hỏi</strong></span>
+                                                <span class="mx-2">|</span>
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                <span th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy')}">Thời gian</span>
+                                            </div>
+                                        </div>
+                                        <div class="ms-3 flex-shrink-0 d-print-none">
+                                             <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye me-1"></i>Xem
+                                            </a>
+                                        </div>
                                     </div>
                                     
-                                    <div class="mt-2">
-                                        <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}" 
-                                           class="btn btn-sm btn-outline-primary w-100">
-                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
-                                        </a>
-                                    </div>
+                                    <blockquote class="blockquote small border-start border-3 border-secondary-subtle ps-3 py-2 bg-light rounded mb-3">
+                                        <p class="mb-0 fst-italic" th:text="${#strings.abbreviate(answer.contentQuestion, 200)}">
+                                            Nội dung câu hỏi...
+                                        </p>
+                                    </blockquote>
+                                    
+                                    <blockquote class="blockquote small border-start border-3 border-success-subtle ps-3 py-2 bg-success-subtle rounded">
+                                        <p class="mb-0" th:text="${#strings.abbreviate(answer.contentAnswer, 200)}">
+                                            Nội dung câu trả lời...
+                                        </p>
+                                        <footer class="blockquote-footer mt-2 mb-0 fs-sm">
+                                            Bạn đã trả lời lúc <cite th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời gian trả lời</cite>
+                                        </footer>
+                                    </blockquote>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Pagination -->
-               <nav class="mt-4" th:if="${totalPages > 1}">
+                <nav class="mt-4" th:if="${totalPages > 1}">
                     <ul class="pagination justify-content-center">
-                        <!-- Previous button -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                             <a class="page-link"
-                            th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
-                                <i class="fas fa-chevron-left"></i>
+                               th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                <i class="fas fa-chevron-left small"></i>
                             </a>
                         </li>
-                        <!-- Page numbers -->
                         <li class="page-item"
                             th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                             th:classappend="${i == currentPage} ? 'active'">
                             <a class="page-link"
-                            th:href="@{/consultant/history(page=${i}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}"
-                            th:text="${i + 1}">1</a>
+                               th:href="@{/consultant/history(page=${i}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}"
+                               th:text="${i + 1}">1</a>
                         </li>
-                        <!-- Next button -->
                         <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                             <a class="page-link"
-                            th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
-                                <i class="fas fa-chevron-right"></i>
+                               th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, type=${param.type}, timeRange=${param.timeRange}, keyword=${param.keyword})}">
+                                <i class="fas fa-chevron-right small"></i>
                             </a>
                         </li>
                     </ul>
@@ -177,22 +168,7 @@
     </div>
 </main>
 
-<!-- Footer -->
 <th:block th:replace="~{fragments/footer :: footer}"></th:block>
-
-<style>
-    .hover-item {
-        transition: all 0.3s ease;
-    }
-    
-    .hover-item:hover {
-        background-color: #f8f9fa;
-        transform: translateX(5px);
-    }
-    
-    .bg-opacity-10 {
-        --bs-bg-opacity: 0.1;
-    }
-</style>
+<div th:replace="~{fragments/toast :: toast}"></div>
 </body>
 </html>
