@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "Messages")
 @JsonIdentityInfo(
-  generator = ObjectIdGenerators.PropertyGenerator.class, 
-  property = "messageID"
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "messageID"
 )
 public class Messages {
     @Id
@@ -51,11 +51,13 @@ public class Messages {
     @JoinColumn(name = "ReceiverID", referencedColumnName = "ProfileID", insertable = false, updatable = false)
     private Profiles receiver;
 
-    
+    // Trường này bạn đã có - Lombok sẽ tạo getAi() và setAi()
+    @Column(name="isAi")
+    private Boolean ai = false;
+
     @Column(name = "is_recalled")
     private Boolean isRecalled = false;
 
-    
     public enum MessageType {
         text, image, file
     }

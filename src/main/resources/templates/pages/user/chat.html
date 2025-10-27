@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:replace="~{fragments/head :: head('QAUTE - Chat với tư vấn viên')}"></th:block>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .chat-container {
             height: calc(100vh - 150px);
@@ -62,212 +63,386 @@
             color: #666;
             padding: 5px 10px;
         }
+        /* Feedback buttons styles */
+        .feedback-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            align-items: center;
+        }
+        .feedback-btn {
+            padding: 4px 12px;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            background-color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .feedback-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .feedback-btn.satisfied {
+            border-color: #28a745;
+            color: #28a745;
+        }
+        .feedback-btn.satisfied.active {
+            background-color: #28a745;
+            color: white;
+        }
+        .feedback-btn.unsatisfied {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        .feedback-btn.unsatisfied.active {
+            background-color: #dc3545;
+            color: white;
+        }
+        .feedback-text {
+            font-size: 0.75rem;
+            color: #666;
+            margin-left: 8px;
+        }
+        .ai-badge {
+            display: inline-block;
+            background-color: #6c757d;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand text-primary fw-bold fs-3" href="/user/home">
-                <i class="fas fa-graduation-cap me-2"></i>QAUTE
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-primary fw-bold fs-3" href="/user/home">
+            <i class="fas fa-graduation-cap me-2"></i>QAUTE
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/user/home">Trang chủ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/user/consultants">Tư vấn viên</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" href="/user/history">Lịch sử</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img th:if="${currentUser.avatar}" th:src="${currentUser.avatar}" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+                        <img th:unless="${currentUser.avatar}" src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+                        <span class="fw-semibold" th:text="${currentUser.fullName}">Nguyễn Văn A</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="/user/profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Chat Container -->
+<div class="container mt-3">
+    <div class="chat-container shadow-sm border rounded">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <a href="/user/consultants" class="btn btn-sm btn-light me-3">
+                <i class="fas fa-arrow-left"></i>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="/user/home">Trang chủ</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="/user/consultants">Tư vấn viên</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link fw-semibold" href="/user/history">Lịch sử</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img th:if="${currentUser.avatar}" th:src="${currentUser.avatar}" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                            <img th:unless="${currentUser.avatar}" src="https://via.placeholder.com/32" class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-                            <span class="fw-semibold" th:text="${currentUser.fullName}">Nguyễn Văn A</span>
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/user/profile"><i class="fas fa-user me-2"></i>Hồ sơ cá nhân</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                        </ul>
-                    </li>
-                </ul>
+            <img th:if="${consultant.avatar}" th:src="${consultant.avatar}" class="rounded-circle me-2" alt="Consultant" width="40" height="40">
+            <img th:unless="${consultant.avatar}" src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Consultant" width="40" height="40">
+            <div>
+                <div class="fw-bold" th:text="${consultant.fullName}">Tên tư vấn viên</div>
+                <div class="small text-success">
+                    <span class="online-indicator"></span>Online
+                </div>
             </div>
         </div>
-    </nav>
 
-    <!-- Chat Container -->
-    <div class="container mt-3">
-        <div class="chat-container shadow-sm border rounded">
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <a href="/user/consultants" class="btn btn-sm btn-light me-3">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                <img th:if="${consultant.avatar}" th:src="${consultant.avatar}" class="rounded-circle me-2" alt="Consultant" width="40" height="40">
-                <img th:unless="${consultant.avatar}" src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Consultant" width="40" height="40">
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="messageArea">
+            <!-- Message history with feedback buttons for AI messages -->
+            <div th:each="message : ${chatHistory}"
+                 th:class="${message.senderID == currentUser.profileID ? 'message message-sent' : 'message message-received'}"
+                 th:attr="data-message-id=${message.messageID}">
                 <div>
-                    <div class="fw-bold" th:text="${consultant.fullName}">Tên tư vấn viên</div>
-                    <div class="small text-success">
-                        <span class="online-indicator"></span>Online
-                    </div>
+                    <span th:text="${message.content}">Nội dung tin nhắn</span>
+                    <span th:if="${message.ai != null && message.ai}" class="ai-badge">AI</span>
                 </div>
-            </div>
-            
-            <!-- Chat Messages -->
-            <div class="chat-messages" id="messageArea">
-                <!-- Message history will be displayed here -->
-                <div th:each="message : ${chatHistory}" th:class="${message.senderID == currentUser.profileID ? 'message message-sent' : 'message message-received'}">
-                    <div th:text="${message.content}">Nội dung tin nhắn</div>
-                    <div class="message-time" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">12:34</div>
-                </div>
-                
-                <!-- Typing indicator, show when consultant is typing -->
-                <div class="typing-indicator" id="typing-indicator" style="display: none;">
-                    Tư vấn viên đang nhập...
-                </div>
-            </div>
-            
-            <!-- Chat Input -->
-            <div class="chat-input">
-                <div class="d-flex">
-                    <input type="hidden" id="senderID" th:value="${currentUser.profileID}">
-                    <input type="hidden" id="receiverID" th:value="${consultant.profileID}">
-                    <input type="text" class="form-control me-2" id="messageInput" placeholder="Nhập tin nhắn...">
-                    <button class="btn btn-primary" id="sendButton">
-                        <i class="fas fa-paper-plane"></i>
+                <div class="message-time" th:text="${#temporals.format(message.createdAt, 'HH:mm')}">12:34</div>
+
+                <!-- DEBUG: Bỏ comment dòng này để xem giá trị -->
+                <!-- <div style="font-size: 10px; color: red;">
+                    ai: [[${message.ai}]],
+                    senderID: [[${message.senderID}]],
+                    currentUserID: [[${currentUser.profileID}]]
+                </div> -->
+
+                <!-- Feedback buttons chỉ hiển thị cho tin nhắn AI mà user nhận được -->
+                <div th:if="${message.ai != null && message.ai == true && message.senderID != currentUser.profileID}"
+                     class="feedback-buttons"
+                     th:attr="data-message-id=${message.messageID}">
+                    <button class="feedback-btn satisfied"
+                            th:classappend="${message.feedbackStatus != null && message.feedbackStatus == 'satisfied' ? 'active' : ''}"
+                            onclick="submitFeedback(this, 'satisfied')">
+                        <i class="fas fa-thumbs-up"></i>
+                        <span>Hài lòng</span>
+                    </button>
+                    <button class="feedback-btn unsatisfied"
+                            th:classappend="${message.feedbackStatus != null && message.feedbackStatus == 'unsatisfied' ? 'active' : ''}"
+                            onclick="submitFeedback(this, 'unsatisfied')">
+                        <i class="fas fa-thumbs-down"></i>
+                        <span>Không hài lòng</span>
                     </button>
                 </div>
             </div>
+
+            <!-- Typing indicator -->
+            <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                Tư vấn viên đang nhập...
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input">
+            <div class="d-flex">
+                <input type="hidden" id="senderID" th:value="${currentUser.profileID}">
+                <input type="hidden" id="receiverID" th:value="${consultant.profileID}">
+                <input type="text" class="form-control me-2" id="messageInput" placeholder="Nhập tin nhắn...">
+                <button class="btn btn-primary" id="sendButton">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- WebSocket scripts -->
-    <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
-    <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+<!-- WebSocket scripts -->
+<script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
 
-    <script th:inline="javascript">
-        // Thông tin người dùng và tư vấn viên
-        const currentUserID = /*[[${currentUser.profileID}]]*/ 0;
-        const consultantID = /*[[${consultant.profileID}]]*/ 0;
-        let stompClient = null;
-        
-        function connect() {
-            const socket = new SockJS('/ws');
-            stompClient = Stomp.over(socket);
-            
-            stompClient.connect({}, function(frame) {
-                console.log('Connected: ' + frame);
-                
-                // Subscribe để nhận tin nhắn từ tư vấn viên
-                stompClient.subscribe('/user/' + currentUserID + '/queue/messages', function(message) {
-                    const messageBody = JSON.parse(message.body);
-                    displayMessage(messageBody);
-                });
-                
-                // Đánh dấu là đã kết nối
-                document.querySelector('.chat-input').classList.add('connected');
-            }, function(error) {
-                console.error('STOMP error: ', error);
-                setTimeout(connect, 3000); // Thử kết nối lại sau 3 giây
-            });
-        }
-        
-        function sendMessage() {
-            const messageInput = document.getElementById('messageInput');
-            const messageContent = messageInput.value.trim();
-            
-            if (messageContent && stompClient && document.querySelector('.chat-input').classList.contains('connected')) {
-                const chatMessage = {
-                    senderID: currentUserID,
-                    receiverID: consultantID,
-                    content: messageContent,
-                    type: 'text',
-                    status: 'sent',
-                    timestamp: new Date()
-                };
-                
-                // Gửi tin nhắn thông qua WebSocket
-                stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
-                
-                // Hiển thị tin nhắn đã gửi
-                displayMessage(chatMessage);
-                
-                // Xóa nội dung đã nhập
-                messageInput.value = '';
-            }
-        }
-        
-        function displayMessage(message) {
-            const messageArea = document.getElementById('messageArea');
-            const isSentByMe = message.senderID === currentUserID;
-            
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message');
-            messageDiv.classList.add(isSentByMe ? 'message-sent' : 'message-received');
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.textContent = message.content;
-            messageDiv.appendChild(contentDiv);
-            
-            const timeDiv = document.createElement('div');
-            timeDiv.classList.add('message-time');
-            
-            // Format timestamp
-            let timestamp;
-            if (message.timestamp instanceof Date) {
-                timestamp = message.timestamp;
-            } else {
-                timestamp = new Date(message.timestamp);
-            }
-            
-            const hours = String(timestamp.getHours()).padStart(2, '0');
-            const minutes = String(timestamp.getMinutes()).padStart(2, '0');
-            timeDiv.textContent = hours + ':' + minutes;
-            
-            messageDiv.appendChild(timeDiv);
-            messageArea.appendChild(messageDiv);
-            
-            // Scroll to bottom
-            messageArea.scrollTop = messageArea.scrollHeight;
-            
-            // Ẩn typing indicator khi nhận được tin nhắn
-            document.getElementById('typing-indicator').style.display = 'none';
-        }
-        
-        // Function to show typing indicator when consultant is typing
-        function showTypingIndicator() {
-            document.getElementById('typing-indicator').style.display = 'block';
-            const messageArea = document.getElementById('messageArea');
-            messageArea.scrollTop = messageArea.scrollHeight;
-        }
-        
-        // Thiết lập event listeners khi trang được tải
-        document.addEventListener('DOMContentLoaded', function() {
-            // Kết nối WebSocket
-            connect();
-            
-            // Thiết lập event listeners
-            document.getElementById('sendButton').addEventListener('click', sendMessage);
-            document.getElementById('messageInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendMessage();
-                    e.preventDefault();
+<script th:inline="javascript">
+    const currentUserID = /*[[${currentUser.profileID}]]*/ 0;
+    const consultantID = /*[[${consultant.profileID}]]*/ 0;
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function(frame) {
+            console.log('Connected: ' + frame);
+
+            // Subscribe to receive messages
+            const chatChannel = '/topic/chat/' + currentUserID + '/' + consultantID;
+            stompClient.subscribe(chatChannel, function(message) {
+                const messageData = JSON.parse(message.body);
+
+                // Xử lý các loại thông báo khác nhau
+                if (messageData.type === 'FEEDBACK') {
+                    updateFeedbackUI(messageData.messageID, messageData.feedbackStatus);
+                } else if (messageData.type === 'RECALL') {
+                    handleRecallMessage(messageData.messageID);
+                } else {
+                    // Tin nhắn thông thường
+                    displayMessage(messageData);
                 }
             });
-            
-            // Scroll chat area to bottom initially
-            const messageArea = document.getElementById('messageArea');
-            messageArea.scrollTop = messageArea.scrollHeight;
+
+            document.querySelector('.chat-input').classList.add('connected');
+        }, function(error) {
+            console.error('STOMP error: ', error);
+            setTimeout(connect, 3000);
         });
-    </script>
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const messageContent = messageInput.value.trim();
+
+        if (messageContent && stompClient && document.querySelector('.chat-input').classList.contains('connected')) {
+            const chatMessage = {
+                senderID: currentUserID,
+                receiverID: consultantID,
+                content: messageContent,
+                type: 'text',
+                status: 'sent',
+                timestamp: new Date()
+            };
+
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+            displayMessage(chatMessage);
+            messageInput.value = '';
+        }
+    }
+
+    function displayMessage(message) {
+        const messageArea = document.getElementById('messageArea');
+        const isSentByMe = message.senderID === currentUserID;
+        const isAI = message.ai === true;
+
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        messageDiv.classList.add(isSentByMe ? 'message-sent' : 'message-received');
+        messageDiv.setAttribute('data-message-id', message.messageID || '');
+
+        const contentWrapper = document.createElement('div');
+        const contentText = document.createTextNode(message.content);
+        contentWrapper.appendChild(contentText);
+
+        if (isAI) {
+            const aiBadge = document.createElement('span');
+            aiBadge.classList.add('ai-badge');
+            aiBadge.textContent = 'AI';
+            contentWrapper.appendChild(aiBadge);
+        }
+
+        messageDiv.appendChild(contentWrapper);
+
+        const timeDiv = document.createElement('div');
+        timeDiv.classList.add('message-time');
+        let timestamp = message.timestamp instanceof Date ? message.timestamp : new Date(message.timestamp || message.createdAt);
+        const hours = String(timestamp.getHours()).padStart(2, '0');
+        const minutes = String(timestamp.getMinutes()).padStart(2, '0');
+        timeDiv.textContent = hours + ':' + minutes;
+        messageDiv.appendChild(timeDiv);
+
+        // Thêm feedback buttons cho tin nhắn AI
+        if (isAI && !isSentByMe) {
+            const feedbackDiv = document.createElement('div');
+            feedbackDiv.classList.add('feedback-buttons');
+            feedbackDiv.setAttribute('data-message-id', message.messageID || '');
+
+            const satisfiedBtn = document.createElement('button');
+            satisfiedBtn.classList.add('feedback-btn', 'satisfied');
+            satisfiedBtn.innerHTML = '<i class="fas fa-thumbs-up"></i><span>Hài lòng</span>';
+            satisfiedBtn.onclick = function() { submitFeedback(this, 'satisfied'); };
+
+            const unsatisfiedBtn = document.createElement('button');
+            unsatisfiedBtn.classList.add('feedback-btn', 'unsatisfied');
+            unsatisfiedBtn.innerHTML = '<i class="fas fa-thumbs-down"></i><span>Không hài lòng</span>';
+            unsatisfiedBtn.onclick = function() { submitFeedback(this, 'unsatisfied'); };
+
+            feedbackDiv.appendChild(satisfiedBtn);
+            feedbackDiv.appendChild(unsatisfiedBtn);
+            messageDiv.appendChild(feedbackDiv);
+        }
+
+        messageArea.appendChild(messageDiv);
+        messageArea.scrollTop = messageArea.scrollHeight;
+
+        document.getElementById('typing-indicator').style.display = 'none';
+    }
+
+    function submitFeedback(button, feedbackType) {
+        const feedbackButtons = button.closest('.feedback-buttons');
+        const messageId = feedbackButtons.getAttribute('data-message-id');
+
+        if (!messageId) {
+            console.error('Message ID not found');
+            return;
+        }
+
+        fetch('/api/chat/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                'messageId': messageId,
+                'userId': currentUserID,
+                'feedbackType': feedbackType
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFeedbackUI(messageId, feedbackType);
+
+                    // Hiển thị thông báo nhẹ
+                    const feedbackText = document.createElement('span');
+                    feedbackText.classList.add('feedback-text');
+                    feedbackText.textContent = 'Cảm ơn phản hồi của bạn!';
+                    feedbackButtons.appendChild(feedbackText);
+
+                    setTimeout(() => {
+                        feedbackText.remove();
+                    }, 3000);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi phản hồi');
+            });
+    }
+
+    function updateFeedbackUI(messageId, feedbackStatus) {
+        const feedbackButtons = document.querySelector(`.feedback-buttons[data-message-id="${messageId}"]`);
+        if (!feedbackButtons) return;
+
+        const satisfiedBtn = feedbackButtons.querySelector('.satisfied');
+        const unsatisfiedBtn = feedbackButtons.querySelector('.unsatisfied');
+
+        satisfiedBtn.classList.remove('active');
+        unsatisfiedBtn.classList.remove('active');
+
+        if (feedbackStatus === 'satisfied') {
+            satisfiedBtn.classList.add('active');
+        } else if (feedbackStatus === 'unsatisfied') {
+            unsatisfiedBtn.classList.add('active');
+        }
+    }
+
+    function handleRecallMessage(messageId) {
+        const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageDiv) {
+            const contentDiv = messageDiv.querySelector('div:first-child');
+            if (contentDiv) {
+                contentDiv.textContent = 'Tin nhắn đã được thu hồi';
+                contentDiv.style.fontStyle = 'italic';
+                contentDiv.style.color = '#999';
+            }
+        }
+    }
+
+    function showTypingIndicator() {
+        document.getElementById('typing-indicator').style.display = 'block';
+        const messageArea = document.getElementById('messageArea');
+        messageArea.scrollTop = messageArea.scrollHeight;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        connect();
+
+        document.getElementById('sendButton').addEventListener('click', sendMessage);
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+                e.preventDefault();
+            }
+        });
+
+        const messageArea = document.getElementById('messageArea');
+        messageArea.scrollTop = messageArea.scrollHeight;
+    });
+</script>
 </body>
 </html>

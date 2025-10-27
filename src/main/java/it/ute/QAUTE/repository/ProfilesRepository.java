@@ -1,5 +1,6 @@
 package it.ute.QAUTE.repository;
 
+import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Profiles;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -3,20 +3,15 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.dto.ConsultantDTO;
 import it.ute.QAUTE.dto.MessageDTO;
 import it.ute.QAUTE.dto.UserDTO;
-import it.ute.QAUTE.entity.Consultant;
-import it.ute.QAUTE.entity.Messages;
-import it.ute.QAUTE.entity.Profiles;
-import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.entity.*;
+import it.ute.QAUTE.service.AIService;
 import it.ute.QAUTE.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -31,7 +26,8 @@ public class ChatController {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
-
+    @Autowired
+    private AIService aiService;
   
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload MessageDTO messageDTO) {
@@ -44,16 +40,30 @@ public class ChatController {
         
         messagingTemplate.convertAndSend(senderChannel, savedMessage);
         messagingTemplate.convertAndSend(receiverChannel, savedMessage);
+        aiService.replyMessage(savedMessage);
     }
-
 
     @GetMapping("/api/chat/history")
     @ResponseBody
     public List<Messages> getChatHistory(
             @RequestParam("senderId") Integer senderId,
             @RequestParam("receiverId") Integer receiverId) {
-        System.out.println("API /api/chat/history called with senderId: " + senderId + ", receiverId: " + receiverId);
-        return messageService.getChatHistory(senderId, receiverId);
+        List<Messages> messages=messageService.getChatHistory(senderId, receiverId);
+        if(messages.isEmpty()){
+            if(messageService.getRole(senderId)== Account.Role.User && messageService.getRole(receiverId)== Account.Role.Consultant){
+                Messages message = new Messages();
+                message.setSenderID(senderId);
+                message.setReceiverID(receiverId);
+                message.setContent("Xin chào! Tôi có thể giúp gì cho bạn?");
+                message.setType(Messages.MessageType.text);
+                message.setCreatedAt(LocalDateTime.now());
+                message.setUpdatedAt(LocalDateTime.now());
+                messageService.save(message);
+                messageService.createMessage(senderId,receiverId);
+                messages.add(message);
+            }
+        }
+        return messages;
     }
     
 
@@ -167,5 +177,31 @@ public class ChatController {
             response.put("message", "Lỗi: " + e.getMessage());
             return response;
         }
+    }
+    @PostMapping("/telemetry/ai-feedback")
+    @ResponseBody
+    public void receiveAiFeedback(@RequestBody Map<String, Object> body) {
+        Object m = body.get("messageId");
+        Long messageId = (m instanceof Number) ? ((Number) m).longValue()
+                : (m != null ? Long.parseLong(m.toString().trim()) : null);
+        String status = String.valueOf(body.get("status"));
+        Object u = body.get("userId");
+        Integer userId = (u instanceof Number) ? ((Number) u).intValue()
+                : (u != null ? Integer.parseInt(u.toString().trim()) : null);
+
+        Object c = body.get("contactId");
+        Integer contactId = (c instanceof Number) ? ((Number) c).intValue()
+                : (c != null ? Integer.parseInt(c.toString().trim()) : null);
+        messageService.updateConversation(Math.toIntExact(messageId), status);
+        Map<String, Object> ack = new HashMap<>();
+        ack.put("type", "AI_FEEDBACK");
+        ack.put("messageID", messageId);
+        ack.put("feedbackStatus", status);
+
+        String chUserView       = "/topic/chat/" + userId    + "/" + contactId;
+        String chConsultantView = "/topic/chat/" + contactId + "/" + userId;
+
+        messagingTemplate.convertAndSend(chUserView, ack);
+        messagingTemplate.convertAndSend(chConsultantView, ack);
     }
 }
