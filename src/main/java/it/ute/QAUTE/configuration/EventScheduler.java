@@ -4,8 +4,8 @@ import it.ute.QAUTE.entity.Event;
 import it.ute.QAUTE.entity.EventRegistration;
 import it.ute.QAUTE.repository.EventRepository;
 import it.ute.QAUTE.repository.EventRegistrationRepository;
-import it.ute.QAUTE.service.EventService;
-import it.ute.QAUTE.service.NotificationService;
+import it.ute.QAUTE.service.Implement.EventServiceImplement;
+import it.ute.QAUTE.service.Implement.NotificationServiceImplement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,10 +25,10 @@ public class EventScheduler {
     private EventRegistrationRepository registrationRepository;
     
     @Autowired
-    private EventService eventService;
+    private EventServiceImplement eventService;
     
     @Autowired
-    private NotificationService notificationService;
+    private NotificationServiceImplement notificationService;
     
     /**
      * Cập nhật trạng thái sự kiện mỗi 5 phút

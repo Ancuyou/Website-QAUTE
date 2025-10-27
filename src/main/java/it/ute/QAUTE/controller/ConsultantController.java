@@ -3,25 +3,20 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.dto.AnswerQuestionDTO;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionDTO;
-import it.ute.QAUTE.dto.UserDTO;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
-import it.ute.QAUTE.entity.Messages;
 import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.service.*;
 
+import it.ute.QAUTE.service.Implement.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,61 +24,53 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.Sort;
-import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-import java.util.Arrays;
-import java.io.File;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import it.ute.QAUTE.entity.Event;
 import it.ute.QAUTE.entity.Field;
 @Controller
 @RequestMapping("/consultant")
 public class ConsultantController {
     @Autowired
-    private MessageService messageService;
+    private MessageServiceImplement messageService;
     
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
 
     @Autowired
-    private ConsultantService consultantService;
+    private ConsultantServiceImplement consultantService;
 
     @Autowired
-    private QuestionService questionService;
+    private QuestionServiceImplement questionService;
 
     @Autowired
-    private AnswerService answerService;
+    private AnswerServiceImplement answerService;
 
     @Autowired
-    private EventService eventService;
+    private EventServiceImplement eventService;
 
     @Autowired
-    private FileStorageService fileStorageService;
+    private FileStorageServiceImplement fileStorageService;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImplement userService;
 
     @Autowired
-    private DepartmentService departmentService;
+    private DepartmentServiceImplement departmentService;
 
     @Autowired
-    private FieldService fieldService;
+    private FieldServiceImplement fieldService;
 
     @Autowired
-    private QuestionLikeService questionLikeService;
+    private QuestionLikeServiceImplement questionLikeService;
     @GetMapping({"", "/"})
     public String consultantRoot() {
         return "redirect:/consultant/home";

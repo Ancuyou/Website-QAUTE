@@ -4,7 +4,6 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
-import it.ute.QAUTE.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

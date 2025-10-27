@@ -2,9 +2,9 @@ package it.ute.QAUTE.web;
 
 import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AuthenticationService;
-import it.ute.QAUTE.service.SecurityService;
+import it.ute.QAUTE.service.Implement.AccountServiceImplement;
+import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
+import it.ute.QAUTE.service.Implement.SecurityServiceImplement;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,10 +20,10 @@ import java.net.InetAddress;
 @Component
 @RequiredArgsConstructor
 public class AuthPageGuard implements HandlerInterceptor {
-    private final AuthenticationService authenticationService;
-    private final AccountService accountService;
+    private final AuthenticationServiceImplement authenticationService;
+    private final AccountServiceImplement accountService;
     private final CustomJwtDecoder customJwtDecoder;
-    private final SecurityService securityService;
+    private final SecurityServiceImplement securityService;
     private String resolveRedirectByRole(String role) {
         switch (role) {
             case "ROLE_User":

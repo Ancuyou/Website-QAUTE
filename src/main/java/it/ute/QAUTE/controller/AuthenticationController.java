@@ -1,15 +1,12 @@
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.entity.Profiles;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AuthenticationService;
-import it.ute.QAUTE.service.EmailService;
-import it.ute.QAUTE.service.SecurityService;
+import it.ute.QAUTE.service.Implement.AccountServiceImplement;
+import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
+import it.ute.QAUTE.service.Implement.SecurityServiceImplement;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -33,7 +30,6 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Controller
@@ -41,11 +37,11 @@ import java.util.UUID;
 public class AuthenticationController {
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImplement authenticationService;
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
     @Autowired
-    private SecurityService securityService;
+    private SecurityServiceImplement securityService;
     //Post
     @GetMapping("/auth/login")
     public String loginForm(@ModelAttribute("account") Account account,

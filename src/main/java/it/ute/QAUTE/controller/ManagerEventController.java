@@ -4,7 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.Implement.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -33,19 +33,19 @@ import lombok.extern.slf4j.Slf4j;
 public class ManagerEventController {
 
     @Autowired
-    private EventService eventService;
+    private EventServiceImplement eventService;
 
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImplement authenticationService;
 
     @Autowired
-    private DepartmentService departmentService;
+    private DepartmentServiceImplement departmentService;
 
     @Autowired
-    private ConsultantService consultantService;
+    private ConsultantServiceImplement consultantService;
 
     @GetMapping("")
     public String listAllEvents(

@@ -1,8 +1,7 @@
 package it.ute.QAUTE.web;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import it.ute.QAUTE.repository.ProfilesRepository;
-import it.ute.QAUTE.service.AccountService;
+import it.ute.QAUTE.service.Implement.AccountServiceImplement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ public class OnlineStatusHandler extends TextWebSocketHandler {
     @Autowired
     private Cache<Integer, Boolean> onlineCache;
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
     private final ConcurrentHashMap<Integer, WebSocketSession> onlineSessions = new ConcurrentHashMap<>();
 
     @Override

@@ -8,7 +8,7 @@ import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.Implement.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -37,39 +37,39 @@ import java.util.Set;
 @RequestMapping("/manager")
 public class ManagerController {
     @Autowired
-    private QuestionService questionService;
+    private QuestionServiceImplement questionService;
     @Autowired
     private FieldRepository fieldRepository;
 
     @Autowired
-    private DepartmentService  departmentService;
+    private DepartmentServiceImplement departmentService;
 
     @Autowired
-    private FieldService fieldService;
+    private FieldServiceImplement fieldService;
 
     @Autowired
-    private AnswerReportService answerReportService;
+    private AnswerReportServiceImplement answerReportService;
 
     @Autowired
-    private QuestionReportService questionReportService;
+    private QuestionReportServiceImplement questionReportService;
 
     @Autowired
-    private UserReportService  userReportService;
+    private UserReportServiceImplement userReportService;
 
     @Autowired
-    private ConsultantReportService consultantReportService;
+    private ConsultantReportServiceImplement consultantReportService;
 
     @Autowired
-    private ToxicContentService toxicContentService;
+    private ToxicContentServiceImplement toxicContentService;
 
     @Autowired
-    private NotificationService notificationService;
+    private NotificationServiceImplement notificationService;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImplement authenticationService;
 
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
 
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,

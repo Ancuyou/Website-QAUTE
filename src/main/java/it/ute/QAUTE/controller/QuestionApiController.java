@@ -9,9 +9,8 @@ import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.Implement.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -28,11 +27,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuestionApiController {
 
-    private final QuestionLikeService questionLikeService;
-    private final AccountService accountService;
-    private final UserService userService;
-    private final DepartmentService departmentService;
-    private final QuestionService questionService;
+    private final QuestionLikeServiceImplement questionLikeService;
+    private final AccountServiceImplement accountService;
+    private final UserServiceImplement userService;
+    private final DepartmentServiceImplement departmentService;
+    private final QuestionServiceImplement questionService;
 
     @PostMapping("/{questionId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(

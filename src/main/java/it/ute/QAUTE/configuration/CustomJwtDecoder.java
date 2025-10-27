@@ -7,7 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.nimbusds.jwt.SignedJWT;
 import it.ute.QAUTE.entity.RefreshToken;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
-import it.ute.QAUTE.service.AuthenticationService;
+import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +28,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     private String signerKey;
 
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImplement authenticationService;
 
     @Autowired
     private RefreshTokenRepository refreshTokenRepository;

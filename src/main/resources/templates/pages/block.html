@@ -1,10 +1,193 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truy Cập Bị Chặn</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .blocked-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: none;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+            width: 100%;
+            padding: 50px 40px;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon-container {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .icon-container i {
+            font-size: 50px;
+            color: white;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .message {
+            color: #718096;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .reason-box {
+            background: #fff5f5;
+            border-left: 4px solid #dc3545;
+            padding: 15px 20px;
+            margin: 25px 0;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .reason-box strong {
+            color: #c53030;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .reason-box p {
+            color: #742a2a;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .contact-info {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        .contact-info p {
+            color: #4a5568;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .contact-info p:last-child {
+            margin-bottom: 0;
+        }
+
+        .contact-info a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .contact-info a:hover {
+            color: #0056b3;
+        }
+
+        .btn-custom {
+            display: inline-block;
+            background: linear-gradient(45deg, #007bff, #0056b3);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+            color: white;
+        }
+
+        .footer {
+            margin-top: 30px;
+            color: #a0aec0;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
+<div class="blocked-card">
+    <div class="icon-container">
+        <i class="fas fa-ban"></i>
+    </div>
 
+    <h1>Truy Cập Bị Chặn</h1>
+
+    <p class="message">
+        Tài khoản của bạn đã bị chặn và không thể truy cập vào hệ thống.
+        Vui lòng đọc thông tin bên dưới để biết thêm chi tiết.
+    </p>
+
+    <div class="reason-box">
+        <strong>Lý do bị chặn:</strong>
+        <p>Vi phạm điều khoản sử dụng dịch vụ hoặc phát hiện hoạt động bất thường trên tài khoản của bạn.</p>
+    </div>
+
+    <div class="contact-info">
+        <p><strong>Cần hỗ trợ?</strong></p>
+        <p>Liên hệ với chúng tôi qua:</p>
+        <p><i class="fas fa-envelope me-2 text-primary"></i>Email: <a href="mailto:support@example.com">support@example.com</a></p>
+        <p><i class="fas fa-phone me-2 text-primary"></i>Hotline: <a href="tel:1900xxxx">1900 xxxx</a></p>
+    </div>
+
+    <a href="/" class="btn-custom">
+        <i class="fas fa-home me-2"></i>Về Trang Chủ
+    </a>
+
+    <div class="footer">
+        <p>Mã lỗi: ERR_ACCESS_BLOCKED_403</p>
+    </div>
+</div>
 </body>
 </html>

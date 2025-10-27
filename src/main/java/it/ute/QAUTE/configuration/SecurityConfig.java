@@ -4,8 +4,8 @@ import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
 import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.service.AuthenticationService;
-import it.ute.QAUTE.service.SecurityService;
+import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
+import it.ute.QAUTE.service.Implement.SecurityServiceImplement;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,8 +44,8 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**", "/css/**", "/js/**", "/images/**" };
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
-    @Autowired private AuthenticationService authenticationService;
-    @Autowired @Lazy private SecurityService securityService;
+    @Autowired private AuthenticationServiceImplement authenticationService;
+    @Autowired @Lazy private SecurityServiceImplement securityService;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity

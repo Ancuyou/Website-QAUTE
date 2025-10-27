@@ -3,16 +3,13 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.dto.*;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.exception.AppException;
-import it.ute.QAUTE.exception.ErrorCode;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.Implement.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -27,7 +24,6 @@ import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -35,22 +31,22 @@ import java.util.stream.Collectors;
 public class QuestionController {
 
     @Autowired
-    private QuestionService questionService;
+    private QuestionServiceImplement questionService;
 
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
 
     @Autowired
-    private UserService userService;
+    private UserServiceImplement userService;
 
     @Autowired
-    private AnswerService answerService;
+    private AnswerServiceImplement answerService;
 
     @Autowired
-    private ConsultantService consultantService;
+    private ConsultantServiceImplement consultantService;
 
     @Autowired
-    private QuestionLikeService questionLikeService;
+    private QuestionLikeServiceImplement questionLikeService;
 
     @GetMapping({""})
     public String showQuestionPage(

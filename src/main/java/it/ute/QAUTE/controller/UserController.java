@@ -5,7 +5,7 @@ import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.dto.ConsultantDTO;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.Implement.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -35,25 +35,25 @@ import java.util.stream.Collectors;
 @RequestMapping("/user")
 public class UserController {
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
     @Autowired
-    private UserService userService;
+    private UserServiceImplement userService;
     @Autowired
-    private ConsultantService consultantService;
+    private ConsultantServiceImplement consultantService;
     @Autowired
-    private MessageService messageService;
+    private MessageServiceImplement messageService;
     @Autowired
-    private FileStorageService fileStorageService;
+    private FileStorageServiceImplement fileStorageService;
     @Autowired
-    private AuthenticationService authenticationService;
+    private AuthenticationServiceImplement authenticationService;
     @Autowired
-    private QuestionService questionService;
+    private QuestionServiceImplement questionService;
     @Autowired
-    private AnswerService answerService;
+    private AnswerServiceImplement answerService;
     @Autowired
-    private QuestionLikeService questionLikeService;
+    private QuestionLikeServiceImplement questionLikeService;
     @Autowired
-    private EventService eventService;
+    private EventServiceImplement eventService;
 
     @GetMapping({"", "/"})
     public String consultantRoot() {

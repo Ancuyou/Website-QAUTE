@@ -2,11 +2,8 @@ package it.ute.QAUTE.controller;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Objects;
-import java.util.Optional;
 
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.AnswerRepository;
 import it.ute.QAUTE.repository.MessageRepository;
 import it.ute.QAUTE.repository.QuestionRepository;
@@ -14,24 +11,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.ReportService;
+import it.ute.QAUTE.service.Implement.AccountServiceImplement;
+import it.ute.QAUTE.service.Implement.ReportServiceImplement;
 
 @Controller
 public class ReportController {
     
     @Autowired
-    private ReportService reportService;
+    private ReportServiceImplement reportService;
 
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImplement accountService;
 
     @Autowired
     private QuestionRepository questionRepository;
