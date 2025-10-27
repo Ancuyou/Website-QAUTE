@@ -85,11 +85,6 @@
                 </a>
             </li>
             <li th:unless="${isConsultant}">
-                <a class="dropdown-item" th:href="@{/settings}">
-                    <i class="fas fa-cog me-2"></i>Cài đặt
-                </a>
-            </li>
-            <li th:unless="${isConsultant}">
                 <a class="dropdown-item" th:href="@{/user/history}">
                     <i class="fas fa-history me-2"></i>Lịch sử tư vấn
                 </a>
