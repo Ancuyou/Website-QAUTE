@@ -5,11 +5,13 @@ import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.service.AuthenticationService;
+import it.ute.QAUTE.service.SecurityService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -30,6 +32,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
+import java.net.InetAddress;
 import java.text.ParseException;
 import java.time.Duration;
 
@@ -42,7 +45,7 @@ public class SecurityConfig {
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AuthenticationService authenticationService;
-
+    @Autowired @Lazy private SecurityService securityService;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -141,13 +144,23 @@ public class SecurityConfig {
             OAuth2User oauthUser = oauthToken.getPrincipal();
 
             String email = (String) oauthUser.getAttributes().get("email");
-
+            String deviceId=authenticationService.getClientIP(request);
+            String deviceName= InetAddress.getLocalHost().getHostName();
             log.info("email: " + email);
             AuthenticationResponse auth = null;
             try {
-                auth = authenticationService.authentication(Account.builder().email(email).build(), "DANGNGOCNHAN", true);
+                auth = authenticationService.authentication(Account.builder().email(email).build(),deviceId, deviceName, true);
             } catch (ParseException e) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+            if (securityService.isDeviceBlock(deviceId, deviceName)) {
+                response.sendRedirect(request.getContextPath() + "/pages/block");
+                return;
+            }
+            Account account=authenticationService.getCurrentAccount();
+            if(account != null && Boolean.parseBoolean(securityService.isAccountLocked(account))){
+                response.sendRedirect(request.getContextPath() + "/pages/login");
+                return;
             }
             if (auth != null) {
                 HttpSession session = request.getSession(true);

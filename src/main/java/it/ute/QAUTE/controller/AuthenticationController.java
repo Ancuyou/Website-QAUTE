@@ -9,6 +9,7 @@ import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AuthenticationService;
 import it.ute.QAUTE.service.EmailService;
+import it.ute.QAUTE.service.SecurityService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.Map;
@@ -42,12 +44,17 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private SecurityService securityService;
     //Post
     @GetMapping("/auth/login")
     public String loginForm(@ModelAttribute("account") Account account,
-                            Model model) {
+                            Model model,HttpServletRequest request) throws UnknownHostException {
         if (account == null) account = new Account();
         if (!model.containsAttribute("account")) model.addAttribute("account", account);
+        String deviceId=authenticationService.getClientIP(request);
+        String deviceName=InetAddress.getLocalHost().getHostName();
+        if (securityService.isDeviceBlock(deviceId,deviceName)) return "pages/block";
         return "pages/login";
     }
 
@@ -147,7 +154,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/auth/login/MFA/verifyPin")
-    public String verifyMfaPin(@RequestParam String cid,@RequestParam String code,HttpServletRequest request,HttpServletResponse response) throws ParseException, JOSEException {
+    public String verifyMfaPin(@RequestParam String cid,@RequestParam String code,HttpServletRequest request,HttpServletResponse response) throws ParseException, JOSEException, UnknownHostException {
         MFAResponse ch = authenticationService.get(cid);
         int id = Math.toIntExact(authenticationService.getCurrentUserId(ch.getAccesstoken(),request,response));
         Account account=accountService.findById(id);
@@ -155,7 +162,9 @@ public class AuthenticationController {
         if (account.getRole()==Account.Role.Admin) secretPin=account.getProfile().getAdmin().getSecretPin();
         else secretPin=account.getProfile().getManager().getSecretPin();
         if(!authenticationService.check(code,secretPin)){
-            System.out.println("sai mã pin");
+            String deviceId=authenticationService.getClientIP(request);
+            String deviceName=InetAddress.getLocalHost().getHostName();
+            securityService.loginFailed(account.getUsername(),deviceId,deviceName);
             return "redirect:/auth/login";
         }
         HttpSession session = request.getSession(true);
@@ -198,7 +207,9 @@ public class AuthenticationController {
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
-            var auth = authenticationService.authentication(account, InetAddress.getLocalHost().getHostName(), false); // device name demo
+            String deviceId=authenticationService.getClientIP(request);
+            String deviceName=InetAddress.getLocalHost().getHostName();
+            var auth = authenticationService.authentication(account,deviceId ,deviceName, false); // device name demo
 
             System.out.println("Token: " + auth.getToken());
 

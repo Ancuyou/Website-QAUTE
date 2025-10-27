@@ -2,27 +2,36 @@ package it.ute.QAUTE.service;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.BlackList;
 import it.ute.QAUTE.repository.AccountRepository;
+import it.ute.QAUTE.repository.BlackListRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class SecurityService {
     @Autowired
+    @Qualifier("securityLimiterCache")
     private Cache<String, Map<String, Integer>>securityLimiterCache;
     @Autowired
     private Cache<String, Long> temporaryLockCache;
     @Autowired
+    @Qualifier("deviceAttemptCache")
+    private Cache<String, Map<String, Integer>> deviceAttemptCache;
+    @Autowired
     private AccountRepository accountRepository;
-    private static final int ramThreshold = 1;
+    @Autowired
+    private BlackListRepository blackListRepository;
+    private static final int ramThreshold = 4;
     private static final int dbLockThreshold=2;
     private static final int downgradeCircle=7;
     public void initData(String username){
@@ -110,9 +119,9 @@ public class SecurityService {
         LocalDateTime lockUntil=levelLockTime(level);
         long lockUntilMillis = lockUntil.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         temporaryLockCache.put(username, lockUntilMillis);
-        long lockMinutes = java.time.Duration.between(LocalDateTime.now(), lockUntil).toMinutes();
+        long lockMinutes = Duration.between(LocalDateTime.now(), lockUntil).toMinutes();
         System.out.println(String.format("🔒 KHÓA TRÊN RAM - %s (Level %d) - Khóa %d phút (đến %s)",
-                username, level, lockMinutes, lockUntil.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"))));
+                username, level, lockMinutes, lockUntil.format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
     }
     public String isAccountLocked(Account account){
         initData(account.getUsername());
@@ -130,13 +139,60 @@ public class SecurityService {
         if(account.isBlock()){
             if (account.getLockUntil() != null) {
                 LocalDateTime lockUntil = LocalDateTime.ofInstant(account.getLockUntil().toInstant(), ZoneId.systemDefault());
-                long lockMinutes = java.time.Duration.between(LocalDateTime.now(), lockUntil).toMinutes();
+                long lockMinutes = Duration.between(LocalDateTime.now(), lockUntil).toMinutes();
                 return String.format("⏳ Đã khóa tài khoản - %s còn %d phút", account.getUsername(), lockMinutes);
             }
             return "Tài khoản đã bị khoá";
         }
         accountRepository.save(account);
         return "";
+    }
+    public void loginFailed(String username,String deviceId,String deviceName){
+        Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
+        if (usernameAttempts== null) {
+            usernameAttempts = new HashMap<>();
+        }
+        usernameAttempts.put(username, usernameAttempts.getOrDefault(username, 0) + 1);
+        deviceAttemptCache.put(deviceId, usernameAttempts);
+        handleBlockDevice(deviceId,deviceName);
+    }
+    public void handleBlockDevice(String deviceId,String deviceName){
+        System.out.println("gọi khoá thiết bị");
+        Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
+        List<String> targetUsernames = new ArrayList<>(usernameAttempts.keySet());
+        Long failCount=usernameAttempts.values().stream().filter(count -> count >= 0).count();
+        boolean isBLock=false;
+        if(targetUsernames.size()==1 && failCount>=1) isBLock=true;
+        else if(targetUsernames.size()==2 && failCount>=15) isBLock=true;
+        else if(targetUsernames.size()>=3 && failCount>=15) isBLock=true;
+        if(isBLock){
+            System.out.println("khoá thiết bị");
+            BlackList newBlock=new BlackList();
+            LocalDateTime unblockAt=LocalDateTime.now().plusHours(8);
+            newBlock.setUnblockAt(Date.from(unblockAt.atZone(ZoneId.systemDefault()).toInstant()));
+            newBlock.setBlock(true);
+            newBlock.setDeviceId(deviceId);
+            newBlock.setBlockAt(new Date());
+            newBlock.setDeviceName(deviceName);
+            blackListRepository.save(newBlock);
+            // có thể tích hợp gửi email cho admin
+        }
+    }
+    public boolean isDeviceBlock(String deviceId,String deviceName){
+        BlackList blackList=blackListRepository.findByDeviceIdAndDeviceName(deviceId,deviceName);
+        if (blackList!=null){
+            blackList=unblockDevice(blackList);
+            if(blackList.isBlock())return true;
+        }
+        return false;
+    }
+    public BlackList unblockDevice(BlackList blackList){
+        if(blackList.getUnblockAt()!=null&&blackList.getUnblockAt().before(new Date())){
+            blackList.setUnblockAt(null);
+            blackList.setBlock(false);
+            return blackListRepository.save(blackList);
+        }
+        return blackList;
     }
     public LocalDateTime levelLockTime(int level){
         return switch (level) {

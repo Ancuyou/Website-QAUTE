@@ -66,4 +66,12 @@ public class CacheConfig {
                 })
                 .build();
     }
+    @Bean
+    public Cache<String, Map<String, Integer>> deviceAttemptCache() {
+        return Caffeine.newBuilder()
+                .maximumSize(50_000)
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .recordStats()
+                .build();
+    }
 }

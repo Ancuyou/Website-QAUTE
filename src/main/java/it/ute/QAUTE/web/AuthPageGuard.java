@@ -4,6 +4,7 @@ import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.AuthenticationService;
+import it.ute.QAUTE.service.SecurityService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,12 +14,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import java.net.InetAddress;
+
 @Component
 @RequiredArgsConstructor
 public class AuthPageGuard implements HandlerInterceptor {
     private final AuthenticationService authenticationService;
     private final AccountService accountService;
     private final CustomJwtDecoder customJwtDecoder;
+    private final SecurityService securityService;
     private String resolveRedirectByRole(String role) {
         switch (role) {
             case "ROLE_User":
@@ -30,7 +35,7 @@ public class AuthPageGuard implements HandlerInterceptor {
             case "ROLE_Manager":
                 return "/manager/questions";
             default:
-                return "/auth/login";
+                return "redirect:/auth/login";
         }
     }
     private String tryResolveRole(HttpServletRequest request, HttpServletResponse response) {
@@ -88,6 +93,27 @@ public class AuthPageGuard implements HandlerInterceptor {
     }
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String uri = request.getRequestURI();
+        if (uri.startsWith(request.getContextPath() + "/auth") ||
+                uri.startsWith(request.getContextPath() + "/css") ||
+                uri.startsWith(request.getContextPath() + "/js") ||
+                uri.startsWith(request.getContextPath() + "/images")) {
+            return true;
+        }
+        String deviceId = authenticationService.getClientIP(request);
+        String deviceName = InetAddress.getLocalHost().getHostName();
+        if (securityService.isDeviceBlock(deviceId, deviceName)) {
+            response.sendRedirect(request.getContextPath() + "/pages/block");
+            return false;
+        }
+        Account account = authenticationService.getCurrentAccount();
+        String message=securityService.isAccountLocked(account);
+        if (account != null && !message.isBlank()) {
+            HttpSession s = request.getSession(false);
+            if (s != null) s.invalidate();
+            response.sendRedirect(request.getContextPath() + "/auth/login?locked=true");
+            return false;
+        }
         String role = tryResolveRole(request, response);
         if (role != null) {
             response.sendRedirect(request.getContextPath() + resolveRedirectByRole(role));
