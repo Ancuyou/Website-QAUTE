@@ -48,9 +48,6 @@ public class AuthenticationController {
                             Model model,HttpServletRequest request) throws UnknownHostException {
         if (account == null) account = new Account();
         if (!model.containsAttribute("account")) model.addAttribute("account", account);
-        String deviceId=authenticationService.getClientIP(request);
-        String deviceName=InetAddress.getLocalHost().getHostName();
-        if (securityService.isDeviceBlock(deviceId,deviceName)) return "pages/block";
         return "pages/login";
     }
 
@@ -158,8 +155,8 @@ public class AuthenticationController {
         if (account.getRole()==Account.Role.Admin) secretPin=account.getProfile().getAdmin().getSecretPin();
         else secretPin=account.getProfile().getManager().getSecretPin();
         if(!authenticationService.check(code,secretPin)){
-            String deviceId=authenticationService.getClientIP(request);
-            String deviceName=InetAddress.getLocalHost().getHostName();
+            String deviceId=securityService.getClientIP(request);
+            String deviceName= securityService.getDeviceFingerprint(request);
             securityService.loginFailed(account.getUsername(),deviceId,deviceName);
             return "redirect:/auth/login";
         }
@@ -194,6 +191,10 @@ public class AuthenticationController {
     public String registerForm() {
         return "pages/register";
     }
+    @GetMapping("/auth/block")
+    public String blockForm() {
+        return "pages/block";
+    }
     // Post
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
@@ -203,8 +204,8 @@ public class AuthenticationController {
                             HttpServletResponse response,
                             RedirectAttributes redirectAttributes) {
         try {
-            String deviceId=authenticationService.getClientIP(request);
-            String deviceName=InetAddress.getLocalHost().getHostName();
+            String deviceId=securityService.getClientIP(request);
+            String deviceName= securityService.getDeviceFingerprint(request);
             var auth = authenticationService.authentication(account,deviceId ,deviceName, false); // device name demo
 
             System.out.println("Token: " + auth.getToken());

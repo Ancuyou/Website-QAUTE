@@ -23,7 +23,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "/auth/google",
                         "/auth/google/callback",
                         "/auth/login/MFA/**",
-                        "/auth/logout"
+                        "/auth/logout",
+                        "/pages/block"
                 );
     }
 }

@@ -111,8 +111,10 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             else {
                 authenticated = check(account.getPassword(),
                         accountRep.getPassword());
-                if (!authenticated) securityService.handleFailedLogin(account.getUsername());
-                securityService.loginFailed(account.getUsername(),deviceId,name_device);
+                if (!authenticated) {
+                    securityService.handleFailedLogin(account.getUsername());
+                    securityService.loginFailed(account.getUsername(),deviceId,name_device);
+                }
             }
         } else{
             accountRep = accountRepository.findByEmail(account.getEmail());
@@ -445,38 +447,5 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         return cid;
     }
     public MFAResponse get(String cid) { return temporaryMFACache.getIfPresent(cid); }
-    // Thêm vào AuthenticationController hoặc tạo Utility class riêng
-
-    public String getClientIP(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        String xRealIP = request.getHeader("X-Real-IP");
-        if (xRealIP != null && !xRealIP.isEmpty() && !"unknown".equalsIgnoreCase(xRealIP)) {
-            return xRealIP;
-        }
-        String proxyClientIP = request.getHeader("Proxy-Client-IP");
-        if (proxyClientIP != null && !proxyClientIP.isEmpty() && !"unknown".equalsIgnoreCase(proxyClientIP)) {
-            return proxyClientIP;
-        }
-        String wlProxyClientIP = request.getHeader("WL-Proxy-Client-IP");
-        if (wlProxyClientIP != null && !wlProxyClientIP.isEmpty() && !"unknown".equalsIgnoreCase(wlProxyClientIP)) {
-            return wlProxyClientIP;
-        }
-        String httpClientIP = request.getHeader("HTTP_CLIENT_IP");
-        if (httpClientIP != null && !httpClientIP.isEmpty() && !"unknown".equalsIgnoreCase(httpClientIP)) {
-            return httpClientIP;
-        }
-        String httpXForwardedFor = request.getHeader("HTTP_X_FORWARDED_FOR");
-        if (httpXForwardedFor != null && !httpXForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(httpXForwardedFor)) {
-            return httpXForwardedFor.split(",")[0].trim();
-        }
-        String remoteAddr = request.getRemoteAddr();
-        if ("0:0:0:0:0:0:0:1".equals(remoteAddr)) {
-            return "127.0.0.1";
-        }
-        return remoteAddr;
-    }
 }
 

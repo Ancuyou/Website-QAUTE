@@ -67,7 +67,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findUserAndConsultant();
     @Query("SELECT a FROM Account a WHERE a.profile.profileID = :profileId")
     Account findByProfile_ProfileID(@Param("profileId") Integer profileId);
-
+    @Query("SELECT a FROM Account a WHERE a.role = 'Admin'")
+    List<Account> findAllAdmin();
     /*@Modifying
     @Transactional
     @Query("UPDATE Account a SET a.isBlock = true WHERE a.accountID = :id")
