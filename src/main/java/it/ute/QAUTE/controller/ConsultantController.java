@@ -205,6 +205,12 @@ public class ConsultantController {
     ) throws IOException {
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
+
+        if(experienceYears <= 0 || experienceYears == null){
+            redirectAttributes.addFlashAttribute("error", "true");
+            redirectAttributes.addFlashAttribute("errorMessage", "Experience years must be a positive number.");
+            return "redirect:/consultant/profile";
+        }
         account.getProfile().setFullName(fullName);
         account.getProfile().setPhone(phone);
         account.getProfile().getConsultant().setExperienceYears(experienceYears);
@@ -214,6 +220,7 @@ public class ConsultantController {
             account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.updateAccount(account);
+        redirectAttributes.addFlashAttribute("success", "true");
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully.");
         return "redirect:/consultant/profile";
     }

@@ -4,6 +4,8 @@ import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.Implement.*;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -110,12 +113,26 @@ public class ConsultantEventController {
 
     @PostMapping("/create")
     public String createEvent(
-            @ModelAttribute Event event,
+            @Valid @ModelAttribute Event event,
+            BindingResult bindingResult, // BindingResult phải đi ngay sau @Valid
             @RequestParam(value = "bannerFile", required = false) MultipartFile bannerFile,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer fieldId,
             Principal principal,
-            RedirectAttributes ra) {
+            RedirectAttributes ra,
+            Model model) {
+        if (event.getStartTime() != null && event.getEndTime() != null
+                && event.getEndTime().isBefore(event.getStartTime())) {
+            bindingResult.rejectValue("endTime", "error.event", "Thời gian kết thúc phải sau thời gian bắt đầu.");
+        }
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("fields", fieldService.getAllFields());
+            model.addAttribute("departments", departmentService.findAll());
+            model.addAttribute("eventTypes", Arrays.asList(Event.EventType.values()));
+            model.addAttribute("eventModes", Arrays.asList(Event.EventMode.values()));
+            model.addAttribute("account", accountService.findUserByUsername(principal.getName()));
+            return "pages/consultant/events/create";
+        }
         try {
             Account account = accountService.findUserByUsername(principal.getName());
             Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
@@ -131,18 +148,21 @@ public class ConsultantEventController {
                 event.setField(fieldService.getFieldById(fieldId));
             }
 
-            Event created = eventService.createEvent(event, bannerFile);
-
+            eventService.createEvent(event, bannerFile);
             ra.addFlashAttribute("success", true);
             ra.addFlashAttribute("successMessage",
                     "Tạo sự kiện thành công! Sự kiện đang chờ phê duyệt từ Manager.");
-
             return "redirect:/consultant/events";
-
         } catch (AppException e) {
-            ra.addFlashAttribute("error", true);
-            ra.addFlashAttribute("errorMessage", "Tạo sự kiện thất bại: " + e.getMessage());
-            return "redirect:/consultant/events/new";
+            model.addAttribute("errorMessage", "Tạo sự kiện thất bại: " + e.getMessage());
+
+            model.addAttribute("fields", fieldService.getAllFields());
+            model.addAttribute("departments", departmentService.findAll());
+            model.addAttribute("eventTypes", Arrays.asList(Event.EventType.values()));
+            model.addAttribute("eventModes", Arrays.asList(Event.EventMode.values()));
+            model.addAttribute("account", accountService.findUserByUsername(principal.getName()));
+
+            return "pages/consultant/events/create"; 
         }
     }
 
@@ -338,11 +358,12 @@ public class ConsultantEventController {
 
         return "pages/consultant/events/participants";
     }
+
     @PostMapping("/participants/update-status/{eventId}")
     public String updateParticipantStatus(
             @PathVariable Integer eventId,
             @RequestParam Integer registrationId,
-            @RequestParam String status, 
+            @RequestParam String status,
             Principal principal,
             RedirectAttributes ra) {
         try {
