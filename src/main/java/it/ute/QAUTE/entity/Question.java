@@ -8,6 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Formula;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -72,4 +73,10 @@ public class Question {
         Approved,
         Rejected
     }
+
+    @Column(name = "Likes", columnDefinition = "INT DEFAULT 0")
+    private int likes = 0;
+
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<QuestionLike> questionLikes = new HashSet<>();
 }

@@ -12,7 +12,7 @@ spring:
   thymeleaf:
     cache: false
   datasource:
-    url: jdbc:mysql://localhost:3306/qaute
+    url: jdbc:mysql://localhost:3306/studentconsultingsystem
     username: root
     password: root
   jpa:

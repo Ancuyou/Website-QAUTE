@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -187,4 +188,9 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
             "FROM Question q JOIN q.field f " +
             "GROUP BY f.fieldID, f.fieldName ORDER BY COUNT(q.questionID) DESC")
     List<HotTopicDTO> findTopFields(Pageable pageable);
+
+    @Query("SELECT SUM(q.likes) FROM Question q WHERE q.user = :user")
+    Long sumLikesByUser(@Param("user") User user);
+
+    Page<Question> findAll(Specification<Question> spec, Pageable pageable);
 }

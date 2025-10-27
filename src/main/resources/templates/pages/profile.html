@@ -17,7 +17,7 @@
                     <a class="nav-link fw-semibold" th:href="@{/user/home}">Trang chủ</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" href="/user/home#consultants">Tư vấn viên</a>
+                    <a class="nav-link fw-semibold" th:href="@{/user/consultants}">Tư vấn viên</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link fw-semibold"  th:href="@{/user/questions}">Cộng đồng</a>
@@ -129,8 +129,8 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
 
-                        <!-- Profile update (giữ nguyên nếu bạn đã có mapping /home/profile/update ở controller khác) -->
-                        <form th:action="@{/home/profile/update}" method="post" enctype="multipart/form-data">
+                        <!-- Profile update (giữ nguyên nếu bạn đã có mapping /user/profile/update ở controller khác) -->
+                        <form th:action="@{/user/profile/update}" method="post" enctype="multipart/form-data">
                             <!-- Avatar Upload (Hidden) -->
                             <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;" onchange="previewAvatar(this)">
 
@@ -340,7 +340,7 @@
 </section>
 
 <!-- Hidden form fallback để POST send-otp nếu fetch lỗi hoặc bị chặn -->
-<form id="sendOtpForm" th:action="@{/home/profile/send-otp}" method="post" style="display:none"></form>
+<form id="sendOtpForm" th:action="@{/user/profile/send-otp}" method="post" style="display:none"></form>
 
 <!-- Modal: Đổi mật khẩu (thuần form POST theo MVC) -->
 <div class="modal fade" id="changePwModal" tabindex="-1" aria-hidden="true">
@@ -358,7 +358,7 @@
                 <hr class="my-3">
 
                 <!-- BƯỚC 2: XÁC MINH OTP (6 ô) -->
-                <form th:action="@{/home/profile/verify-otp}" method="post" onsubmit="return onOtpSubmit(event)">
+                <form th:action="@{/user/profile/verify-otp}" method="post" onsubmit="return onOtpSubmit(event)">
                     <!-- hidden để gửi chuỗi 6 số lên controller -->
                     <input type="hidden" name="otp" id="otpHidden">
 
@@ -436,7 +436,7 @@
     }
 
     // URL động theo context-path & CSRF nếu có
-    const URL_SEND_OTP = /*[[@{/home/profile/send-otp}]]*/ '/home/profile/send-otp';
+    const URL_SEND_OTP = /*[[@{/user/profile/send-otp}]]*/ '/user/profile/send-otp';
     const headers = {};
     (function(){
         var h = document.querySelector('meta[name="_csrf_header"]');
@@ -561,7 +561,7 @@
                 resetFlag = document.createElement('input');
                 resetFlag.type = 'hidden';
                 resetFlag.name = 'resetAvatar';
-                const form = document.querySelector('form[action$="/home/profile/update"]');
+                const form = document.querySelector('form[action$="/user/profile/update"]');
                 if (form) form.appendChild(resetFlag);
             }
             resetFlag.value = 'true';
@@ -572,7 +572,7 @@
         }
     }
     (function () {
-        const form = document.querySelector('form[action$="/home/profile/update"]');
+        const form = document.querySelector('form[action$="/user/profile/update"]');
         if (!form) return;
         const newPw = document.getElementById('newPassword');
         const cfPw  = document.getElementById('confirmPassword');

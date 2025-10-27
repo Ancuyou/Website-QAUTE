@@ -80,7 +80,7 @@
 
             <!-- Nếu KHÔNG phải consultant -->
             <li th:unless="${isConsultant}">
-                <a class="dropdown-item" th:href="@{/home/profile}">
+                <a class="dropdown-item" th:href="@{/user/profile}">
                     <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
                 </a>
             </li>
@@ -90,7 +90,7 @@
                 </a>
             </li>
             <li th:unless="${isConsultant}">
-                <a class="dropdown-item" th:href="@{/advice/history}">
+                <a class="dropdown-item" th:href="@{/user/history}">
                     <i class="fas fa-history me-2"></i>Lịch sử tư vấn
                 </a>
             </li>

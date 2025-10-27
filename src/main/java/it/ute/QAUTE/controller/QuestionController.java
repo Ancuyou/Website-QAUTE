@@ -1,20 +1,18 @@
 package it.ute.QAUTE.controller;
 
-import it.ute.QAUTE.dto.FieldDTO;
-import it.ute.QAUTE.dto.HotTopicDTO;
-import it.ute.QAUTE.dto.QuestionDTO;
+import it.ute.QAUTE.dto.*;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.AccountService;
-import it.ute.QAUTE.service.AnswerService;
-import it.ute.QAUTE.service.ConsultantService;
-import it.ute.QAUTE.service.QuestionService;
-import it.ute.QAUTE.service.UserService;
+import it.ute.QAUTE.exception.AppException;
+import it.ute.QAUTE.exception.ErrorCode;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,8 +27,11 @@ import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
+@RequestMapping("/user/questions")
 public class QuestionController {
 
     @Autowired
@@ -48,8 +49,10 @@ public class QuestionController {
     @Autowired
     private ConsultantService consultantService;
 
+    @Autowired
+    private QuestionLikeService questionLikeService;
 
-    @GetMapping({"/user/questions"})
+    @GetMapping({""})
     public String showQuestionPage(
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer fieldId,
@@ -61,15 +64,26 @@ public class QuestionController {
             Principal principal,
             HttpServletRequest request) {
 
+        Pageable pageable = PageRequest.of(page, 2);
+        Page<Question> questionPage = questionService.searchAndFilterQuestions(
+                departmentId, fieldId, keyword, sortBy, pageable);
+
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
             model.addAttribute("account", account);
-        }
 
-        Pageable pageable = PageRequest.of(page, 2); // 2 câu hỏi mỗi trang
-        Page<Question> questionPage = questionService.searchAndFilterQuestions(
-                departmentId, fieldId, keyword, sortBy, pageable);
+            if (account != null && account.getProfile() != null) {
+                User user = userService.findByProfileId(account.getProfile().getProfileID()).orElse(null);
+                if (user != null) {
+                    model.addAttribute("likedQuestions", questionPage.getContent().stream()
+                            .collect(Collectors.toMap(
+                                    Question::getQuestionID,
+                                    q -> questionLikeService.isLikedByUser(q.getQuestionID(), user)
+                            )));
+                }
+            }
+        }
 
         model.addAttribute("questionDTO", new QuestionDTO());
         model.addAttribute("questions", questionPage.getContent());
@@ -89,7 +103,6 @@ public class QuestionController {
         }
         List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
         model.addAttribute("hotTopics", hotTopics);
-
         String requestedWithHeader = request.getHeader("X-Requested-With");
         if ("fetch".equals(requestedWithHeader)) {
             // Nếu là yêu cầu AJAX, chỉ trả về fragment nội dung
@@ -98,7 +111,7 @@ public class QuestionController {
         return "pages/user/questions";
     }
 
-    @PostMapping({"/user/questions/ask"})
+    @PostMapping({"/ask"})
     public String handleAskQuestion(@Valid @ModelAttribute("questionDTO") QuestionDTO questionDTO,
                                     BindingResult bindingResult,
                                     Principal principal,
@@ -195,7 +208,7 @@ public class QuestionController {
         return "redirect:/user/questions";
     }
 
-    @PostMapping({"/user/questions/answer"})
+    @PostMapping({"/answer"})
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,
                                    @RequestParam("content") String content,
                                    Principal principal,
@@ -236,20 +249,53 @@ public class QuestionController {
         return "redirect:/consultant/questions";
     }
 
-    @GetMapping("/api/fields/{departmentId}")
-    @ResponseBody
-    public java.util.List<FieldDTO> getFieldsByDepartment(@PathVariable Integer departmentId) {
-        java.util.List<Field> fields = questionService.getFieldsByDepartmentId(departmentId);
-        return fields.stream()
-                .map(f -> new FieldDTO(f.getFieldID(), f.getFieldName()))
-                .toList();
-    }
 
-    @GetMapping("/api/fields/all")
-    @ResponseBody
-    public java.util.List<FieldDTO> getAllFields() {
-        return questionService.getAllFields().stream()
-                .map(f -> new FieldDTO(f.getFieldID(), f.getFieldName()))
-                .toList();
+
+    // Endpoint mới để cập nhật câu hỏi
+    @PostMapping("/update/{id}")
+    public String updateQuestion(@PathVariable Integer id,
+                                 @Valid @ModelAttribute("questionDTO") QuestionDTO questionDTO,
+                                 BindingResult bindingResult,
+                                 Principal principal,
+                                 RedirectAttributes redirectAttributes,
+                                 Model model,
+                                 HttpServletRequest request) { // Thêm HttpServletRequest
+        if (principal == null) {
+            return "redirect:/auth/login";
+        }
+        String username = principal.getName();
+        Account account = accountService.findUserByUsername(username);
+        User user = userService.findByProfileId(account.getProfile().getProfileID())
+                .orElse(null);
+
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin người dùng.");
+            return "redirect:" + request.getHeader("Referer"); // Quay lại trang trước đó
+        }
+
+
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ.");
+            // Có thể thêm chi tiết lỗi nếu muốn
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.questionDTO", bindingResult);
+            redirectAttributes.addFlashAttribute("questionDTO", questionDTO);
+            return "redirect:" + request.getHeader("Referer"); // Quay lại trang trước đó
+        }
+
+        try {
+            questionService.updateQuestion(id, user.getUserID(), questionDTO); // Service method mới
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật câu hỏi thành công!");
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+        catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn khi cập nhật.");
+            // Log lỗi e
+        }
+
+        // Quay lại trang trước đó (home hoặc history)
+        String referer = request.getHeader("Referer");
+        return "redirect:" + (referer != null ? referer : "/user/home");
+
     }
 }

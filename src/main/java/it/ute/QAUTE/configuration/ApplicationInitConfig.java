@@ -2,6 +2,8 @@ package it.ute.QAUTE.configuration;
 
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.AccountRepository;
+import it.ute.QAUTE.repository.DepartmentRepository;
+import it.ute.QAUTE.repository.FieldRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +15,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Configuration
@@ -23,7 +27,7 @@ public class ApplicationInitConfig {
     @Autowired
     PasswordEncoder passwordEncoder;
     @Bean
-    ApplicationRunner applicationRunner(AccountRepository accountRepository){
+    ApplicationRunner applicationRunner(AccountRepository accountRepository, DepartmentRepository departmentRepository, FieldRepository fieldRepository){
         return args -> {
             // tạo admin
             if(accountRepository.findByUsername("admin") == null){
@@ -110,6 +114,45 @@ public class ApplicationInitConfig {
                 accountRepository.save(account);
                 log.warn("✅ User account created: username=user, password=user. Please change it!");
             }
+            // --- TẠO KHOA VÀ LĨNH VỰC ---
+            if (departmentRepository.count() == 0) {
+                log.info("Seeding Departments and Fields...");
+
+                // 1. Tạo các Khoa
+                Department cntt = new Department();
+                cntt.setDepartmentName("Khoa Công nghệ thông tin");
+                cntt.setType(Department.DepartmentType.Faculty);
+                departmentRepository.save(cntt);
+
+                Department ckctm = new Department();
+                ckctm.setDepartmentName("Khoa Cơ khí Chế tạo máy");
+                ckctm.setType(Department.DepartmentType.Faculty);
+                departmentRepository.save(ckctm);
+
+                Department ddt = new Department();
+                ddt.setType(Department.DepartmentType.Faculty);
+                ddt.setDepartmentName("Khoa Điện - Điện tử");
+                departmentRepository.save(ddt);
+
+                // 2. Tạo các Lĩnh vực và liên kết với Khoa
+                createField("Công nghệ phần mềm", Set.of(cntt), fieldRepository);
+                createField("Hệ thống thông tin", Set.of(cntt), fieldRepository);
+                createField("An toàn thông tin", Set.of(cntt), fieldRepository);
+
+                createField("Cơ điện tử", Set.of(ckctm, ddt), fieldRepository);
+                createField("Kỹ thuật cơ khí", Set.of(ckctm), fieldRepository);
+
+                createField("Kỹ thuật điều khiển và tự động hóa", Set.of(ddt), fieldRepository);
+                createField("Hệ thống nhúng", Set.of(ddt), fieldRepository);
+
+                log.info("✅ Departments and Fields seeded successfully.");
+            }
         };
+    }
+    private void createField(String fieldName, Set<Department> departments, FieldRepository fieldRepository) {
+        Field field = new Field();
+        field.setFieldName(fieldName);
+        field.setDepartments(new HashSet<>(departments));
+        fieldRepository.save(field);
     }
 }
