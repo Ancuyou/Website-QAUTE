@@ -153,15 +153,6 @@ public class SecurityConfig {
             } catch (ParseException e) {
                 throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
-            if (securityService.isDeviceBlock(deviceId, deviceName)) {
-                response.sendRedirect(request.getContextPath() + "/pages/block");
-                return;
-            }
-            Account account=authenticationService.getCurrentAccount();
-            if(account != null && Boolean.parseBoolean(securityService.isAccountLocked(account))){
-                response.sendRedirect(request.getContextPath() + "/pages/login");
-                return;
-            }
             if (auth != null) {
                 HttpSession session = request.getSession(true);
                 session.setAttribute("ACCESS_TOKEN", auth.getToken());

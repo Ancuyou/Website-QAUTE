@@ -93,27 +93,6 @@ public class AuthPageGuard implements HandlerInterceptor {
     }
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String uri = request.getRequestURI();
-        if (uri.startsWith(request.getContextPath() + "/auth") ||
-                uri.startsWith(request.getContextPath() + "/css") ||
-                uri.startsWith(request.getContextPath() + "/js") ||
-                uri.startsWith(request.getContextPath() + "/images")) {
-            return true;
-        }
-        String deviceId = authenticationService.getClientIP(request);
-        String deviceName = InetAddress.getLocalHost().getHostName();
-        if (securityService.isDeviceBlock(deviceId, deviceName)) {
-            response.sendRedirect(request.getContextPath() + "/pages/block");
-            return false;
-        }
-        Account account = authenticationService.getCurrentAccount();
-        String message=securityService.isAccountLocked(account);
-        if (account != null && !message.isBlank()) {
-            HttpSession s = request.getSession(false);
-            if (s != null) s.invalidate();
-            response.sendRedirect(request.getContextPath() + "/auth/login?locked=true");
-            return false;
-        }
         String role = tryResolveRole(request, response);
         if (role != null) {
             response.sendRedirect(request.getContextPath() + resolveRedirectByRole(role));
@@ -121,4 +100,5 @@ public class AuthPageGuard implements HandlerInterceptor {
         }
         return true;
     }
+
 }

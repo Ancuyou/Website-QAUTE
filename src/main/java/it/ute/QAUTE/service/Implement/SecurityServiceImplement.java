@@ -162,7 +162,7 @@ public class SecurityServiceImplement implements SecurityService {
         List<String> targetUsernames = new ArrayList<>(usernameAttempts.keySet());
         Long failCount=usernameAttempts.values().stream().filter(count -> count >= 0).count();
         boolean isBLock=false;
-        if(targetUsernames.size()==1 && failCount>=1) isBLock=true;
+        if(targetUsernames.size()==1 && failCount>=20) isBLock=true;
         else if(targetUsernames.size()==2 && failCount>=15) isBLock=true;
         else if(targetUsernames.size()>=3 && failCount>=15) isBLock=true;
         if(isBLock){
