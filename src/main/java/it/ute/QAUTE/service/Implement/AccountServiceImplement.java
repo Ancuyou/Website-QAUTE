@@ -206,4 +206,8 @@ public class AccountServiceImplement implements AccountService {
         List<Integer> allUserIds = new ArrayList<>(onlineCache.asMap().keySet());
         return allUserIds;
     }
+    public long countAll_User() {
+        return accountRepository.countByRole(Account.Role.User);
+    }
+
 }

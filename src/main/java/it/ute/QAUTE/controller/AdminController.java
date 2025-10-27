@@ -646,4 +646,5 @@ public class AdminController {
         else ra.addFlashAttribute("error", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
         return "redirect:/admin/notifications";
     }
+
 }

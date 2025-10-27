@@ -42,4 +42,39 @@ public class FastApiClient {
                 .onErrorReturn("Xin lỗi, hệ thống đang bận. Vui lòng thử lại sau.")
                 .block();
     }
+
+    public Mono<Integer> predictToxicAsync(String text) {
+        Map<String, String> body = Map.of("text", text);
+
+        return webClient.post()
+                .uri("/predict")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(res -> {
+                    Object value = res.get("label");
+                    if (value instanceof Number) {
+                        return ((Number) value).intValue();
+                    } else if (value instanceof String) {
+                        try {
+                            return Integer.parseInt((String) value);
+                        } catch (NumberFormatException e) {
+                            return 0;
+                        }
+                    } else {
+                        return 0;
+                    }
+                });
+    }
+
+    public int predictToxic(String text) {
+        Integer result = predictToxicAsync(text)
+                .timeout(Duration.ofSeconds(10))
+                .onErrorReturn(0)
+                .block();
+
+        return result != null ? result : 0;
+    }
+
 }

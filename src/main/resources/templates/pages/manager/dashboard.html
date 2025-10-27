@@ -1,0 +1,388 @@
+<th:block th:replace="~{pages/manager/layout-manager :: layout(~{::dashboard_content}, 'dashboard')}">
+    <th:block th:fragment="dashboard_content">
+
+        <div class="container-fluid py-4">
+
+            <div class="page-header">
+                <h2>
+                    <i class="fas fa-chart-line me-2"></i> Bảng điều khiển tổng quan
+                </h2>
+                <p>Theo dõi nhanh các thống kê hoạt động trên hệ thống QAUTE</p>
+            </div>
+
+            <div class="section-title">
+                <i class="fas fa-grip-horizontal"></i>
+                Thống kê chính
+            </div>
+            <div class="row g-4 mb-5">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card primary">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-question-circle stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Tổng số câu hỏi</div>
+
+                        <div class="stat-value" th:text="${totalQuestions}">3</div>
+
+                        <div class="stat-change"
+                             th:classappend="${questionChange >= 0 ? 'positive' : 'negative'}">
+                            <i class="fas"
+                               th:classappend="${questionChange >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                            <span th:text="${#numbers.formatDecimal(questionChange, 1, 'COMMA', 0, 'POINT')} + '% so với tháng trước'">
+                                12% so với tháng trước
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card success">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-reply stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Tổng số câu trả lời</div>
+
+                        <div class="stat-value" th:text="${totalAnswers}">1</div>
+
+                        <div class="stat-change"
+                             th:classappend="${answerChange >= 0 ? 'positive' : 'negative'}">
+                            <i class="fas"
+                               th:classappend="${answerChange >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                            <span th:text="${#numbers.formatDecimal(answerChange, 1, 'COMMA', 0, 'POINT')} + '% so với tháng trước'">
+                                8% so với tháng trước
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card info">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-users stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Người dùng</div>
+
+                        <div class="stat-value" th:text="${totalUsers}">1</div>
+
+                        <div class="stat-change"
+                             th:classappend="${userChange >= 0 ? 'positive' : 'negative'}">
+                            <i class="fas"
+                               th:classappend="${userChange >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                            <span th:text="${#numbers.formatDecimal(userChange, 1, 'COMMA', 0, 'POINT')} + '% so với tháng trước'">
+                                5% so với tháng trước
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-card danger">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-ban stat-icon" th:classappend="${toxicReports > 0 ? 'pulse' : ''}"></i>
+                        </div>
+                        <div class="stat-label">Nội dung xấu</div>
+
+                        <div class="stat-value" th:text="${toxicReports}">3</div>
+
+                        <div class="stat-change negative" th:if="${toxicReports > 0}">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Cần xử lý</span>
+                        </div>
+                        <div class="stat-change positive" th:if="${toxicReports == 0}">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Không có</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">
+                <i class="fas fa-layer-group"></i>
+                Thống kê hệ thống
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card warning">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-layer-group stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Tổng số lĩnh vực</div>
+
+                        <div class="stat-value" th:text="${totalFields}">2</div>
+
+                        <div class="stat-change positive">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Đang hoạt động</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card primary">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-calendar-alt stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Tổng số sự kiện</div>
+
+                        <div class="stat-value" th:text="${totalEvents}">0</div>
+
+                        <div class="stat-change">
+                            <i class="fas fa-minus-circle"></i>
+                            <span style="color: #6b7280;" th:text="${totalEvents > 0 ? 'Đang diễn ra' : 'Không có sự kiện'}">
+                                Không có thay đổi
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <div class="stat-card success">
+                        <div class="stat-icon-wrapper">
+                            <i class="fas fa-bell stat-icon"></i>
+                        </div>
+                        <div class="stat-label">Tổng số thông báo</div>
+
+                        <div class="stat-value" th:text="${totalNotifications}">0</div>
+
+                        <div class="stat-change">
+                            <i class="fas fa-minus-circle"></i>
+                            <span style="color: #6b7280;" th:text="${totalNotifications > 0 ? 'Thông báo mới' : 'Không có thông báo'}">
+                                Không có thay đổi
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #6366f1;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Bỏ: body { ... } */
+        /* Bỏ: .dashboard-container { ... } */
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .page-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            margin: 8px 0 0 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--card-color) 0%, var(--card-color-light) 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-hover-shadow);
+            border-color: var(--card-color);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-card.primary {
+            --card-color: var(--primary-color);
+            --card-color-light: var(--primary-light);
+        }
+
+        .stat-card.success {
+            --card-color: var(--success-color);
+            --card-color-light: #34d399;
+        }
+
+        .stat-card.info {
+            --card-color: var(--info-color);
+            --card-color-light: #60a5fa;
+        }
+
+        .stat-card.danger {
+            --card-color: var(--danger-color);
+            --card-color-light: #f87171;
+        }
+
+        .stat-card.warning {
+            --card-color: var(--warning-color);
+            --card-color-light: #fbbf24;
+        }
+
+        .stat-icon-wrapper {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .stat-card.primary .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(99, 102, 241, 0.2) 100%);
+        }
+
+        .stat-card.success .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(52, 211, 153, 0.2) 100%);
+        }
+
+        .stat-card.info .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(96, 165, 250, 0.2) 100%);
+        }
+
+        .stat-card.danger .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(248, 113, 113, 0.2) 100%);
+        }
+
+        .stat-card.warning .stat-icon-wrapper {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(251, 191, 36, 0.2) 100%);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-card.primary .stat-icon {
+            color: var(--primary-color);
+        }
+
+        .stat-card.success .stat-icon {
+            color: var(--success-color);
+        }
+
+        .stat-card.info .stat-icon {
+            color: var(--info-color);
+        }
+
+        .stat-card.danger .stat-icon {
+            color: var(--danger-color);
+        }
+
+        .stat-card.warning .stat-icon {
+            color: var(--warning-color);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--danger-color);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #e5e7eb 0%, transparent 100%);
+        }
+
+        @media (max-width: 768px) {
+            /* Bỏ: .dashboard-container { ... } */
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            .stat-icon-wrapper {
+                width: 60px;
+                height: 60px;
+            }
+
+            .stat-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: .8;
+            }
+        }
+    </style>
+
+    </th:block>
+</th:block>

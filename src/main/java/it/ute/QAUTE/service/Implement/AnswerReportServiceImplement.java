@@ -1,12 +1,13 @@
-package it.ute.QAUTE.service.Implement;
+package it.ute.QAUTE.service;
 
 import it.ute.QAUTE.dto.AnswerReportDTO;
 import it.ute.QAUTE.repository.AnswerRepository;
-import it.ute.QAUTE.service.AnswerReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.*;
 
 @Service
@@ -36,5 +37,29 @@ public class AnswerReportServiceImplement implements AnswerReportService {
                         ((java.sql.Date) r[0]).toLocalDate()
                 ))
                 .toList();
+    }
+
+    public double answerChange() {
+        LocalDateTime now = LocalDateTime.now();
+
+        YearMonth thisMonth = YearMonth.from(now);
+        LocalDateTime startOfThisMonth = thisMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = thisMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        YearMonth lastMonth = thisMonth.minusMonths(1);
+        LocalDateTime startOfLastMonth = lastMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = lastMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        long newCount = answerRepository.countAllAnswers(startOfThisMonth, endOfThisMonth);
+        long oldCount = answerRepository.countAllAnswers(startOfLastMonth, endOfLastMonth);
+
+        if (oldCount == 0) {
+            if (newCount > 0) {
+                return 100.0;
+            } else {
+                return 0.0;
+            }
+        }
+        return ((double) (newCount - oldCount) / oldCount) * 100.0;
     }
 }

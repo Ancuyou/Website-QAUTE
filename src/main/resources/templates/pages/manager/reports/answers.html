@@ -2,7 +2,6 @@
     <th:block th:fragment="answers_content">
         <div class="container-fluid py-4">
 
-            <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="h3 mb-1 text-dark fw-bold">
@@ -17,7 +16,6 @@
                 </div>
             </div>
 
-            <!-- Bộ lọc thời gian -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
                     <form th:action="@{/manager/reports/answers}" method="get" class="row g-3 align-items-end">
@@ -44,7 +42,6 @@
                 </div>
             </div>
 
-            <!-- Tổng quan -->
             <div class="row g-4 mb-4">
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-lg h-100 overflow-hidden position-relative"
@@ -102,7 +99,6 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ -->
             <div class="row g-4">
                 <div class="col-lg-6">
                     <div class="card shadow-sm border-0 h-100">
@@ -144,13 +140,10 @@
             }
 
             .card {
-                transition: transform 0.2s, box-shadow 0.2s;
+                /* transition: transform 0.2s, box-shadow 0.2s; <-- Đã xóa */
             }
 
-            .card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
-            }
+            /* Đã xóa .card:hover */
 
             .form-control:focus {
                 border-color: #667eea;
@@ -160,28 +153,19 @@
             .btn-primary {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 border: none;
-                transition: all 0.3s;
+                /* transition: all 0.3s; <-- Đã xóa */
             }
 
-            .btn-primary:hover {
-                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            }
+            /* Đã xóa .btn-primary:hover */
 
             .btn-outline-primary {
                 border-color: #667eea;
                 color: #667eea;
-                transition: all 0.3s;
+                /* transition: all 0.3s; <-- Đã xóa */
             }
 
-            .btn-outline-primary:hover {
-                background: #667eea;
-                border-color: #667eea;
-                transform: translateY(-2px);
-            }
+            /* Đã xóa .btn-outline-primary:hover */
         </style>
-
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script th:inline="javascript">
             // Dữ liệu từ server - SỬA ĐÃ: Dùng fullName thay vì name

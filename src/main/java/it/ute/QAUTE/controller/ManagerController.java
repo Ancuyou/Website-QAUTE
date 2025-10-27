@@ -8,7 +8,12 @@ import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
+import it.ute.QAUTE.service.*;
+import it.ute.QAUTE.service.AnswerReportServiceImplement;
+import it.ute.QAUTE.service.ConsultantReportServiceImplement;
 import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.QuestionReportServiceImplement;
+import it.ute.QAUTE.service.UserReportServiceImplement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -71,6 +76,12 @@ public class ManagerController {
     @Autowired
     private AccountServiceImplement accountService;
 
+    @Autowired
+    private AnswerServiceImplement answerService;
+
+    @Autowired
+    private EventServiceImplement eventService;
+
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,
                                 @RequestParam(required = false) Integer departmentId,
@@ -78,13 +89,17 @@ public class ManagerController {
                                 @RequestParam(required = false) String userName,
                                 @RequestParam(required = false) String status,
                                 Model model) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by("dateSend").descending());
+        Pageable pageable = PageRequest.of(page, 5, Sort.by("dateSend").descending());
         Page<Question> questionPage = questionService.filterQuestions(departmentId, fieldId, userName, status, pageable);  // this username is Ho va ten not acc
 
         model.addAttribute("questions", questionPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", questionPage.getTotalPages());
         model.addAttribute("totalElements", questionPage.getTotalElements());
+        model.addAttribute("totalQuestions", questionService.countAll());
+        model.addAttribute("pendingCount", questionService.countByStatus(Question.QuestionStatus.Pending));
+        model.addAttribute("approvedCount", questionService.countByStatus(Question.QuestionStatus.Approved));
+        model.addAttribute("rejectedCount", questionService.countByStatus(Question.QuestionStatus.Rejected));
 
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("fields", fieldRepository.findAllByDepartments_departmentID(departmentId));
@@ -165,12 +180,11 @@ public class ManagerController {
     @GetMapping("/fields")
     public String listFields(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) String keyword,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fieldID").descending());
+        Pageable pageable = PageRequest.of(page, 5, Sort.by("fieldID").descending());
         Page<Field> fieldPage = fieldService.searchField(departmentId, keyword, pageable);
 
         List<Department> departments = departmentService.findAll();
@@ -329,6 +343,7 @@ public class ManagerController {
         var byDept = questionReportService.getByDepartment(startDate, endDate);
         var byStatus = questionReportService.getByStatus(startDate, endDate);
         var byDate = questionReportService.getByDate(startDate, endDate);
+        long answeredCount = questionService.countAnwer_Questions(startDate, endDate);
 
         model.addAttribute("totalQuestions", total);
 
@@ -359,10 +374,7 @@ public class ManagerController {
         model.addAttribute("dateData",
                 byDate.stream().map(QuestionReportDTO::getCount).toList());
 
-        long answeredCount = byStatus.stream()
-                .filter(s -> "ANSWERED".equalsIgnoreCase(s.getName()))
-                .mapToLong(QuestionReportDTO::getCount)
-                .sum();
+
         double answeredRate = total > 0 ? (answeredCount * 100.0 / total) : 0.0;
         model.addAttribute("answeredRate", Math.round(answeredRate));
 
@@ -371,13 +383,13 @@ public class ManagerController {
 
     @GetMapping("/reports/users")
     public String getUserReport(@RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDateTime startDate,
+                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                LocalDateTime startDate,
 
-            @RequestParam(required = false)
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-            LocalDateTime endDate,
-            Model model)
+                                @RequestParam(required = false)
+                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                LocalDateTime endDate,
+                                Model model)
     {
 
         if (startDate == null) startDate = LocalDateTime.now().minusDays(7);
@@ -391,6 +403,7 @@ public class ManagerController {
         model.addAttribute("activeUsers", userReportService.getActiveUsers());
         model.addAttribute("usersByRole", userReportService.getUsersByRole(startDate, endDate));
         model.addAttribute("topUsers", userReportService.getTop10Users(startDate, endDate));
+
         return "pages/manager/reports/users";
     }
 
@@ -405,11 +418,13 @@ public class ManagerController {
 
         List<ConsultantReportDTO> reports = consultantReportService.getPerformance(startDate, endDate);
         long totalConsultants = consultantReportService.getTotalConsultants();
+        long totalAnswer = answerReportService.getTotalAnswers(startDate, endDate);
 
         model.addAttribute("totalConsultants", totalConsultants);
         model.addAttribute("reports", reports);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+        model.addAttribute("totalAnswers", totalAnswer);
 
         return "pages/manager/reports/consultants";
     }
@@ -419,11 +434,12 @@ public class ManagerController {
                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
                                   @RequestParam(value = "page", defaultValue = "0") int page,
                                   Model model) {
-        Pageable pageable = PageRequest.of(page, 10);
+        Pageable pageable = PageRequest.of(page, 5);
         Page<Question> toxicQuestions = toxicContentService.findToxicQuestionsByDateRange(startDate, endDate, pageable);
         model.addAttribute("toxicPage", toxicQuestions);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", toxicQuestions.getTotalPages());
+        model.addAttribute("totalElements", toxicQuestions.getTotalElements());
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         return "pages/manager/badContents";
@@ -509,16 +525,17 @@ public class ManagerController {
                                 @RequestParam(defaultValue = "") String status,
                                 @RequestParam(defaultValue = "1") int page,
                                 @RequestParam(defaultValue = "10") int size,
-                                Model model, HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
-        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
+                                Model model) throws ParseException, JOSEException {
+
+        int id = Math.toIntExact(authenticationService.getCurrentAccount().getAccountID());
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
-        Page<Notification> notifications=notificationService.findNotificationsBySenderId(id,pageable);
+        Page<Notification> notifications=notificationService.findNotificationsBySenderId(q,status,id,pageable);
         model.addAttribute("notifications", notifications.getContent());
         model.addAttribute("currentPage", page);
+        model.addAttribute("totalElements",  notifications.getTotalElements());
         model.addAttribute("totalPages", notifications.getTotalPages());
         model.addAttribute("q", q);
-        model.addAttribute("selectedStatus", status);
+        model.addAttribute("status", status);
         return "pages/manager/notifications";
     }
     @GetMapping("/notifications/new")
@@ -537,11 +554,19 @@ public class ManagerController {
                                    @RequestParam("targetType") String targetType,
                                    @RequestParam("priority") Boolean priority,
                                    @RequestParam("status") String status,
-                                   HttpSession session,HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
-        Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
-        Account account = accountService.findById(id);
-        notificationService.createNotification(account, title, content, targetType, status,priority);
+                                   RedirectAttributes redirectAttributes) throws ParseException, JOSEException {
+        try {
+            int id = Math.toIntExact(authenticationService.getCurrentAccount().getAccountID());
+            Account account = accountService.findById(id);
+            notificationService.createNotification(account, title, content, targetType, status,priority);
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Notification has been created!");
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",  "Error add: " + e.getMessage());
+        }
+
+
         return "redirect:/manager/notifications";
     }
     @PostMapping("/notifications/edit/{id}")
@@ -550,15 +575,56 @@ public class ManagerController {
                                    @RequestParam("content") String content,
                                    @RequestParam("priority") Boolean priority,
                                    @RequestParam("targetType") String targetType,
-                                   @RequestParam("status") String status){
-        notificationService.updateNotification(id,title,content,targetType,status,priority);
+                                   @RequestParam("status") String status,
+                                   RedirectAttributes redirectAttributes){
+        try {
+            notificationService.updateNotification(id,title,content,targetType,status,priority);
+            redirectAttributes.addFlashAttribute("success", true);
+            redirectAttributes.addFlashAttribute("successMessage", "Notification has been edited!");
+        } catch (AppException e) {
+            redirectAttributes.addFlashAttribute("error", true);
+            redirectAttributes.addFlashAttribute("errorMessage",  "Error add: " + e.getMessage());
+        }
+
         return "redirect:/manager/notifications";
     }
     @PostMapping("/notifications/delete/{id}")
     public String deleteNotification(@PathVariable("id") Long id,RedirectAttributes ra){
-        boolean result=notificationService.deleteNotification(id);
-        if(result) ra.addFlashAttribute("success", "Xóa thông báo thành công.");
-        else ra.addFlashAttribute("error", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
+        try{
+            boolean result=notificationService.deleteNotification(id);
+            if(result) {
+                ra.addFlashAttribute("success", true);
+                ra.addFlashAttribute("successMessage", "Xóa thông báo thành công.");
+            }
+            else{
+                ra.addFlashAttribute("error", true);
+                ra.addFlashAttribute("errorMessage", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
+            }
+        } catch (AppException e) {
+            ra.addFlashAttribute("error", true);
+            ra.addFlashAttribute("errorMessage",  "Error add: " + e.getMessage());
+        }
+
         return "redirect:/manager/notifications";
+    }
+
+
+    @GetMapping("/home")
+    public String dashboard(Model model) {
+        model.addAttribute("totalQuestions", questionService.countAll());
+        model.addAttribute("questionChange", questionReportService.questionChange());
+
+        model.addAttribute("totalAnswers", answerService.countAll());
+        model.addAttribute("answerChange", answerReportService.answerChange());
+
+        model.addAttribute("totalUsers", accountService.countAll_User());
+        model.addAttribute("userChange", userReportService.userChange());
+
+        model.addAttribute("toxicReports", questionService.countByStatus(Question.QuestionStatus.Rejected));
+        model.addAttribute("totalFields", fieldService.countAll());
+        model.addAttribute("totalEvents", eventService.countAll());
+        model.addAttribute("totalNotifications", notificationService.countAll());
+
+        return "pages/manager/dashboard";
     }
 }

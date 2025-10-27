@@ -1,182 +1,248 @@
-<th:block th:replace="~{pages/manager/layout-manager :: layout(~{::questions_content}, 'questions')}">
-    <th:block th:fragment="questions_content">
-
-        <div class="container-fluid py-3">
-            <!-- Tiêu đề trang -->
-            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                <h2 class="h4 mb-0"><i class="fas fa-question-circle me-2 text-primary"></i>Danh sách câu hỏi</h2>
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pages/manager/layout-manager :: layout(~{::content}, 'questions')}">
+<th:block th:fragment="content">
+    <div class="py-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="fas fa-question-circle text-primary me-2"></i>Quản lý Câu hỏi
+                </h2>
+                <p class="text-muted mb-0">Quản lý tất cả câu hỏi trong hệ thống</p>
             </div>
+        </div>
 
-            <!-- Bộ lọc tìm kiếm -->
-            <form th:action="@{/manager/questions}" method="get" class="row gy-2 gx-3 align-items-center mb-4">
-                <!-- Department -->
-                <div class="col-md-3">
-                    <label for="departmentSelect" class="form-label fw-semibold">Khoa/Ngành</label>
-                    <select id="departmentSelect" name="departmentId" class="form-select"
-                            onchange="updateFields(this.value)">
-                        <option value="">-- Tất cả khoa/ngành --</option>
-                        <option th:each="dep : ${departments}"
-                                th:value="${dep.departmentID}"
-                                th:text="${dep.departmentName}"
-                                th:selected="${dep.departmentID == selectedDepartmentId}">
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Field -->
-                <div class="col-md-2">
-                    <label for="fieldSelect" class="form-label fw-semibold">Lĩnh vực</label>
-                    <select id="fieldSelect" name="fieldId" class="form-select">
-                        <option value="">-- Tất cả lĩnh vực --</option>
-                        <option th:each="f : ${fields}"
-                                th:value="${f.fieldID}"
-                                th:text="${f.fieldName}"
-                                th:selected="${f.fieldID == selectedFieldId}">
-                        </option>
-                    </select>
-                </div>
-
-                <!-- Trạng thái -->
-                <div class="col-md-2">
-                    <label for="statusSelect" class="form-label fw-semibold">Trạng thái</label>
-                    <select id="statusSelect" name="status" class="form-select">
-                        <option value="">-- Tất cả trạng thái --</option>
-                        <option th:each="st : ${T(it.ute.QAUTE.entity.Question.QuestionStatus).values()}"
-                                th:value="${st.name()}"
-                                th:text="${st}"
-                                th:selected="${st.name() == selectedStatus}">
-                        </option>
-                    </select>
-                </div>
-
-                <div class="d-flex align-items-end gap-2">
-                    <div class="flex-grow-1">
-                        <label for="username" class="form-label fw-semibold">Tìm theo người dùng</label>
-                        <input type="text" id="username" name="userName" class="form-control" placeholder="Nhập tên người dùng...">
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-primary text-white">
+                    <div class="card-body">
+                        <h6 class="text-white-50 mb-1">Tổng câu hỏi</h6>
+                        <h2 class="mb-0 fw-bold" th:text="${totalQuestions}">0</h2>
                     </div>
-                    <div>
-                        <button type="submit" class="btn btn-primary fw-semibold px-3">
-                            <i class="fas fa-search me-1"></i> Lọc kết quả
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-warning text-white">
+                    <div class="card-body">
+                        <h6 class="text-white-50 mb-1">Chờ duyệt</h6>
+                        <h2 class="mb-0 fw-bold" th:text="${pendingCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-success text-white">
+                    <div class="card-body">
+                        <h6 class="text-white-50 mb-1">Đã duyệt</h6>
+                        <h2 class="mb-0 fw-bold" th:text="${approvedCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-danger text-white">
+                    <div class="card-body">
+                        <h6 class="text-white-50 mb-1">Từ chối</h6>
+                        <h2 class="mb-0 fw-bold" th:text="${rejectedCount}">0</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Card -->
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body">
+                <form th:action="@{/manager/questions}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Khoa/Ngành</label>
+                        <select id="departmentSelect" name="departmentId" class="form-select"
+                                onchange="updateFields(this.value)">
+                            <option value="">Tất cả</option>
+                            <option th:each="dep : ${departments}"
+                                    th:value="${dep.departmentID}"
+                                    th:text="${dep.departmentName}"
+                                    th:selected="${dep.departmentID == selectedDepartmentId}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">Lĩnh vực</label>
+                        <select id="fieldSelect" name="fieldId" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option th:each="f : ${fields}"
+                                    th:value="${f.fieldID}"
+                                    th:text="${f.fieldName}"
+                                    th:selected="${f.fieldID == selectedFieldId}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option th:each="st : ${T(it.ute.QAUTE.entity.Question.QuestionStatus).values()}"
+                                    th:value="${st.name()}"
+                                    th:text="${st}"
+                                    th:selected="${st.name() == selectedStatus}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold">Tìm theo người dùng</label>
+                        <input type="text" name="userName" class="form-control"
+                               placeholder="Nhập tên người dùng..."
+                               th:value="${userName}">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Lọc
                         </button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
+        </div>
 
-            <!-- Bảng danh sách câu hỏi -->
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
+        <!-- Questions Table Card -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div th:if="${questions != null and !questions.isEmpty()}">
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-primary">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
                             <tr>
-                                <th class="text-center" style="width: 5%;">ID</th>
-                                <th style="width: 18%;">Tiêu đề</th>
-                                <th style="width: 10%;">Người gửi</th>
-                                <th style="width: 13%;">Khoa/Ngành</th>
-                                <th style="width: 10%;">Lĩnh vực</th>
-                                <th class="text-center" style="width: 11%;">Ngày gửi</th>
-                                <th class="text-center" style="width: 7%;">Lượt xem</th>
-                                <th class="text-center" style="width: 9%;">Trạng thái</th>
-                                <th class="text-center" style="width: 12%;">Hành động</th>
+                                <th style="width: 5%;">ID</th>
+                                <th style="width: 25%;">Câu hỏi</th>
+                                <th style="width: 12%;">Người gửi</th>
+                                <th style="width: 13%;">Khoa/Lĩnh vực</th>
+                                <th style="width: 12%;">Ngày gửi</th>
+                                <th style="width: 8%;" class="text-center">Lượt xem</th>
+                                <th style="width: 10%;">Trạng thái</th>
+                                <th style="width: 15%;" class="text-end">Thao tác</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="q : ${questions}"
-                                th:classappend="${q.status == 'Pending'} ? 'table-warning' : ''">
-
-                                <!-- ID -->
-                                <td class="text-center" th:text="${q.questionID}"></td>
-
-                                <!-- Tiêu đề -->
-                                <td th:text="${q.title}" class="fw-semibold"></td>
-
-                                <!-- Người gửi -->
-                                <td th:text="${q.user != null && q.user.profile != null ? q.user.profile.fullName : 'Ẩn danh'}"></td>
-
-                                <!-- Khoa/Ngành -->
-                                <td th:text="${q.department != null ? q.department.departmentName : '-'}"></td>
-
-                                <!-- Lĩnh vực -->
-                                <td th:text="${q.field != null ? q.field.fieldName : '-'}"></td>
-
-                                <!-- Ngày gửi -->
-                                <td class="text-center" th:text="${#temporals.format(q.dateSend, 'dd/MM/yyyy HH:mm')}"></td>
-
-                                <!-- Lượt xem -->
-                                <td class="text-center" th:text="${q.views}"></td>
-
-                                <!-- Trạng thái -->
-                                <td class="text-center">
-                                    <span class="badge"
-                                          th:classappend="${q.status.name() == 'Pending' ? ' bg-warning text-dark' :
-                                                          (q.status.name() == 'Approved' ? ' bg-success' : ' bg-danger')}">
-                                        <span th:text="${q.status}"></span>
-                                    </span>
+                            <tr th:each="q : ${questions}">
+                                <td th:text="${q.questionID}">1</td>
+                                <td>
+                                    <div class="fw-semibold mb-1" th:text="${q.title}">Title</div>
+                                    <small class="text-muted"
+                                           th:text="${#strings.length(q.content) > 80 ? #strings.substring(q.content, 0, 80) + '...' : q.content}">
+                                        Content preview
+                                    </small>
                                 </td>
-
-                                <!-- Hành động -->
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="@{${q.user.profile?.avatar != null && !#strings.isEmpty(q.user.profile.avatar) ? q.user.profile.avatar : '/images/default_avatar.png'}}"
+                                             class="rounded-circle me-2" width="32" height="32" alt="Avatar"/>
+                                        <span class="small"
+                                              th:text="${q.user?.profile?.fullName != null ? q.user.profile.fullName : 'Ẩn danh'}">
+                                                Name
+                                            </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="small fw-semibold"
+                                         th:text="${q.department?.departmentName != null ? q.department.departmentName : '-'}">
+                                        Department
+                                    </div>
+                                    <small class="text-muted"
+                                           th:text="${q.field?.fieldName != null ? q.field.fieldName : '-'}">
+                                        Field
+                                    </small>
+                                </td>
+                                <td>
+                                    <small class="d-block"
+                                           th:text="${#temporals.format(q.dateSend, 'dd/MM/yyyy')}">
+                                        Date
+                                    </small>
+                                    <small class="text-muted"
+                                           th:text="${#temporals.format(q.dateSend, 'HH:mm')}">
+                                        Time
+                                    </small>
+                                </td>
                                 <td class="text-center">
-                                    <div class="btn-group" role="group">
+                                    <span class="badge bg-secondary" th:text="${q.views}">0</span>
+                                </td>
+                                <td>
+                                    <span th:if="${q.status.name() == 'Pending'}" class="badge bg-warning text-dark">Chờ duyệt</span>
+                                    <span th:if="${q.status.name() == 'Approved'}" class="badge bg-success">Đã duyệt</span>
+                                    <span th:if="${q.status.name() == 'Rejected'}" class="badge bg-danger">Từ chối</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
                                         <a th:href="@{/manager/questions/edit/{id}(id=${q.questionID})}"
-                                           class="btn btn-sm btn-outline-primary"
+                                           class="btn btn-outline-secondary"
                                            title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Xóa"
-                                                th:data-question-id="${q.questionID}"
-                                                th:data-question-title="${q.title}"
-                                                onclick="confirmDelete(this)">
+                                        <button type="button" class="btn btn-outline-danger"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#deleteModal' + ${q.questionID}"
+                                                title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
-                                </td>
-                            </tr>
 
-                            <!-- Trường hợp không có dữ liệu -->
-                            <tr th:if="${#lists.isEmpty(questions)}">
-                                <td colspan="9" class="text-center text-muted py-4">Không có câu hỏi nào phù hợp.</td>
+                                    <div class="modal fade" th:id="'deleteModal' + ${q.questionID}" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered modal-sm">
+                                            <div class="modal-content shadow-lg border-0" style="border-radius: 12px; overflow: hidden;">
+                                                <div class="modal-header border-0" style="background: #1e3a5f; color: white; padding: 1.25rem 1.5rem;">
+                                                    <h5 class="modal-title" style="font-weight: 600;">Xác nhận xóa</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter: brightness(0) invert(1);"></button>
+                                                </div>
+                                                <div class="modal-body" style="padding: 1.5rem; background: #f8f9fa;">
+                                                    <p class="text-muted mb-3">Bạn có chắc chắn muốn xóa câu hỏi:</p>
+                                                    <div class="mb-3" style="background: white; padding: 0.75rem 1rem; border-radius: 6px; border-left: 3px solid #1e3a5f;">
+                                                        <strong th:text="${q.title}"></strong>
+                                                    </div>
+                                                    <p class="text-muted small mb-0"><i>Hành động này không thể hoàn tác.</i></p>
+                                                </div>
+                                                <div class="modal-footer border-0" style="background: #f8f9fa; padding: 1rem 1.5rem; border-top: 1px solid #dee2e6;">
+                                                    <button type="button" class="btn" data-bs-dismiss="modal"
+                                                            style="background: white; border: 1px solid #dee2e6; color: #6c757d; padding: 0.5rem 1.5rem; border-radius: 6px;">
+                                                        Hủy
+                                                    </button>
+                                                    <form th:action="@{/manager/questions/delete/{id}(id=${q.questionID})}" method="post" class="d-inline">
+                                                        <button type="submit" class="btn"
+                                                                style="background: #dc3545; color: white; padding: 0.5rem 1.5rem; border-radius: 6px; border: none;">
+                                                            Xóa
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                <!-- Phân trang -->
-                <div class="card-footer" th:if="${totalPages > 0}">
-                    <nav aria-label="Phân trang câu hỏi">
-                        <ul class="pagination justify-content-center mb-0">
-                            <!-- Nút Previous -->
+                    <!-- Pagination -->
+                    <nav th:if="${totalPages > 1}">
+                        <ul class="pagination justify-content-center">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/manager/questions(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, userName=${userName})}"
-                                   aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
+                                   th:href="@{/manager/questions(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, status=${selectedStatus}, userName=${userName})}">
+                                    Trước
                                 </a>
                             </li>
-
-                            <!-- Số trang -->
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${i == currentPage} ? 'active'">
                                 <a class="page-link"
-                                   th:href="@{/manager/questions(page=${i}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, userName=${userName})}"
+                                   th:href="@{/manager/questions(page=${i}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, status=${selectedStatus}, userName=${userName})}"
                                    th:text="${i + 1}">1</a>
                             </li>
-
-                            <!-- Nút Next -->
                             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                 <a class="page-link"
-                                   th:href="@{/manager/questions(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, userName=${userName})}"
-                                   aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
+                                   th:href="@{/manager/questions(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, status=${selectedStatus}, userName=${userName})}">
+                                    Sau
                                 </a>
                             </li>
                         </ul>
                     </nav>
 
-                    <!-- Thông tin phân trang -->
+                    <!-- Pagination Info -->
                     <div class="text-center mt-2 text-muted">
                         <small>
                             Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
@@ -184,72 +250,38 @@
                         </small>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Modal xác nhận xóa -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="deleteModalLabel">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <p>Bạn có chắc chắn muốn xóa câu hỏi:</p>
-                        <p class="fw-bold text-danger" id="questionTitle"></p>
-                        <p class="text-muted mb-0">Hành động này không thể hoàn tác!</p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <form id="deleteForm" method="post" style="display: inline;">
-                            <input type="hidden" name="_method" value="delete">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Xóa
-                            </button>
-                        </form>
-                    </div>
+                <!-- Empty State -->
+                <div th:if="${questions == null or questions.isEmpty()}" class="text-center py-5">
+                    <i class="fas fa-question-circle fa-4x text-muted mb-3"></i>
+                    <h5 class="text-muted">Không có câu hỏi nào</h5>
+                    <p class="text-muted">Thử thay đổi bộ lọc để xem kết quả khác</p>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Script cập nhật danh sách Field -->
-        <script>
-            function updateFields(departmentId) {
-                if (!departmentId) {
-                    document.getElementById("fieldSelect").innerHTML = '<option value="">-- Tất cả lĩnh vực --</option>';
-                    return;
-                }
-                fetch(`/qaute/manager/fields/by-department/${departmentId}`)
-                        .then(res => res.json())
-                    .then(fields => {
-                        const select = document.getElementById("fieldSelect");
-                        select.innerHTML = '<option value="">-- Tất cả lĩnh vực --</option>';
-                        fields.forEach(f => {
-                            const option = document.createElement("option");
-                            option.value = f.fieldID;
-                            option.textContent = f.fieldName;
-                            select.appendChild(option);
-                        });
+    <!-- Script -->
+    <script>
+        function updateFields(departmentId) {
+            if (!departmentId) {
+                document.getElementById("fieldSelect").innerHTML = '<option value="">Tất cả</option>';
+                return;
+            }
+            fetch(`/qaute/manager/fields/by-department/${departmentId}`)
+                .then(res => res.json())
+                .then(fields => {
+                    const select = document.getElementById("fieldSelect");
+                    select.innerHTML = '<option value="">Tất cả</option>';
+                    fields.forEach(f => {
+                        const option = document.createElement("option");
+                        option.value = f.fieldID;
+                        option.textContent = f.fieldName;
+                        select.appendChild(option);
                     });
-            }
-
-            function confirmDelete(button) {
-                const questionId = button.getAttribute('data-question-id');
-                const questionTitle = button.getAttribute('data-question-title');
-
-                document.getElementById('questionTitle').textContent = questionTitle;
-
-                const form = document.getElementById('deleteForm');
-                form.action = '/qaute/manager/questions/delete/' + questionId;
-                form.method = 'post'; // Chỉnh method thành POST
-
-                const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-                deleteModal.show();
-            }
-        </script>
-
-    </th:block>
+                })
+                .catch(err => console.error('Error loading fields:', err));
+        }
+    </script>
 </th:block>
+</html>

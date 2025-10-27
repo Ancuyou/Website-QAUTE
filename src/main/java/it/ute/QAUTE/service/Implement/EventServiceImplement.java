@@ -520,4 +520,9 @@ public class EventServiceImplement implements EventService {
                 .collect(Collectors.toList());
                 
     }
+
+    public long countAll() {
+        return eventRepository.count();
+    }
+
 }

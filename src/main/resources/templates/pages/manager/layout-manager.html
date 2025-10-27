@@ -6,8 +6,11 @@
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm fixed-top manager-navbar">
     <div class="container-fluid">
         <a class="navbar-brand fw-bold fs-4 d-flex align-items-center brand-logo" href="/manager/home">
+            <div class="brand-icon-wrapper">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
             <div class="brand-text">
-                <span class="brand-name"> QAUTE</span>
+                <span class="brand-name">QAUTE</span>
                 <span class="brand-subtitle">Manager Portal</span>
             </div>
         </a>
@@ -17,16 +20,29 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item me-3 d-none d-md-block">
-                    <span class="text-light small fw-semibold" id="greeting"></span>
+                    <div class="greeting-card">
+                        <span class="text-light small fw-semibold" id="greeting"></span>
+                    </div>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        <span class="fw-semibold text-light">Manager</span>
+                    <a class="nav-link dropdown-toggle d-flex align-items-center user-dropdown" href="#" role="button" data-bs-toggle="dropdown">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <span class="fw-semibold text-light ms-2">Manager</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><a class="dropdown-item" href="/qaute/manager/profile"><i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end shadow modern-dropdown">
+                        <li>
+                            <a class="dropdown-item" href="/qaute/manager/profile">
+                                <i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân
+                            </a>
+                        </li>
                         <li><hr class="dropdown-divider"/></li>
-                        <li><a class="dropdown-item text-danger" href="/qaute/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                        <li>
+                            <a class="dropdown-item text-danger" href="/qaute/auth/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
@@ -35,7 +51,7 @@
 </nav>
 
 <!-- Layout Body -->
-<div class="container-fluid" style="margin-top: 70px;">
+<div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
         <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block manager-sidebar">
@@ -43,96 +59,106 @@
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" th:classappend="${active=='dashboard'}? 'active'" th:href="@{/manager/home}">
-                            <i class="fas fa-chart-line me-2"></i>Dashboard tổng quan
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <span>Dashboard tổng quan</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" th:classappend="${active=='questions'}? 'active'" th:href="@{/manager/questions}">
-                            <i class="fas fa-question-circle me-2"></i>Quản lý câu hỏi
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <span>Quản lý câu hỏi</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link"
-                           th:classappend="${active=='fields'} ? 'active'"
-                           th:href="@{/manager/fields}">
-                            <i class="fas fa-layer-group me-2"></i>Quản lý lĩnh vực
+                        <a class="nav-link" th:classappend="${active=='fields'} ? 'active'" th:href="@{/manager/fields}">
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <span>Quản lý lĩnh vực</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${active=='notifications'}? 'active'" th:href="@{/manager/notifications}">
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <span>Quản lý thông báo</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:classappend="${active=='events'}? 'active'" th:href="@{/manager/events}">
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <span>Quản lý sự kiện</span>
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link d-flex justify-content-between align-items-center"
+                        <a class="nav-link nav-link-expandable"
                            data-bs-toggle="collapse"
                            href="#collapseContents"
                            role="button"
                            th:classappend="${(active == 'bad-contents' || active == 'reports-user') ? 'active' : 'collapsed'}"
                            th:aria-expanded="${(active == 'bad-contents' || active == 'reports-user') ? 'true' : 'false'}"
                            aria-controls="collapseContents">
-                            <span class="text-nowrap"><i class="fas fa-ban me-2"></i>Quản lý nội dung xấu</span>
-                            <i class="fas fa-chevron-right small"></i>
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-ban"></i>
+                            </div>
+                            <span class="flex-grow-1">Quản lý nội dung xấu</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
                         </a>
 
-                        <div class="collapse ps-3" id="collapseContents"
+                        <div class="collapse submenu-collapse" id="collapseContents"
                              th:classappend="${(active == 'bad-contents' || active == 'reports-user') ? 'show' : ''}">
-
-                            <ul class="nav flex-column ms-2 border-start border-2 border-light-subtle ps-2">
-
+                            <ul class="nav flex-column submenu">
                                 <li>
-                                    <a class="nav-link py-1"
-                                       th:href="@{/manager/bad-contents}">
+                                    <a class="nav-link" th:href="@{/manager/bad-contents}">
                                         <i class="fas fa-robot me-2"></i>Lọc từ hệ thống (AI)
                                     </a>
                                 </li>
-
                                 <li>
-                                    <a class="nav-link py-1"
-                                       th:href="@{/manager/user-reports}">
+                                    <a class="nav-link" th:href="@{/manager/user-reports}">
                                         <i class="fas fa-users me-2"></i>Báo cáo từ người dùng
                                     </a>
                                 </li>
                             </ul>
                         </div>
                     </li>
+
                     <li class="nav-item">
-                        <a class="nav-link d-flex justify-content-between align-items-center"
+                        <a class="nav-link nav-link-expandable"
                            data-bs-toggle="collapse"
                            href="#collapseReports"
                            role="button"
                            th:classappend="${active == 'report' ? 'active' : 'collapsed'}"
                            th:aria-expanded="${active == 'report' ? 'true' : 'false'}"
                            aria-controls="collapseReports">
-                            <span><i class="fas fa-chart-bar me-2"></i>Báo cáo thống kê</span>
-                            <i class="fas fa-chevron-right small"></i>
+                            <div class="nav-icon-wrapper">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <span class="flex-grow-1">Báo cáo thống kê</span>
+                            <i class="fas fa-chevron-down expand-icon"></i>
                         </a>
-                        <div class="collapse ps-3" id="collapseReports" th:classappend="${active == 'report' ? 'show' : ''}">
-                            <ul class="nav flex-column ms-2 border-start border-2 border-light-subtle ps-2">
-                                <li><a class="nav-link py-1" th:href="@{/manager/reports/questions}"><i class="fas fa-question-circle me-2"></i>Câu hỏi</a></li>
-                                <li><a class="nav-link py-1" th:href="@{/manager/reports/answers}"><i class="fas fa-reply me-2"></i>Câu trả lời</a></li>
-                                <li><a class="nav-link py-1" th:href="@{/manager/reports/consultants}"><i class="fas fa-user-tie me-2"></i>Tư vấn viên</a></li>
-                                <li><a class="nav-link py-1" th:href="@{/manager/reports/users}"><i class="fas fa-users me-2"></i>Người dùng</a></li>
+                        <div class="collapse submenu-collapse" id="collapseReports" th:classappend="${active == 'report' ? 'show' : ''}">
+                            <ul class="nav flex-column submenu">
+                                <li><a class="nav-link" th:href="@{/manager/reports/questions}"><i class="fas fa-question-circle me-2"></i>Câu hỏi</a></li>
+                                <li><a class="nav-link" th:href="@{/manager/reports/answers}"><i class="fas fa-reply me-2"></i>Câu trả lời</a></li>
+                                <li><a class="nav-link" th:href="@{/manager/reports/consultants}"><i class="fas fa-user-tie me-2"></i>Tư vấn viên</a></li>
+                                <li><a class="nav-link" th:href="@{/manager/reports/users}"><i class="fas fa-users me-2"></i>Người dùng</a></li>
                             </ul>
                         </div>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${active=='notifications'}? 'active'" th:href="@{/manager/notifications}">
-                            <i class="fas fa-bell me-2"></i>Quản lý thông báo
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" th:classappend="${active=='faq'}? 'active'" th:href="@{/manager/faq}">
-                            <i class="fas fa-book-open me-2"></i>Thư viện FAQ
-                        </a>
-                    </li>
-                     <li class="nav-item">
-                        <a class="nav-link" th:classappend="${active=='events'}? 'active'" th:href="@{/manager/events}">
-                            <i class="fas fa-calendar-alt me-2"></i>Quản lý sự kiện
-                        </a>
                     </li>
                 </ul>
             </div>
         </nav>
 
         <!-- Nội dung chính -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
             <th:block th:replace="${content}"></th:block>
         </main>
     </div>
@@ -140,78 +166,348 @@
 
 <!-- Custom Styles -->
 <style>
+    /* ================= GLOBAL ================= */
+    :root {
+        --navbar-primary: #0f172a;
+        --navbar-secondary: #1e3a8a;
+        --navbar-accent: #2563eb;
+        --sidebar-primary: #1e3a8a;
+        --sidebar-secondary: #3b82f6;
+        --accent-color: #facc15;
+        --accent-light: #fde68a;
+        --text-light: #e2e8f0;
+        --hover-bg: rgba(255,255,255,0.15);
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+        --shadow-md: 0 4px 6px rgba(0,0,0,0.15);
+        --shadow-lg: 0 8px 16px rgba(0,0,0,0.2);
+    }
+
+    body {
+        background: #f8fafc;
+        padding-top: 70px;
+    }
+
     /* ================= NAVBAR ================= */
     .manager-navbar {
-        background: linear-gradient(90deg, #0f172a, #1e3a8a, #2563eb);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+        background: linear-gradient(90deg, var(--navbar-primary), var(--navbar-secondary), var(--navbar-accent));
+        box-shadow: var(--shadow-lg);
+        backdrop-filter: blur(10px);
+        border-bottom: 2px solid rgba(250, 204, 21, 0.3);
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1030;
     }
-    .manager-navbar .navbar-brand span {
-        color: #facc15;
-        letter-spacing: 0.5px;
+
+    .brand-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: transform 0.3s ease;
     }
-    .manager-navbar .dropdown-menu {
-        border-radius: 10px;
+
+    .brand-logo:hover {
+        transform: scale(1.05);
+    }
+
+    .brand-icon-wrapper {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(250, 204, 21, 0.3);
+    }
+
+    .brand-icon-wrapper i {
+        color: var(--navbar-primary);
+        font-size: 24px;
+    }
+
+    .brand-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+    }
+
+    .brand-name {
+        color: var(--accent-color);
+        letter-spacing: 1px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .brand-subtitle {
+        color: var(--text-light);
+        font-size: 0.75rem;
+        font-weight: 500;
+        opacity: 0.9;
+    }
+
+    .greeting-card {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 16px;
+        border-radius: 20px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .user-dropdown {
+        padding: 8px 16px;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+
+    .user-dropdown:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        background: linear-gradient(135deg, var(--accent-color), var(--accent-light));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .user-avatar i {
+        color: var(--navbar-primary);
+        font-size: 20px;
+    }
+
+    .modern-dropdown {
+        border-radius: 12px;
+        border: none;
+        box-shadow: var(--shadow-lg);
+        margin-top: 8px;
+        overflow: hidden;
+    }
+
+    .modern-dropdown .dropdown-item {
+        padding: 12px 20px;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .modern-dropdown .dropdown-item:hover {
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.1), rgba(59, 130, 246, 0.15));
+        transform: translateX(5px);
+    }
+
+    .modern-dropdown .dropdown-item i {
+        width: 24px;
     }
 
     /* ================= SIDEBAR ================= */
     .manager-sidebar {
-        background: linear-gradient(180deg, #1e3a8a, #3b82f6);
+        background: linear-gradient(180deg, var(--sidebar-primary), var(--sidebar-secondary));
         color: #fff;
         height: calc(100vh - 70px);
         position: sticky;
         top: 70px;
         overflow-y: auto;
-        padding-top: 1rem;
-        box-shadow: inset -3px 0 8px rgba(0,0,0,0.15);
+        padding-top: 1.5rem;
+        box-shadow: inset -4px 0 12px rgba(0,0,0,0.2);
     }
 
     .manager-sidebar .nav-link {
-        color: #e2e8f0;
-        padding: 12px 20px;
-        border-radius: 8px;
-        transition: all 0.25s ease;
-        margin: 6px 10px;
+        color: var(--text-light);
+        padding: 14px 18px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin: 6px 12px;
         font-size: 15px;
         display: flex;
         align-items: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
     }
 
-    .manager-sidebar .nav-link i {
-        width: 22px;
-        text-align: center;
+    .manager-sidebar .nav-link::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--accent-color);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+    }
+
+    .nav-icon-wrapper {
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .nav-icon-wrapper i {
         font-size: 16px;
+        transition: transform 0.3s ease;
     }
 
     .manager-sidebar .nav-link:hover {
-        background: rgba(255,255,255,0.15);
+        background: var(--hover-bg);
         color: #fff;
-        transform: translateX(4px);
+        transform: translateX(6px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 
-    .manager-sidebar .nav-link:hover i {
+    .manager-sidebar .nav-link:hover::before {
+        transform: scaleY(1);
+    }
+
+    .manager-sidebar .nav-link:hover .nav-icon-wrapper {
+        background: rgba(250, 204, 21, 0.2);
+        transform: rotate(5deg) scale(1.1);
+    }
+
+    .manager-sidebar .nav-link:hover .nav-icon-wrapper i {
+        color: var(--accent-color);
         transform: scale(1.1);
-        transition: transform 0.2s ease;
     }
 
     .manager-sidebar .nav-link.active {
-        background: linear-gradient(90deg, #facc15, #fde68a);
-        color: #1e3a8a;
+        background: linear-gradient(90deg, var(--accent-color), var(--accent-light));
+        color: var(--navbar-primary);
         font-weight: 700;
-        box-shadow: inset 0 0 8px rgba(0,0,0,0.25);
+        box-shadow: 0 6px 16px rgba(250, 204, 21, 0.4);
+        transform: translateX(4px);
+    }
+
+    .manager-sidebar .nav-link.active::before {
+        transform: scaleY(1);
+    }
+
+    .manager-sidebar .nav-link.active .nav-icon-wrapper {
+        background: rgba(30, 58, 138, 0.2);
+        box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .manager-sidebar .nav-link.active .nav-icon-wrapper i {
+        color: var(--navbar-primary);
+    }
+
+    /* Expandable Menu */
+    .nav-link-expandable {
+        justify-content: space-between;
+    }
+
+    .expand-icon {
+        font-size: 12px;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .nav-link-expandable:not(.collapsed) .expand-icon {
+        transform: rotate(180deg);
+    }
+
+    /* Submenu */
+    .submenu-collapse {
+        margin: 0 12px;
+    }
+
+    .submenu {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 10px;
+        padding: 8px 0;
+        margin-top: 6px;
+    }
+
+    .submenu .nav-link {
+        padding: 10px 16px;
+        margin: 4px 8px;
+        font-size: 14px;
+        border-left: 2px solid transparent;
+        border-radius: 8px;
+    }
+
+    .submenu .nav-link:hover {
+        border-left-color: var(--accent-color);
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .submenu .nav-link i {
+        width: 20px;
+        font-size: 14px;
     }
 
     /* ================= SCROLLBAR ================= */
     .manager-sidebar::-webkit-scrollbar {
         width: 6px;
     }
+    .manager-sidebar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
     .manager-sidebar::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.3);
-        border-radius: 3px;
+        background: rgba(250, 204, 21, 0.4);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+    .manager-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(250, 204, 21, 0.6);
     }
 
     /* ================= MAIN CONTENT ================= */
-    main {
-        padding-top: 25px;
+    .main-content {
+        padding-top: 30px;
+        padding-bottom: 30px;
+        min-height: calc(100vh - 70px);
+    }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 992px) {
+        .manager-sidebar {
+            position: static;
+            width: 100%;
+            height: auto;
+        }
+        .main-content {
+            margin-left: 0;
+        }
+    }
+    @media (max-width: 768px) {
+        .brand-icon-wrapper {
+            width: 38px;
+            height: 38px;
+        }
+
+        .brand-icon-wrapper i {
+            font-size: 20px;
+        }
+
+        .brand-name {
+            font-size: 1.25rem;
+        }
+
+        .nav-icon-wrapper {
+            width: 32px;
+            height: 32px;
+        }
+
+        .manager-sidebar .nav-link {
+            padding: 12px 14px;
+            margin: 4px 8px;
+        }
     }
 </style>
 
@@ -223,7 +519,6 @@
     else if (hour < 18) greeting.textContent = 'Chào buổi chiều 🌤️, Manager!';
     else greeting.textContent = 'Chào buổi tối 🌙, Manager!';
 </script>
-
 <div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/toast :: toast}"></div>
 </body>

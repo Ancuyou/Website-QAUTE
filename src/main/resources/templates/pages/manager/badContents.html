@@ -1,192 +1,201 @@
 <th:block th:replace="~{pages/manager/layout-manager :: layout(~{::bad_contents}, 'bad-contents')}">
     <th:block th:fragment="bad_contents">
 
-        <div class="container-fluid py-3">
+        <div class="py-4">
             <!-- Tiêu đề trang -->
-            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                <h2 class="h4 mb-0">
-                    <i class="fas fa-robot me-2 text-danger"></i>AI lọc nội dung xấu cho câu hỏi
-                </h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-robot text-primary me-2"></i>AI lọc nội dung xấu cho câu hỏi
+                    </h2>
+                    <p class="text-muted mb-0">Quản lý và xử lý các nội dung bị AI đánh giá là vi phạm</p>
+                </div>
             </div>
 
-            <!-- Thông báo cảnh báo -->
-            <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+            <!-- Cảnh báo -->
+            <div class="alert alert-warning d-flex align-items-center shadow-sm border-0 mb-4" role="alert">
                 <i class="fas fa-exclamation-triangle fa-lg me-3"></i>
                 <div>
-                    <strong>Lưu ý:</strong> Khi <strong>APPROVED</strong>, câu hỏi sẽ chuyển trạng thái "APPROVED".
-                    Khi <strong>REJECTED</strong>, sẽ chuyển sang trạng thái "REJECTED".
+                    <strong>Lưu ý:</strong> Khi <span class="fw-semibold text-success">APPROVED</span>, câu hỏi sẽ chuyển sang trạng thái
+                    <code>APPROVED</code>. Khi <span class="fw-semibold text-danger">REJECTED</span>, sẽ chuyển sang trạng thái
+                    <code>REJECTED</code>.
                 </div>
             </div>
 
             <!-- Bộ lọc tìm kiếm -->
-            <form method="get" class="row gy-2 gx-3 mb-4">
-                <div class="col-md-4">
-                    <label for="startDate" class="form-label fw-semibold">
-                        <i class="fas fa-calendar-day me-1"></i>Từ ngày giờ
-                    </label>
-                    <input type="datetime-local" id="startDate" name="startDate"
-                           class="form-control" th:value="${startDate}">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">
+                                <i class="fas fa-calendar-day me-1"></i>Từ ngày giờ
+                            </label>
+                            <input type="datetime-local" name="startDate"
+                                   class="form-control" th:value="${startDate}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">
+                                <i class="fas fa-calendar-check me-1"></i>Đến ngày giờ
+                            </label>
+                            <input type="datetime-local" name="endDate"
+                                   class="form-control" th:value="${endDate}">
+                        </div>
+
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter me-2"></i>Lọc kết quả
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="col-md-4">
-                    <label for="endDate" class="form-label fw-semibold">
-                        <i class="fas fa-calendar-check me-1"></i>Đến ngày giờ
-                    </label>
-                    <input type="datetime-local" id="endDate" name="endDate"
-                           class="form-control" th:value="${endDate}">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary fw-semibold px-3 w-100" style="margin-top: 31px;">
-                        <i class="fas fa-search me-1"></i> Lọc kết quả
-                    </button>
-                </div>
-            </form>
+            </div>
 
             <!-- Bảng danh sách nội dung xấu -->
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-primary">
-                            <tr>
-                                <th class="text-center" style="width: 5%;">ID</th>
-                                <th style="width: 15%;">Tiêu đề</th>
-                                <th style="width: 25%;">Nội dung</th>
-                                <th style="width: 12%;">Người gửi</th>
-                                <th class="text-center" style="width: 12%;">Ngày gửi</th>
-                                <th class="text-center" style="width: 9%;">Trạng thái</th>
-                                <th class="text-center" style="width: 17%;">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="q : ${toxicPage.content}"
-                                th:classappend="${q.status.name() == 'PENDING'} ? 'table-warning' : ''">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div th:if="${toxicPage != null and !toxicPage.content.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th class="text-center" style="width: 6%;">ID</th>
+                                    <th style="width: 18%;">Tiêu đề</th>
+                                    <th style="width: 30%;">Nội dung</th>
+                                    <th style="width: 15%;">Người gửi</th>
+                                    <th class="text-center" style="width: 13%;">Ngày gửi</th>
+                                    <th class="text-center" style="width: 8%;">Trạng thái</th>
+                                    <th class="text-end" style="width: 10%;">Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="q : ${toxicPage.content}"
+                                    th:classappend="${q.status.name() == 'Pending'} ? 'table-warning' : ''">
+                                    <td class="text-center" th:text="${q.questionID}"></td>
+                                    <td class="fw-semibold" th:text="${q.title}"></td>
 
-                                <!-- ID -->
-                                <td class="text-center" th:text="${q.questionID}"></td>
+                                    <td style="max-width: 350px;">
+                                        <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            <span th:text="${q.content}"></span>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-link text-primary p-0 mt-1"
+                                                style="font-size: 12px;"
+                                                data-bs-toggle="modal"
+                                                th:data-bs-target="'#viewContentModal-' + ${q.questionID}">
+                                            <i class="fas fa-eye me-1"></i>Xem chi tiết
+                                        </button>
+                                    </td>
 
-                                <!-- Tiêu đề -->
-                                <td th:text="${q.title}" class="fw-semibold"></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img th:src="@{${q.user.profile?.avatar != null && !#strings.isEmpty(q.user.profile.avatar) ? q.user.profile.avatar : '/images/default_avatar.png'}}"
+                                                 class="rounded-circle me-2" width="32" height="32" alt="Avatar"/>
+                                            <span th:text="${q.user.profile != null ? q.user.profile.fullName : 'N/A'}">Nguyễn Văn A</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-center" th:text="${#temporals.format(q.dateSend, 'dd/MM/yyyy HH:mm')}"></td>
 
-                                <!-- Nội dung -->
-                                <td style="max-width: 300px;">
-                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                        <span th:text="${q.content}"></span>
-                                    </div>
-                                    <button type="button"
-                                            class="btn btn-link text-primary p-0 mt-1"
-                                            style="font-size: 12px;"
-                                            data-bs-toggle="modal"
-                                            th:data-bs-target="'#viewContentModal-' + ${q.questionID}">
-                                        <i class="fas fa-eye me-1"></i>Xem chi tiết
-                                    </button>
-                                </td>
+                                    <td class="text-center">
+                                            <span class="badge rounded-pill"
+                                                  th:classappend="${q.status.name() == 'Pending' ? 'bg-warning text-dark' :
+                                                                   (q.status.name() == 'Approved' ? 'bg-success' : 'bg-danger')}">
+                                                <span th:text="${q.status}"></span>
+                                            </span>
+                                    </td>
 
-                                <!-- Người gửi -->
-                                <td th:text="${q.user.profile.fullName}"></td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <form th:action="@{/manager/bad-contents/approved/{id}(id=${q.questionID})}"
+                                                  method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-success" title="Duyệt">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                            <form th:action="@{/manager/bad-contents/rejected/{id}(id=${q.questionID})}"
+                                                  method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger" title="Từ chối">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-                                <!-- Ngày gửi -->
-                                <td class="text-center" th:text="${#temporals.format(q.dateSend, 'dd/MM/yyyy HH:mm')}"></td>
+                        <!-- Pagination -->
+                        <nav th:if="${totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <!-- Nút Trước -->
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/bad-contents(
+                                            page=${currentPage - 1},
+                                            startDate=${startDate},
+                                            endDate=${endDate}
+                                       )}">
+                                        Trước
+                                    </a>
+                                </li>
 
-                                <!-- Trạng thái -->
-                                <td class="text-center">
-                                    <span class="badge"
-                                          th:classappend="${q.status.name() == 'PENDING' ? ' bg-warning text-dark' :
-                                                          (q.status.name() == 'APPROVED' ? ' bg-success' : ' bg-danger')}">
-                                        <span th:text="${q.status}"></span>
-                                    </span>
-                                </td>
+                                <!-- Danh sách số trang -->
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/bad-contents(
+                                            page=${i},
+                                            startDate=${startDate},
+                                            endDate=${endDate}
+                                       )}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
 
-                                <!-- Hành động -->
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <form th:action="@{/manager/bad-contents/approved/{id}(id=${q.questionID})}"
-                                              method="post" class="d-inline">
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-success"
-                                                    title="APPROVED">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        </form>
-                                        <form th:action="@{/manager/bad-contents/rejected/{id}(id=${q.questionID})}"
-                                              method="post" class="d-inline">
-                                            <button type="submit"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    title="REJECTED">
-                                                <i class="fas fa-times"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
+                                <!-- Nút Sau -->
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/bad-contents(
+                                            page=${currentPage + 1},
+                                            startDate=${startDate},
+                                            endDate=${endDate}
+                                       )}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
 
-                            <!-- Trường hợp không có dữ liệu -->
-                            <tr th:if="${toxicPage.content.isEmpty()}">
-                                <td colspan="7" class="text-center text-muted py-4">
-                                    Không có nội dung xấu nào trong khoảng thời gian này.
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                        <!-- Pagination Info -->
+                        <div class="text-center mt-2 text-muted">
+                            <small>
+                                Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
+                                (Tổng <span th:text="${totalElements}">0</span> câu hỏi toxic)
+                            </small>
+                        </div>
 
-                <!-- Phân trang -->
-                <div class="card-footer" th:if="${totalPages > 0}">
-                    <nav aria-label="Phân trang nội dung xấu">
-                        <ul class="pagination justify-content-center mb-0">
-                            <!-- Nút Previous -->
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/manager/bad-contents(page=${currentPage - 1}, startDate=${startDate}, endDate=${endDate})}"
-                                   aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            <!-- Số trang -->
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{/manager/bad-contents(page=${i}, startDate=${startDate}, endDate=${endDate})}"
-                                   th:text="${i + 1}">1</a>
-                            </li>
-
-                            <!-- Nút Next -->
-                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/manager/bad-contents(page=${currentPage + 1}, startDate=${startDate}, endDate=${endDate})}"
-                                   aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-
-                    <!-- Thông tin phân trang -->
-                    <div class="text-center mt-2 text-muted">
-                        <small>
-                            Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
-                            (Tổng <span th:text="${toxicPage.totalElements}">0</span> nội dung)
-                        </small>
+                    <!-- Khi không có dữ liệu -->
+                    <div th:if="${toxicPage == null or toxicPage.content.isEmpty()}" class="text-center py-5">
+                        <i class="fas fa-robot fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Không có nội dung vi phạm nào</h5>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal xem chi tiết nội dung -->
+        <!-- Modal xem chi tiết -->
         <div th:each="q : ${toxicPage.content}"
              th:id="'viewContentModal-' + ${q.questionID}"
              class="modal fade"
-             tabindex="-1"
-             aria-hidden="true">
+             tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
+                <div class="modal-content border-0 shadow-sm">
                     <div class="modal-header bg-danger text-white">
                         <h5 class="modal-title">
                             <i class="fas fa-eye me-2"></i>Chi tiết nội dung vi phạm
                         </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
@@ -208,7 +217,7 @@
                             <span th:text="${q.content}"></span>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer border-0">
                         <form th:action="@{/manager/bad-contents/approved/{id}(id=${q.questionID})}"
                               method="post" class="d-inline">
                             <button type="submit" class="btn btn-success">

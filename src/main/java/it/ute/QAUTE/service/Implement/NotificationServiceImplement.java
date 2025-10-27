@@ -56,8 +56,8 @@ public class NotificationServiceImplement implements NotificationService {
         return notificationReceiverRepository.findByAccountId(receiverId);
     }
 
-    public Page<Notification> findNotificationsBySenderId(long senderId, Pageable pageable) {
-        return notificationRepository.findNotificationsBySenderId(senderId, pageable);
+    public Page<Notification> findNotificationsBySenderId(String q, String status, long senderId, Pageable pageable) {
+        return notificationRepository.searchNotificationsBySenderId(q, status, senderId, pageable);
     }
 
     public boolean deleteNotification(Long id) {
@@ -417,5 +417,9 @@ public class NotificationServiceImplement implements NotificationService {
                 title,
                 content,
                 false);
+    }
+
+    public long countAll() {
+        return notificationRepository.count();
     }
 }

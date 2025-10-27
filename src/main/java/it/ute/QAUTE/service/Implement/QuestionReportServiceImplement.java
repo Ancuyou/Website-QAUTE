@@ -1,12 +1,13 @@
-package it.ute.QAUTE.service.Implement;
+package it.ute.QAUTE.service;
 
 import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.repository.QuestionRepository;
-import it.ute.QAUTE.service.QuestionReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -32,5 +33,29 @@ public class QuestionReportServiceImplement implements QuestionReportService {
 
     public List<QuestionReportDTO> getByDate(LocalDateTime start, LocalDateTime end) {
         return questionRepository.getQuestionsByDate(start, end);
+    }
+
+    public double questionChange() {
+        LocalDateTime now = LocalDateTime.now();
+
+        YearMonth thisMonth = YearMonth.from(now);
+        LocalDateTime startOfThisMonth = thisMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfThisMonth = thisMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        YearMonth lastMonth = thisMonth.minusMonths(1);
+        LocalDateTime startOfLastMonth = lastMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfLastMonth = lastMonth.atEndOfMonth().atTime(LocalTime.MAX);
+
+        long newCount = questionRepository.countAllQuestions(startOfThisMonth, endOfThisMonth);
+        long oldCount = questionRepository.countAllQuestions(startOfLastMonth, endOfLastMonth);
+
+        if (oldCount == 0) {
+            if (newCount > 0) {
+                return 100.0;
+            } else {
+                return 0.0;
+            }
+        }
+        return ((double) (newCount - oldCount) / oldCount) * 100.0;
     }
 }

@@ -105,6 +105,16 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
     );
 
     @Query("""
+    SELECT COUNT(q)
+    FROM Question q
+    WHERE q.dateSend BETWEEN :startDate AND :endDate
+      AND SIZE(q.answers) > 0
+    """)
+    long countAnsweredQuestionsByQuestionDate(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate")   LocalDateTime endDate);
+
+    @Query("""
         SELECT new it.ute.QAUTE.dto.QuestionReportDTO(
             q.field.fieldName, COUNT(q), null
         )
@@ -193,4 +203,6 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
     Long sumLikesByUser(@Param("user") User user);
 
     Page<Question> findAll(Specification<Question> spec, Pageable pageable);
+
+    long countByStatus(Question.QuestionStatus status);
 }
