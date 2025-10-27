@@ -41,7 +41,7 @@ import java.time.Duration;
 @EnableMethodSecurity
 @Slf4j
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**", "/css/**", "/js/**", "/images/**" };
+    private final String[] PUBLIC_ENDPOINT = {"/auth/**", "/oauth2/**","/ws/**", "/app/**", "/topic/**","/queue/**","/api/**", "/app-error/**", "/notifications/**", "/css/**", "/js/**", "/images/**" ,"/pages/block"};
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AuthenticationServiceImplement authenticationService;
@@ -144,8 +144,8 @@ public class SecurityConfig {
             OAuth2User oauthUser = oauthToken.getPrincipal();
 
             String email = (String) oauthUser.getAttributes().get("email");
-            String deviceId=authenticationService.getClientIP(request);
-            String deviceName= InetAddress.getLocalHost().getHostName();
+            String deviceId=securityService.getClientIP(request);
+            String deviceName= securityService.getDeviceFingerprint(request);
             log.info("email: " + email);
             AuthenticationResponse auth = null;
             try {

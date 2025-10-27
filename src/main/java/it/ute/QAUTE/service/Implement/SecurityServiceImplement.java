@@ -5,7 +5,9 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.BlackList;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.BlackListRepository;
+import it.ute.QAUTE.service.EmailService;
 import it.ute.QAUTE.service.SecurityService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ public class SecurityServiceImplement implements SecurityService {
     private AccountRepository accountRepository;
     @Autowired
     private BlackListRepository blackListRepository;
+    @Autowired
+    private EmailServiceImplement emailService;
     private static final int ramThreshold = 4;
     private static final int dbLockThreshold=2;
     private static final int downgradeCircle=7;
@@ -157,42 +161,48 @@ public class SecurityServiceImplement implements SecurityService {
         handleBlockDevice(deviceId,deviceName);
     }
     public void handleBlockDevice(String deviceId,String deviceName){
-        System.out.println("gọi khoá thiết bị");
         Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
         List<String> targetUsernames = new ArrayList<>(usernameAttempts.keySet());
         Long failCount=usernameAttempts.values().stream().filter(count -> count >= 0).count();
         boolean isBLock=false;
-        if(targetUsernames.size()==1 && failCount>=20) isBLock=true;
+        StringBuilder reason= new StringBuilder("Danh sách các tên đăng nhập của các tài khoản bị tấn công là: ");
+        for (String targetUsername : targetUsernames){
+            reason.append(targetUsername).append(", ");
+        }
+        reason.append("\nVui lòng thực hiện việc khóa tài khoản hoặc đưa ra các giải pháp phù hợp");
+        if(targetUsernames.size()==1 && failCount>=1) isBLock=true;
         else if(targetUsernames.size()==2 && failCount>=15) isBLock=true;
         else if(targetUsernames.size()>=3 && failCount>=15) isBLock=true;
         if(isBLock){
             System.out.println("khoá thiết bị");
             BlackList newBlock=new BlackList();
-            LocalDateTime unblockAt=LocalDateTime.now().plusHours(8);
+            LocalDateTime unblockAt=LocalDateTime.now().plusMinutes(1);
             newBlock.setUnblockAt(Date.from(unblockAt.atZone(ZoneId.systemDefault()).toInstant()));
             newBlock.setBlock(true);
             newBlock.setDeviceId(deviceId);
             newBlock.setBlockAt(new Date());
             newBlock.setDeviceName(deviceName);
             blackListRepository.save(newBlock);
-            // có thể tích hợp gửi email cho admin
+            List<Account> adminList=accountRepository.findAllAdmin();
+            for (Account admin:adminList){
+                emailService.sendSuspiciousActivityAlert(admin.getEmail(),deviceId,deviceName,"Đang thực hiện đăng nhập nhiều đăng nhập",reason.toString());
+            }
         }
     }
     public boolean isDeviceBlock(String deviceId,String deviceName){
         BlackList blackList=blackListRepository.findByDeviceIdAndDeviceName(deviceId,deviceName);
         if (blackList!=null){
-            blackList=unblockDevice(blackList);
-            if(blackList.isBlock())return true;
+            boolean unlock=unblockDevice(blackList);
+            if(!unlock)return true;
         }
         return false;
     }
-    public BlackList unblockDevice(BlackList blackList){
+    public boolean unblockDevice(BlackList blackList){
         if(blackList.getUnblockAt()!=null&&blackList.getUnblockAt().before(new Date())){
-            blackList.setUnblockAt(null);
-            blackList.setBlock(false);
-            return blackListRepository.save(blackList);
+            blackListRepository.deleteByDeviceIdAndDeviceName(blackList.getDeviceId(),blackList.getDeviceName());
+            return true;
         }
-        return blackList;
+        return false;
     }
     public LocalDateTime levelLockTime(int level){
         return switch (level) {
@@ -206,5 +216,58 @@ public class SecurityServiceImplement implements SecurityService {
             case 7 -> LocalDateTime.now().plusMonths(1);
             default -> null;
         };
+    }
+    public String getClientIP(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+        String xRealIP = request.getHeader("X-Real-IP");
+        if (xRealIP != null && !xRealIP.isEmpty() && !"unknown".equalsIgnoreCase(xRealIP)) {
+            return xRealIP;
+        }
+        String proxyClientIP = request.getHeader("Proxy-Client-IP");
+        if (proxyClientIP != null && !proxyClientIP.isEmpty() && !"unknown".equalsIgnoreCase(proxyClientIP)) {
+            return proxyClientIP;
+        }
+        String wlProxyClientIP = request.getHeader("WL-Proxy-Client-IP");
+        if (wlProxyClientIP != null && !wlProxyClientIP.isEmpty() && !"unknown".equalsIgnoreCase(wlProxyClientIP)) {
+            return wlProxyClientIP;
+        }
+        String httpClientIP = request.getHeader("HTTP_CLIENT_IP");
+        if (httpClientIP != null && !httpClientIP.isEmpty() && !"unknown".equalsIgnoreCase(httpClientIP)) {
+            return httpClientIP;
+        }
+        String httpXForwardedFor = request.getHeader("HTTP_X_FORWARDED_FOR");
+        if (httpXForwardedFor != null && !httpXForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(httpXForwardedFor)) {
+            return httpXForwardedFor.split(",")[0].trim();
+        }
+        String remoteAddr = request.getRemoteAddr();
+        if ("0:0:0:0:0:0:0:1".equals(remoteAddr)) {
+            return "127.0.0.1";
+        }
+        return remoteAddr;
+    }
+    public String getDeviceFingerprint(HttpServletRequest request) {
+        StringBuilder fingerprint = new StringBuilder();
+
+        // User-Agent
+        String userAgent = request.getHeader("User-Agent");
+        fingerprint.append(userAgent != null ? userAgent : "Unknown");
+
+        // Accept-Language
+        String language = request.getHeader("Accept-Language");
+        if (language != null) {
+            fingerprint.append("|").append(language);
+        }
+
+        // Screen resolution từ custom header (cần frontend gửi lên)
+        String screenRes = request.getHeader("X-Screen-Resolution");
+        if (screenRes != null) {
+            fingerprint.append("|").append(screenRes);
+        }
+
+        // Hash để rút ngắn
+        return String.valueOf(fingerprint.toString().hashCode());
     }
 }

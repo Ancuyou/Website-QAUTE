@@ -93,9 +93,22 @@ public class AuthPageGuard implements HandlerInterceptor {
     }
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String deviceId = securityService.getClientIP(request);
+        String deviceName = securityService.getDeviceFingerprint(request);
+        System.out.println("Device ID: " + deviceId);
+        System.out.println("Device Name: " + deviceName);
+        if (securityService.isDeviceBlock(deviceId, deviceName)) {
+            System.out.println("❌ Thiết bị bị khóa - Redirect to /auth/block");
+            String redirectUrl = contextPath + "/auth/block";
+            System.out.println("Redirect URL: " + redirectUrl);
+            response.sendRedirect(redirectUrl);
+            return false;
+        }
         String role = tryResolveRole(request, response);
         if (role != null) {
-            response.sendRedirect(request.getContextPath() + resolveRedirectByRole(role));
+            response.sendRedirect(contextPath + resolveRedirectByRole(role));
             return false;
         }
         return true;

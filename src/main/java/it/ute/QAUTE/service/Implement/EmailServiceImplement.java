@@ -91,6 +91,24 @@ public class EmailServiceImplement implements EmailService {
             self.sendEmail(toEmail, header, "Xin chào,\n\n" + body + "\n\nTrân trọng,\nQAUTE");
         }
     }
+    public void sendSuspiciousActivityAlert(String toEmail,String ipAddress,String deviceName, String activity, String reason ) {
+        try {
+            String htmlContent = getEmailTemplate("🔍 HOẠT ĐỘNG BẤT THƯỜNG",
+                    getSuspiciousActivityContent(ipAddress, deviceName, activity, reason));
+            self.sendEmailHtml(toEmail, "🔍 PHÁT HIỆN HOẠT ĐỘNG BẤT THƯỜNG", htmlContent);
+        } catch (MessagingException e) {
+            String plainText = String.format(
+                    "HOẠT ĐỘNG BẤT THƯỜNG\n\n" +
+                            "Tên thiết bị: %s\n" +
+                            "Hoạt động: %s\n" +
+                            "Lý do cảnh báo: %s\n" +
+                            "Địa chỉ IP: %s\n\n" +
+                            "Vui lòng xem xét!",
+                    deviceName, activity, reason, ipAddress
+            );
+            self.sendEmail(toEmail, "🔍 HOẠT ĐỘNG BẤT THƯỜNG", plainText);
+        }
+    }
     @org.springframework.scheduling.annotation.Async("mailExecutor")
     public void sendEmailHtml(String toEmail, String subject, String htmlBody)
             throws MessagingException {
@@ -100,6 +118,27 @@ public class EmailServiceImplement implements EmailService {
         helper.setSubject(subject);
         helper.setText(htmlBody, true);
         mailSender.send(mime);
+    }
+    private String getSuspiciousActivityContent(String ipAddress,String deviceName, String activity, String reason) {
+        return "<h2 style='color: #ffc107;'>🔍 Hoạt Động Bất Thường</h2>" +
+                "<p>Hệ thống phát hiện hoạt động khả nghi cần xem xét!</p>" +
+                "<div class='otp-box' style='background: linear-gradient(135deg, #fffbea 0%, #fffef0 100%); border: 3px solid #ffc107;'>" +
+                "    <div class='otp-icon'>👤</div>" +
+                "    <div class='otp-label' style='color: #ffc107;'>THÔNG TIN NGƯỜI DÙNG</div>" +
+                "    <div style='text-align: left; padding: 20px; color: #333;'>" +
+                "        <p><strong>👤 Tên thiết bị:</strong> " + deviceName + "</p>" +
+                "        <p><strong>🎬 Hoạt động:</strong> " + activity + "</p>" +
+                "        <p><strong>❓ Lý do cảnh báo:</strong> " + reason + "</p>" +
+                "        <p><strong>🌐 Địa chỉ IP:</strong> <code style='background: #f8f9fa; padding: 5px 10px; border-radius: 5px;'>" + ipAddress + "</code></p>" +
+                "    </div>" +
+                "</div>" +
+                "<div class='info-box'>" +
+                "    <p>💡 Xem xét khóa tài khoản tạm thời nếu phát hiện vi phạm nghiêm trọng.</p>" +
+                "</div>" +
+                "<div class='divider'></div>" +
+                "<p style='color: #999999; font-size: 14px; text-align: center;'>" +
+                "    <strong>QAUTE Activity Monitor</strong>" +
+                "</p>";
     }
     private String getMFAOTPContent(String otp) {
         return "<h2>Xác thực đăng nhập</h2>" +
