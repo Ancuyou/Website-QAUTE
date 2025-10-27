@@ -83,7 +83,14 @@ public class EmailService {
         }
         return otp;
     }
-
+    public void sendNotification(String toEmail, String header, String body) {
+        try {
+            String htmlContent = getEmailTemplate(header, getSystemNotificationContent(header, body));
+            self.sendEmailHtml(toEmail, header + " - QAUTE", htmlContent);
+        } catch (MessagingException e) {
+            self.sendEmail(toEmail, header, "Xin chào,\n\n" + body + "\n\nTrân trọng,\nQAUTE");
+        }
+    }
     @org.springframework.scheduling.annotation.Async("mailExecutor")
     public void sendEmailHtml(String toEmail, String subject, String htmlBody)
             throws MessagingException {

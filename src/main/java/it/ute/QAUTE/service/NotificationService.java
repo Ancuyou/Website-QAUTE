@@ -1,5 +1,6 @@
 package it.ute.QAUTE.service;
 
+import com.github.benmanes.caffeine.cache.Cache;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Event;
 import it.ute.QAUTE.entity.EventRegistration;
@@ -30,7 +31,10 @@ public class NotificationService {
     private NotificationReceiverRepository notificationReceiverRepository;
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
-
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private Cache<Integer, Boolean> onlineCache;
     @Autowired
     private EventRegistrationRepository eventRegistrationRepository;
 
@@ -118,6 +122,8 @@ public class NotificationService {
                         String.valueOf(receiver.getUsername()),
                         "/queue/notifications",
                         savedNotification.getTitle() + ": " + savedNotification.getContent());
+                Boolean isOnline = onlineCache.getIfPresent(receiver.getAccountID());
+                if(savedNotification.is_priority() && isOnline==null) emailService.sendNotification(receiver.getEmail(), savedNotification.getTitle(), savedNotification.getContent());
             }
             System.out.println("✅ Gửi thông báo tới " + receivers.size() + " người dùng.");
         } else {
@@ -212,7 +218,7 @@ public class NotificationService {
                     managerReceiver, // Người nhận là Manager
                     title,
                     content,
-                    true);
+                    false);
         }
     }
 
@@ -257,7 +263,7 @@ public class NotificationService {
                 consultantReceiver,
                 title,
                 content,
-                true);
+                false);
     }
 
     public void notifyConsultantEventRejected(Event event, String reason) {
@@ -278,7 +284,7 @@ public class NotificationService {
                 consultantReceiver,
                 title,
                 content,
-                true);
+                false);
     }
 
     public void notifyConsultantNewRegistration(Event event, User user) {
@@ -343,7 +349,7 @@ public class NotificationService {
                 userReceiver,
                 title,
                 content,
-                true);
+                false);
     }
 
     public void notifyUserEventReminder(User user, Event event) {
@@ -364,7 +370,7 @@ public class NotificationService {
                 userReceiver,
                 title,
                 content,
-                true);
+                false);
     }
 
     public void notifyUsersEventStartingSoon(Event event) {
@@ -387,7 +393,7 @@ public class NotificationService {
                     userReceiver,
                     title,
                     content,
-                    true);
+                    false);
         }
     }
 

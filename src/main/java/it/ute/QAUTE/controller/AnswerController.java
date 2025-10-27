@@ -90,7 +90,7 @@ public class AnswerController {
             question.getUser().getProfile().getAccount(), 
             notificationTitle,
             notificationContent,
-            true 
+            false
         );
 
         redirectAttributes.addFlashAttribute("successMessage", "Câu trả lời của bạn đã được gửi thành công!");

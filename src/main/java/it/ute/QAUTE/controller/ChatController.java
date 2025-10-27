@@ -103,7 +103,6 @@ public class ChatController {
     @ResponseBody
     public List<ConsultantDTO> getChatConsultants(@RequestParam("profileId") Integer profileId) {
         List<Profiles> chatConsultants = messageService.getAllChatUsers(profileId);
-        
         return chatConsultants.stream()
             .map(profile -> {
                 Consultant consultant = profile.getConsultant();

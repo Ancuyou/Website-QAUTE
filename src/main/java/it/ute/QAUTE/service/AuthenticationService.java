@@ -8,6 +8,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.dto.response.AuthenticationResponse;
@@ -79,7 +80,6 @@ public class AuthenticationService {
     @NonFinal
     @Value("${openweather.apikey}")
     protected String APIKEY;
-
     public boolean check(String text,String hasedText){
         return passwordEncoder.matches(text,hasedText);
     }
@@ -372,48 +372,42 @@ public class AuthenticationService {
     public int getCurrentUserId(Object tokenObj, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         if (tokenObj instanceof String token && !token.isBlank()) {
             try {
-                //nếu còn hạn accessToken
                 SignedJWT signedJWT = verifyToken(token);
                 String username = signedJWT.getJWTClaimsSet().getSubject();
                 Account acc = accountRepository.findByUsername(username);
                 if (acc != null) return acc.getAccountID();
-            }catch (AppException e){
-                // nếu hết hạn accessToken
-                if (request.getCookies() != null) {
-                    for(Cookie cookie : request.getCookies()) {
-                        if(cookie.getName().equals("REFRESH_TOKEN")) {
-                            String refresh = cookie.getValue();
-                            if (refresh != null && !refresh.isBlank()) {
-                                try {
-                                    var rjwt = verifyToken(refresh);
-                                    String username = rjwt.getJWTClaimsSet().getSubject();
-                                    Account acc = accountRepository.findByUsername(username);
-                                    if (acc != null) {
-                                        String newAccess = generateToken(acc, null, false);
-                                        HttpSession newSession = request.getSession(true);
-                                        newSession.removeAttribute("ACCESS_TOKEN");
-                                        newSession.setAttribute("ACCESS_TOKEN", newAccess);
-                                        return acc.getAccountID();
-                                    }else {
-                                        ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
-                                                .httpOnly(true).secure(false).sameSite("Lax")
-                                                .path("/").maxAge(0).build();
-                                        response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
-                                    }
-                                }catch (Exception ex) {
-                                    ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
-                                            .httpOnly(true).secure(false).sameSite("Lax")
-                                            .path("/").maxAge(0).build();
-                                    response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
+            } catch (Exception e) {
+
             }
         }
-        return 0;
+        String refresh = null;
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if ("REFRESH_TOKEN".equals(c.getName())) { refresh = c.getValue(); break; }
+            }
+        }
+        if (refresh == null || refresh.isBlank()) return 0;
+        try {
+            var rjwt = verifyToken(refresh);
+            String username = rjwt.getJWTClaimsSet().getSubject();
+            Account acc = accountRepository.findByUsername(username);
+            if (acc == null) {
+                ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                        .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
+                response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+                return 0;
+            }
+            String newAccess = generateToken(acc, null, false);
+            HttpSession session = request.getSession(true);
+            session.setAttribute("ACCESS_TOKEN", newAccess);
+            return acc.getAccountID();
+        } catch (Exception e) {
+            ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
+                    .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
+            response.addHeader(HttpHeaders.SET_COOKIE, delete.toString());
+            return 0;
+        }
     }
     public Account getCurrentAccount() {
         HttpServletRequest request = null;
