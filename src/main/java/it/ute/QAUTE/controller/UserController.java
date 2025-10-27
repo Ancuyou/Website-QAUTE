@@ -200,11 +200,24 @@ public class UserController {
             user = new User();
             user.setProfile(account.getProfile());
         }
+        else{
+            long questionsAsked = questionService.countQuestionsByUser(user);
+            long answersReceived = answerService.countAnswersForUser(user);
+            long consultantsChatted = messageService.getRecentChats(account.getProfile().getProfileID())
+                    .stream()
+                    .map(m -> m.getSenderID().equals(account.getProfile().getProfileID()) ? m.getReceiverID() : m.getSenderID())
+                    .distinct()
+                    .count();
+            model.addAttribute("questionsAsked", questionsAsked);
+            model.addAttribute("answersReceived ", answersReceived);
+            model.addAttribute("consultantsChatted", consultantsChatted);
+        }
+
         System.out.println(account.getProfile().getAvatar());
         model.addAttribute("account", account);
         model.addAttribute("user", user);
         model.addAttribute("roleLabels", userService.mapRole());
-        return "pages/profile";
+        return "pages/user/profile";
     }
     @PostMapping("/profile/send-otp")
     public String sendOTP (Principal principal,HttpSession session){

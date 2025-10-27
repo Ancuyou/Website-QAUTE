@@ -625,7 +625,7 @@
                         if (pushState) {
                             history.pushState({ path: url }, '', url);
                         }
-                        rebindEventListeners(); // Gắn lại listener cho nội dung mới
+                        setupDynamicListeners(contentWrapper); // Gắn lại listener cho nội dung mới
                     } else {
                         // Nếu server không trả về fragment (ví dụ: lỗi), tải lại toàn bộ trang
                         window.location.href = url;
