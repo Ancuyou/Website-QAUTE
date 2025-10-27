@@ -49,12 +49,15 @@ public class Question {
     @JoinColumn(name = "DepartmentID", nullable = false)
     private Department department;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "FieldID"
     )
     @OnDelete(action = OnDeleteAction.SET_NULL)
     private Field field;
+
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)

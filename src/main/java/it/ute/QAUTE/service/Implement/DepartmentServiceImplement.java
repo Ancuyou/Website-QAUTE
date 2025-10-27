@@ -1,9 +1,11 @@
 package it.ute.QAUTE.service.Implement;
 
+import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.Department;
 import it.ute.QAUTE.repository.DepartmentRepository;
+import it.ute.QAUTE.repository.QuestionRepository;
 import it.ute.QAUTE.service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,9 @@ import java.util.List;
 public class DepartmentServiceImplement implements DepartmentService {  // done clean
     @Autowired
     DepartmentRepository departmentRepository;
+
+    @Autowired
+    QuestionRepository questionRepository;
 
     public Page<Department> searchNameDepartment(String keyword, Pageable pageable) {
         if (keyword != null && !keyword.equals("")) {

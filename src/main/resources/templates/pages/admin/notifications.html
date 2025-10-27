@@ -21,72 +21,135 @@
           <span th:text="${error}"></span>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
       </div>
-    <!-- Form tìm kiếm -->
-    <form th:action="@{/admin/notifications}" method="get" class="row mb-3">
-      <div class="col-md-9">
-        <input type="text" name="q" class="form-control" th:value="${q}"
-               placeholder="Tìm theo tiêu đề, nội dung, người gửi..."/>
-      </div>
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-primary w-100">
-          <i class="fas fa-search me-2"></i>Tìm kiếm
-        </button>
-      </div>
-    </form>
+      <!-- Form tìm kiếm -->
+      <form th:action="@{/admin/notifications}" method="get" class="row g-2 align-items-end">
+          <!-- Ô tìm kiếm -->
+          <div class="col-12 col-md-6">
+              <label class="form-label small fw-semibold">Tìm kiếm</label>
+              <input type="text" name="q" class="form-control"
+                     th:value="${q}" placeholder="Tìm theo tiêu đề, nội dung, người gửi..."/>
+          </div>
 
-    <!-- Bảng danh sách thông báo -->
+          <!-- Trạng thái -->
+          <div class="col-6 col-md-3">
+              <label class="form-label small fw-semibold">Trạng thái</label>
+              <select name="status" class="form-select">
+                  <option value="">Tất cả</option>
+                  <option value="PUBLISHED" th:selected="${status == 'PUBLISHED'}">Xuất bản</option>
+                  <option value="DRAFT"     th:selected="${status == 'DRAFT'}">Nháp</option>
+              </select>
+          </div>
+
+          <!-- Nút tìm -->
+          <div class="col-6 col-md-3 d-grid">
+              <label class="form-label d-none d-md-block">&nbsp;</label>
+              <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-search me-2"></i>Tìm kiếm
+              </button>
+          </div>
+      </form>
+
+
+      <!-- Bảng danh sách thông báo -->
     <div class="card shadow">
       <div class="card-body">
         <div class="table-responsive">
-          <table class="table table-hover align-middle">
-            <thead>
-            <tr>
-              <th>ID</th>
-              <th>Người gửi</th>
-              <th>Đối tượng</th>
-              <th>Tiêu đề</th>
-              <th>Ngày tạo</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="n : ${notifications}">
-              <td th:text="${n.notificationID}">1</td>
-              <td th:text="${n.sender != null ? n.sender.username : 'N/A'}">Admin</td>
-              <td th:text="${n.targetType}">USER</td>
-              <td th:text="${n.title}">Thông báo cập nhật hệ thống</td>
-              <td th:text="${n.createdDate != null ? #dates.format(n.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">14/10/2025</td>
-              <td>
-                                <span th:text="${n.status}"
-                                      th:classappend="${n.status == 'Xuất bản'} ? 'badge bg-success' : (${n.status == 'Nháp'} ? 'badge bg-secondary' : 'badge bg-warning')">
-                                    Nháp
-                                </span>
-              </td>
-              <td class="text-nowrap">
-                <a class="btn btn-sm btn-warning"
-                   th:href="@{/admin/notifications/edit/{id}(id=${n.notificationID})}"
-                   title="Sửa thông báo">
-                  <i class="fas fa-edit"></i>
-                </a>
-                  <form th:action="@{/admin/notifications/delete/{id}(id=${n.notificationID})}"
-                        method="post"
-                        class="d-inline"
-                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông báo này?');">
-                      <button type="submit" class="btn btn-sm btn-danger" title="Xóa thông báo">
-                          <i class="fas fa-trash"></i>
-                      </button>
-                  </form>
-              </td>
-            </tr>
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th scope="col" style="width: 72px;">ID</th>
+                    <th scope="col" style="min-width: 220px;">Người gửi</th>
+                    <th scope="col" style="width: 120px;">Đối tượng</th>
+                    <th scope="col" style="min-width: 360px;">Nội dung</th>
+                    <th scope="col" style="width: 170px;">Ngày tạo</th>
+                    <th scope="col" style="width: 130px;">Trạng thái</th>
+                    <th scope="col" class="text-nowrap" style="width: 120px;">Thao tác</th>
+                </tr>
+                </thead>
 
-            <tr th:if="${#lists.isEmpty(notifications)}">
-              <td colspan="8" class="text-center text-muted py-4">
-                Không có thông báo nào.
-              </td>
-            </tr>
-            </tbody>
-          </table>
+                <tbody>
+                <tr th:each="n : ${notifications}">
+                    <!-- ID -->
+                    <td class="text-muted" th:text="${n.notificationID}">1</td>
+
+                    <!-- Người gửi: avatar + tên (ưu tiên fullName nếu có) -->
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <img th:src="@{${n.sender?.profile?.avatar} ?: '/images/default_avatar.png'}"
+                                 class="rounded-circle me-2" width="36" height="36" alt="Avatar"/>
+                            <div class="d-flex flex-column">
+                                <span class="fw-semibold"
+                                      th:text="${n.sender?.profile?.fullName != null && !#strings.isEmpty(n.sender.profile.fullName) ? n.sender.profile.fullName : n.sender?.username}">
+                                  Admin
+                                </span>
+                                <small class="text-muted" th:text="${n.sender?.email}">admin@example.com</small>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- Đối tượng: hiển thị dạng badge -->
+                    <td>
+                        <span class="badge bg-info text-dark" th:text="${n.targetType}">USER</span>
+                    </td>
+
+                    <!-- Nội dung: Tiêu đề đậm + trích dẫn nội dung ngắn -->
+                    <td>
+                        <div class="fw-semibold text-truncate" style="max-width: 480px;"
+                             th:text="${n.title}">Thông báo cập nhật hệ thống</div>
+                        <div class="text-muted small text-truncate" style="max-width: 480px;"
+                             th:text="${#strings.abbreviate(n.content, 100)}">
+                            Mô tả ngắn nội dung thông báo…
+                        </div>
+                    </td>
+
+                    <!-- Ngày tạo -->
+                    <td>
+                        <span th:text="${n.createdDate != null ? #dates.format(n.createdDate, 'dd/MM/yyyy HH:mm') : 'N/A'}">
+                          14/10/2025 09:30
+                        </span>
+                    </td>
+
+                    <!-- Trạng thái: badge đẹp, nhất quán -->
+                    <td>
+                        <span class="badge rounded-pill"
+                              th:classappend="${
+                                  n.status == 'PUBLISHED' ? ' bg-success' :
+                                  (n.status == 'DRAFT' ? ' bg-secondary' : ' bg-warning')
+                              }"
+                              th:text="${
+                                  n.status == 'PUBLISHED' ? 'Xuất bản' :
+                                  (n.status == 'DRAFT' ? 'Nháp' : n.status)
+                              }">
+                          Nháp
+                        </span>
+                    </td>
+
+                    <!-- Thao tác -->
+                    <td class="text-nowrap">
+                        <a class="btn btn-sm btn-warning"
+                           th:href="@{/admin/notifications/edit/{id}(id=${n.notificationID})}"
+                           title="Sửa">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form th:action="@{/admin/notifications/delete/{id}(id=${n.notificationID})}"
+                              method="post" class="d-inline"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông báo này?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+
+                <!-- Empty state -->
+                <tr th:if="${#lists.isEmpty(notifications)}">
+                    <td colspan="7" class="text-center text-muted py-4">
+                        Không có thông báo nào.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
         </div>
 
         <!-- Phân trang -->

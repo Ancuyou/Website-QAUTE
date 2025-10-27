@@ -205,4 +205,6 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
     Page<Question> findAll(Specification<Question> spec, Pageable pageable);
 
     long countByStatus(Question.QuestionStatus status);
+
+    List<Question> findByDepartment_DepartmentID(Integer departmentId);
 }

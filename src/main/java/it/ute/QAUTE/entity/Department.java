@@ -30,8 +30,18 @@ public class Department {
     @Column(name = "Type", nullable = false)
     private DepartmentType type;
 
-    @ManyToMany(mappedBy = "departments")
+    @ManyToMany(
+            mappedBy = "departments",
+            cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE }
+    )
     private Set<Field> fields;
+
+    @OneToMany(
+            mappedBy = "department",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private Set<Question> questions;
 
     public enum DepartmentType {
         Faculty, Department

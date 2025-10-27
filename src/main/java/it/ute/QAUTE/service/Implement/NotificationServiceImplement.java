@@ -60,6 +60,10 @@ public class NotificationServiceImplement implements NotificationService {
         return notificationRepository.searchNotificationsBySenderId(q, status, senderId, pageable);
     }
 
+    public Page<Notification> findNotifications(String q, String status, Pageable pageable) {
+        return notificationRepository.searchNotifications(q, status, pageable);
+    }
+
     public boolean deleteNotification(Long id) {
         Notification notification = notificationRepository.findById(Math.toIntExact(id)).orElse(null);
         if (notification == null || notification.getStatus().equals("PUBLISHED")) {

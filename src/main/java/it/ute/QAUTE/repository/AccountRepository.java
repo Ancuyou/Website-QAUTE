@@ -28,6 +28,9 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.phone) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Account> searchByKeywordAndRole(String keyword, Account.Role role, Pageable pageable);
+
+
+
     // search User
     @EntityGraph(attributePaths = {"profile", "profile.user"})
     @Query("SELECT a FROM Account a JOIN a.profile p JOIN p.user u " +

@@ -77,6 +77,7 @@ public class AdminController {
             Model model
     ) {
         Account account = adminService.findById(id);
+        log.info(String.valueOf(account.getProfile().getConsultant().getProfile().getProfileID()));
         model.addAttribute("account", account);
         return "pages/admin/editConsultant";
     }
@@ -566,7 +567,7 @@ public class AdminController {
     @GetMapping("/users")
     public String listUsers(
             @RequestParam(defaultValue = "") String q,
-            @RequestParam(required = false, defaultValue = "SinhVien") String roleName,
+            @RequestParam(required = false, defaultValue = "") String roleName,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "5") int size,
             Model model) {
@@ -576,6 +577,8 @@ public class AdminController {
         // search keywork
         if (q != null &&!q.isEmpty()) {
             accountPage = accountService.searchUserByKeywordAndRoleName(q, pageable);
+        } else if(roleName.isEmpty() && roleName.equals("")) {
+            accountPage = accountService.findAccountByRole(Account.Role.User, pageable);
         } else {
             accountPage = accountService.findAccountByRoleAndUserRole(User.Role.valueOf(roleName), pageable);
         }
@@ -597,7 +600,7 @@ public class AdminController {
                                     @RequestParam(defaultValue = "10") int size,
                                     Model model){
         Pageable pageable = PageRequest.of(Math.max(page - 1, 0), size, Sort.by("createdDate").descending());
-        Page<Notification> notifications=notificationService.findAllNotifications(pageable);
+        Page<Notification> notifications=notificationService.findNotifications(q,status, pageable);
         model.addAttribute("notifications", notifications.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", notifications.getTotalPages());
@@ -646,5 +649,4 @@ public class AdminController {
         else ra.addFlashAttribute("error", "Hãy thay đổi trạng thái thông báo trước khi thực hiện hành động xoá");
         return "redirect:/admin/notifications";
     }
-
 }

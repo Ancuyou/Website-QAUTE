@@ -17,6 +17,9 @@
 
                     <form th:action="@{/admin/consultant/update}" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
                         <input type="hidden" name="accountID" th:value="${account.accountID}"/>
+                        <input type="hidden" name="profile.profileID" th:value="${account.profile.profileID}"/>
+                        <input type="hidden" name="profile.consultant.consultantID" th:value="${account.profile.consultant.consultantID}"/>
+                        <input type="hidden" name="profile.consultant.profile.profileID" th:value="${account.profile.profileID}"/>
 
                         <!-- Avatar -->
                         <div class="text-center mb-4">
@@ -86,6 +89,20 @@
                                     <option th:value="Consultant" th:selected="${account.role == T(it.ute.QAUTE.entity.Account.Role).Consultant}">Tư vấn viên</option>
                                     <option th:value="User"       th:selected="${account.role == T(it.ute.QAUTE.entity.Account.Role).User}">Người dùng</option>
                                 </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="experienceYears" class="form-label fw-semibold">
+                                    <i class="fas fa-briefcase me-1 text-primary"></i>Số năm kinh nghiệm
+                                </label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="experienceYears"
+                                       name="profile.consultant.experienceYears"
+                                       min="0"
+                                       max="50"
+                                       step="1"
+                                       th:value="${account.profile.consultant.experienceYears != null ? account.profile.consultant.experienceYears : ''}"
+                                       placeholder="Nhập số năm kinh nghiệm">
                             </div>
                         </div>
 
