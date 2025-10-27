@@ -25,12 +25,12 @@ public class AnswerService {
         return answerRepository.findByConsultant_ConsultantID(consultantId);
     }
 
-    public Page<Answer> getAnswersHistoryByConsultant(Integer consultantId, Integer timeRange, String keyword, Pageable pageable) {
+    public Page<Answer> getAnswersHistoryByConsultant(Integer consultantId, Integer departmentId, Integer fieldId, Integer timeRange, String keyword, Pageable pageable) {
         LocalDateTime cutoffDate = null;
         if (timeRange != null) {
             cutoffDate = LocalDateTime.now().minusDays(timeRange);
         }
-        return answerRepository.findAnswersHistoryByConsultant(consultantId, cutoffDate, keyword, pageable);
+        return answerRepository.findAnswersHistoryByConsultant(consultantId, departmentId, fieldId, cutoffDate, keyword, pageable);
     }
 
     public List<Answer> getAnswersByQuestionId(Integer questionId) {

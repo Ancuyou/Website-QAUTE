@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import it.ute.QAUTE.entity.Event;
+import it.ute.QAUTE.entity.Field;
 @Controller
 @RequestMapping("/consultant")
 public class ConsultantController {
@@ -74,6 +75,12 @@ public class ConsultantController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DepartmentService departmentService;
+
+    @Autowired
+    private FieldService fieldService;
 
     @Autowired
     private QuestionLikeService questionLikeService;
@@ -228,19 +235,28 @@ public class ConsultantController {
     public String historyConsultant(
             Model model,
             Principal principal,
-            @RequestParam(required = false) String type,
+            @RequestParam(required = false) Integer departmentId, 
+            @RequestParam(required = false) Integer fieldId,     
             @RequestParam(required = false) Integer timeRange,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request 
+            ) {
 
         String username = principal.getName();
         Account account = accountService.findUserByUsername(username);
         Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
 
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dateAnswered").descending()); 
         Page<Answer> answerPage = answerService.getAnswersHistoryByConsultant(
-                consultant.getConsultantID(), timeRange, keyword, PageRequest.of(page, size));
+                consultant.getConsultantID(),
+                departmentId, 
+                fieldId,      
+                timeRange,
+                keyword,
+                pageable);
 
         List<AnswerQuestionDTO> answerQuestionDTOs = answerPage.getContent().stream()
             .map(answer -> {
@@ -285,9 +301,24 @@ public class ConsultantController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", answerPage.getTotalPages());
         model.addAttribute("pageSize", size);
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("selectedFieldId", fieldId);
+        model.addAttribute("timeRange", timeRange); // Giữ lại timeRange
+        model.addAttribute("keyword", keyword); // Giữ lại keyword
+        model.addAttribute("departments", departmentService.findAll());
+
+        // Load fields ban đầu dựa trên selectedDepartmentId nếu có
+        List<Field> fieldsForFilter = departmentId != null
+                ? questionService.getFieldsByDepartmentId(departmentId)
+                : fieldService.getAllFields(); 
+        model.addAttribute("fields", fieldsForFilter);
+      
+    
 
         return "pages/consultant/history";
     }
+
+
     @GetMapping("/question-details/{id}")
     public String questionDetails(@PathVariable("id") Integer questionId, Model model, Principal principal) {
         String username = principal.getName();
