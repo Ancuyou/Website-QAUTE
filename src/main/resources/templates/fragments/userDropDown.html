@@ -108,7 +108,7 @@
 </ul>
 
 <!-- Fragment cho header của consultant -->
-<nav th:fragment="consultantHeader(userName, avatarUrl, isConsultant)"
+<nav th:fragment="consultantHeader(userName, avatarUrl, isConsultant, active)"
      class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
     <div class="container">
         <a class="navbar-brand text-primary fw-bold fs-3" th:href="@{/consultant/home}">
@@ -122,26 +122,24 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Menu trái cho consultant -->
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/home}">Trang chính</a>
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/home}" th:classappend="${active == 'home'} ? 'active text-primary'">Trang chính</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/questions}">Câu hỏi khách hàng</a>
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/questions}" th:classappend="${active == 'questions'} ? 'active text-primary'">Câu hỏi khách hàng</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/history}">Lịch sử tư vấn</a>
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/history}" th:classappend="${active == 'history'} ? 'active text-primary'">Lịch sử tư vấn</a>
                 </li>
-                <li>
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/profile}">Hồ sơ cá nhân</a>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/events}" th:classappend="${active == 'events'} ? 'active text-primary'">Quản lý sự kiện</a>
                 </li>
-                <li>
-                    <a class="nav-link fw-semibold" th:href="@{/consultant/events}">Sự kiện của tôi</a>
+                <li class="nav-item">
+                    <a class="nav-link fw-semibold" th:href="@{/consultant/profile}" th:classappend="${active == 'profile'} ? 'active text-primary'">Hồ sơ cá nhân</a>
                 </li>
             </ul>
 
-            <!-- User dropdown -->
             <th:block th:replace="~{fragments/userDropDown :: userDropdown(${userName}, ${avatarUrl}, ${isConsultant})}"></th:block>
         </div>
     </div>

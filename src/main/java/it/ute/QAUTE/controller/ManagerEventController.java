@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -117,10 +118,13 @@ public class ManagerEventController {
     @GetMapping("/{id}")
     public String eventDetails(
             @PathVariable Integer id,
-            Model model) {
+            Model model,
+            Principal principal) {
         Event event = eventService.findById(id);
         var participants = eventService.findEventParticipants(id);
-
+        if (principal != null) {
+                model.addAttribute("account", accountService.findUserByUsername(principal.getName()));
+        }
         model.addAttribute("event", event);
         model.addAttribute("participants", participants);
 
@@ -248,20 +252,5 @@ public class ManagerEventController {
         }
 
         return "redirect:/manager/events";
-    }
-
-    // ========== Xem danh sách người đăng ký ==========
-
-    @GetMapping("/participants/{id}")
-    public String viewParticipants(
-            @PathVariable Integer id,
-            Model model) {
-        Event event = eventService.findById(id);
-        var participants = eventService.findEventParticipants(id);
-
-        model.addAttribute("event", event);
-        model.addAttribute("participants", participants);
-
-        return "pages/manager/events/participants";
     }
 }

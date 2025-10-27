@@ -1,4 +1,4 @@
-// src/main/java/it/ute/QAUTE/controller/HomeController.java
+
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
@@ -54,6 +54,11 @@ public class UserController {
     private QuestionLikeService questionLikeService;
     @Autowired
     private EventService eventService;
+
+    @GetMapping({"", "/"})
+    public String consultantRoot() {
+        return "redirect:/user/home";
+    }
 
     @GetMapping("/home")
     public String homeUser(Model model, Principal principal) {

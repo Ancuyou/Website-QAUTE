@@ -32,8 +32,8 @@
                                  style="width: 40px; height: 40px; object-fit: cover;"
                                  alt="Avatar">
                             <div>
-                                <div class="fw-semibold" th:text="*{consultant.profile.fullName}">Consultant Name</div>
-                                <small class="text-muted" th:text="*{consultant.profile.account.email}">consultant@email.com</small>
+                                <div class="fw-semibold" th:text="*{consultant.profile?.fullName}">Consultant Name</div>
+                                <small class="text-muted" th:text="*{consultant.profile?.account?.email}">consultant@email.com</small>
                             </div>
                         </div>
                         
@@ -128,7 +128,7 @@
                                             <span th:text="${reg.user.profile.fullName}">User Name</span>
                                         </div>
                                     </td>
-                                    <td th:text="${reg.user.email}">user@email.com</td>
+                                    <td th:text="${reg.user.profile.account?.email}">user@email.com</td>
                                     <td th:text="${#temporals.format(reg.registeredAt, 'HH:mm dd/MM/yyyy')}">Date</td>
                                     <td>
                                         <span th:if="${reg.status.toString() == 'Registered'}" class="badge bg-primary">Đã đăng ký</span>

@@ -212,3 +212,50 @@
         .d-none {
             display: none !important;
         }
+/* === Feedback bubble đẹp hơn === */
+.bg-feedback {
+    border: 1px solid #eef2f6;
+    border-radius: 16px;
+    padding: 12px 14px;      /* thoáng hơn xíu */
+}
+
+/* Dòng hướng dẫn */
+.ai-feedback .text-muted {
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+/* Hai nút: đều nhau, canh giữa, chống tràn chữ */
+.ai-feedback-actions {
+    display: flex;           /* dùng flex cho chắc */
+    gap: 10px;
+}
+
+.ai-feedback-actions .btn {
+    flex: 1 1 0;             /* hai nút rộng bằng nhau */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 6px;      /* tăng/giảm tuỳ thích */
+    font-size: 10px;         /* ← chỉnh size ở đây */
+    line-height: 1.2;
+    border-width: 2px;
+    white-space: normal;     /* cho phép xuống dòng, KHÔNG bị tràn */
+    text-align: center;
+    min-height: 20px;        /* chiều cao tối thiểu để 2 nút đều nhau khi wrap */
+    font-weight: 600;
+}
+
+.ai-feedback-actions .btn i {
+    margin-right: 6px;
+    font-size: 16px;
+}
+
+/* Màn hình rất hẹp thì xếp dọc */
+@media (max-width: 360px) {
+    .ai-feedback-actions {
+        flex-direction: column;
+    }
+}
+
+

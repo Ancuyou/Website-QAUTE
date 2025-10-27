@@ -181,10 +181,6 @@
                                                class="btn btn-outline-primary" title="Chi tiết">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a th:href="@{/manager/events/participants/{id}(id=${event.eventID})}" 
-                                               class="btn btn-outline-info" title="Người tham gia">
-                                                <i class="fas fa-users"></i>
-                                            </a>
                                             <button type="button" class="btn btn-outline-danger" 
                                                     data-bs-toggle="modal" 
                                                     th:data-bs-target="'#deleteModal' + ${event.eventID}"

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.Principal;
 import java.util.Arrays;
@@ -20,6 +22,8 @@ import java.util.Arrays;
 @Controller
 @RequestMapping("/user/events")
 public class UserEventController {
+
+    private static final Logger log = LoggerFactory.getLogger(UserEventController.class);
 
     @Autowired
     private EventService eventService;
@@ -32,6 +36,17 @@ public class UserEventController {
 
     @Autowired
     private DepartmentService departmentService;
+
+    // Hàm Helper (kiểm tra Enum hợp lệ)
+    private <E extends Enum<E>> boolean isValidEnum(Class<E> enumClass, String value) {
+        if (value == null || value.isEmpty()) return false;
+        try {
+            Enum.valueOf(enumClass, value);
+            return true;
+        } catch (IllegalArgumentException ex) {
+            return false;
+        }
+    }
 
     @GetMapping("")
     public String listEvents(
@@ -48,15 +63,49 @@ public class UserEventController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("startTime").ascending());
 
         Page<Event> events;
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            events = eventService.searchEvents(keyword, pageable);
-        } else if (type != null || mode != null || departmentId != null) {
-            Event.EventType eventType = type != null ? Event.EventType.valueOf(type) : null;
-            Event.EventMode eventMode = mode != null ? Event.EventMode.valueOf(mode) : null;
-            events = eventService.filterEvents(eventType, eventMode, Event.EventStatus.Approved,
-                    departmentId, null, pageable);
-        } else {
-            events = eventService.findUpcomingEvents(pageable);
+
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasType = type != null && !type.trim().isEmpty();
+        boolean hasMode = mode != null && !mode.trim().isEmpty();
+        boolean hasDept = departmentId != null;
+
+        String effectiveType = type;
+        String effectiveMode = mode;
+
+        try {
+            if (hasKeyword) {
+                 events = eventService.searchEvents(keyword, pageable);
+            } else if (hasType || hasMode || hasDept) {
+                Event.EventType eventType = null;
+                if(hasType && isValidEnum(Event.EventType.class, type)) {
+                    eventType = Event.EventType.valueOf(type);
+                } else if (hasType) {
+                     model.addAttribute("filterError", "Loại sự kiện không hợp lệ.");
+                     effectiveType = "";
+                }
+
+                Event.EventMode eventMode = null;
+                 if(hasMode && isValidEnum(Event.EventMode.class, mode)) {
+                    eventMode = Event.EventMode.valueOf(mode);
+                 } else if (hasMode) {
+                     if (!model.containsAttribute("filterError")) {
+                        model.addAttribute("filterError", "Hình thức không hợp lệ.");
+                     }
+                    effectiveMode = "";
+                 }
+                
+                events = eventService.filterEvents(eventType, eventMode, Event.EventStatus.Approved,
+                        departmentId, null, pageable);
+            } else {
+                 events = eventService.findUpcomingEvents(pageable);
+            }
+        } catch (Exception e) { 
+             log.error("Lỗi khi tải danh sách sự kiện: {}", e.getMessage());
+             events = Page.empty(pageable); // Trả về trang rỗng an toàn
+             model.addAttribute("filterError", "Lỗi hệ thống khi tải sự kiện.");
+             effectiveType = "";
+             effectiveMode = "";
+             keyword = "";
         }
 
         model.addAttribute("account", account);
@@ -64,8 +113,8 @@ public class UserEventController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", events.getTotalPages());
         model.addAttribute("keyword", keyword);
-        model.addAttribute("selectedType", type);
-        model.addAttribute("selectedMode", mode);
+        model.addAttribute("selectedType", effectiveType);
+        model.addAttribute("selectedMode", effectiveMode);
         model.addAttribute("selectedDepartmentId", departmentId);
         model.addAttribute("eventTypes", Arrays.asList(Event.EventType.values()));
         model.addAttribute("eventModes", Arrays.asList(Event.EventMode.values()));
@@ -79,20 +128,20 @@ public class UserEventController {
             @PathVariable Integer id,
             Model model,
             Principal principal) {
+        
         Account account = accountService.findUserByUsername(principal.getName());
         User user = userService.findByProfileId(account.getProfile().getProfileID())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        Event event = eventService.findById(id);
+        
+        Event event = eventService.findById(id); 
+        boolean isRegistered = eventService.isUserRegistered(event, user);
 
-        // Check if user already registered
-        boolean isRegistered = event.getRegistrations().stream()
-                .anyMatch(r -> r.getUser().getUserID() == user.getUserID() &&
-                        r.getStatus() != EventRegistration.RegistrationStatus.Cancelled);
+        boolean canRegister = event.canRegister() && !isRegistered;
 
         model.addAttribute("account", account);
         model.addAttribute("event", event);
         model.addAttribute("isRegistered", isRegistered);
-        model.addAttribute("canRegister", event.canRegister() && !isRegistered);
+        model.addAttribute("canRegister", canRegister);
 
         return "pages/user/events/details";
     }
@@ -137,18 +186,28 @@ public class UserEventController {
         Pageable pageable = PageRequest.of(page, size, Sort.by("registeredAt").descending());
 
         Page<EventRegistration> registrations;
+        EventRegistration.RegistrationStatus regStatus = null;
+        String effectiveStatus = status;
+
+        // SỬA LỖI LOGIC: Chuyển đổi Enum và gọi service LỌC
         if (status != null && !status.isEmpty()) {
-            EventRegistration.RegistrationStatus regStatus = EventRegistration.RegistrationStatus.valueOf(status);
-            registrations = eventService.findUserRegistrations(user, pageable);
-        } else {
-            registrations = eventService.findUserRegistrations(user, pageable);
+             try {
+                 regStatus = EventRegistration.RegistrationStatus.valueOf(status);
+             } catch (IllegalArgumentException e) {
+                 model.addAttribute("filterError", "Trạng thái lọc không hợp lệ.");
+                 effectiveStatus = "";
+                 // regStatus vẫn là null
+             }
         }
+        
+        // Gọi hàm service có khả năng lọc (Giả định EventService có hàm này)
+        registrations = eventService.findUserRegistrations(user, regStatus, pageable);
 
         model.addAttribute("account", account);
         model.addAttribute("registrations", registrations.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", registrations.getTotalPages());
-        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedStatus", effectiveStatus); // Dùng biến đã qua xử lý
         model.addAttribute("registrationStatuses",
                 Arrays.asList(EventRegistration.RegistrationStatus.values()));
 
@@ -186,6 +245,13 @@ public class UserEventController {
             @RequestParam(required = false) String feedback,
             Principal principal,
             RedirectAttributes ra) {
+        // Validation
+        if (rating == null || rating < 1 || rating > 5) {
+             ra.addFlashAttribute("error", true);
+             ra.addFlashAttribute("errorMessage", "Vui lòng chọn số sao hợp lệ (1-5).");
+             return "redirect:/user/events/my-registrations";
+        }
+        
         try {
             Account account = accountService.findUserByUsername(principal.getName());
             User user = userService.findByProfileId(account.getProfile().getProfileID())

@@ -63,14 +63,14 @@ public class QuestionController {
             Model model,
             Principal principal,
             HttpServletRequest request) {
-
-        Pageable pageable = PageRequest.of(page, 2);
+        String roleString = "";
+        Pageable pageable = PageRequest.of(page, 10);
         Page<Question> questionPage = questionService.searchAndFilterQuestions(
                 departmentId, fieldId, keyword, sortBy, pageable);
-
         if (principal != null) {
             String username = principal.getName();
             Account account = accountService.findUserByUsername(username);
+            roleString = account.getRole().name();
             model.addAttribute("account", account);
 
             if (account != null && account.getProfile() != null) {
@@ -104,6 +104,11 @@ public class QuestionController {
         List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
         model.addAttribute("hotTopics", hotTopics);
         String requestedWithHeader = request.getHeader("X-Requested-With");
+
+        if(roleString.equals(Account.Role.Consultant.name())){
+            return "pages/consultant/questions-answer";
+        }   
+
         if ("fetch".equals(requestedWithHeader)) {
             // Nếu là yêu cầu AJAX, chỉ trả về fragment nội dung
             return "pages/user/questions :: contentFragment";

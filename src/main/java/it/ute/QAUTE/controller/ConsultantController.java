@@ -1,6 +1,8 @@
 package it.ute.QAUTE.controller;
 
 import it.ute.QAUTE.dto.AnswerQuestionDTO;
+import it.ute.QAUTE.dto.HotTopicDTO;
+import it.ute.QAUTE.dto.QuestionDTO;
 import it.ute.QAUTE.dto.UserDTO;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Answer;
@@ -11,9 +13,11 @@ import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.service.*;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.method.P;
 import org.springframework.security.core.Authentication;
@@ -28,9 +32,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import org.springframework.data.domain.Sort;
 import com.fasterxml.jackson.annotation.JsonCreator.Mode;
-
+import java.util.Arrays;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+import it.ute.QAUTE.entity.Event;
 @Controller
 @RequestMapping("/consultant")
 public class ConsultantController {
@@ -63,7 +67,16 @@ public class ConsultantController {
     private AnswerService answerService;
 
     @Autowired
+    private EventService eventService;
+
+    @Autowired
     private FileStorageService fileStorageService;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private QuestionLikeService questionLikeService;
     @GetMapping({"", "/"})
     public String consultantRoot() {
         return "redirect:/consultant/home";
@@ -148,6 +161,26 @@ public class ConsultantController {
                 model.addAttribute("responseRate", String.format("%.1f", responseRate));
                 model.addAttribute("avgResponseTime", (int) avgResponseTime);
                 model.addAttribute("recentActivities", recentActivities);
+
+                long totalEvents = eventService.countConsultantEvents(consultant);
+                long pendingEvents = eventService.countConsultantEventsByStatus(consultant, Event.EventStatus.Pending);
+                long completedEvents = eventService.countConsultantEventsByStatus(consultant, Event.EventStatus.Completed);
+                
+            
+                Page<Event> recentEventsPage = eventService.findEventsByConsultant(
+                        consultant, 
+                        PageRequest.of(0, 5, Sort.by("createdAt").descending())
+                );
+                List<Event> recentEvents = recentEventsPage.getContent();
+                List<Event> upcomingEvents = eventService.findUpcomingEventsByConsultant(consultant);
+                upcomingEvents.forEach(event -> {
+                    System.out.println("upcoming event title: " + event.getTitle() + ", start time: " + event.getStartTime());
+                });
+                model.addAttribute("upcomingEvents", upcomingEvents.size());
+                model.addAttribute("totalEvents", totalEvents);
+                model.addAttribute("pendingEvents", pendingEvents);
+                model.addAttribute("completedEvents", completedEvents);
+                model.addAttribute("recentEvents", recentEvents);
             }
             model.addAttribute("account", account);
         }
@@ -182,11 +215,7 @@ public class ConsultantController {
         account.getProfile().setPhone(phone);
         account.getProfile().getConsultant().setExperienceYears(experienceYears);
         String oldAvatar = account.getProfile().getAvatar();
-        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
-            fileStorageService.deleteFile(oldAvatar);
-            account.getProfile().setAvatar(null);
-        }
-        else if (avatarFile != null && !avatarFile.isEmpty()) {
+        if (avatarFile != null && !avatarFile.isEmpty()) {
             String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
             account.getProfile().setAvatar(newAvatarUrl);
         }
@@ -194,39 +223,6 @@ public class ConsultantController {
         redirectAttributes.addFlashAttribute("successMessage", "Profile updated successfully.");
         return "redirect:/consultant/profile";
     }
-
-    @GetMapping("/questions")
-    public String questionsConsultant(Principal principal, 
-                                     Model model,
-                                     @RequestParam(required = false) Integer highlightQuestion) {
-        String username = principal.getName();
-        Account account = accountService.findUserByUsername(username);
-
-        model.addAttribute("account", account);
-        model.addAttribute("questions", questionService.getAllQuestions());
-        model.addAttribute("departments", questionService.getAllDepartments());
-        model.addAttribute("fields", questionService.getAllFields());
-        if (highlightQuestion != null) {
-            model.addAttribute("highlightQuestionId", highlightQuestion);
-        }
-        
-        return "pages/consultant/questions-answer";
-    }
-    
-    @GetMapping("/chats")
-    public String chatsConsultant(Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        Profiles profile = accountService.getProfileByUsername(username);
-        
-        if (profile != null) {
-            List<Messages> recentMessages = messageService.getRecentChats(profile.getProfileID());
-            model.addAttribute("recentMessages", recentMessages);
-        }
-        
-        return "pages/consultant/chats";
-    }
-    
 
     @GetMapping("/history")
     public String historyConsultant(
@@ -243,7 +239,6 @@ public class ConsultantController {
         Consultant consultant = consultantService.findByProfileId(account.getProfile().getProfileID())
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy thông tin tư vấn viên."));
 
-        // Gọi service lấy Page<Answer>
         Page<Answer> answerPage = answerService.getAnswersHistoryByConsultant(
                 consultant.getConsultantID(), timeRange, keyword, PageRequest.of(page, size));
 
@@ -306,5 +301,68 @@ public class ConsultantController {
         model.addAttribute("answers", answers);
 
         return "pages/consultant/questiondetails";
+    }
+    @GetMapping({"/questions"})
+    public String showQuestionPage(
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer fieldId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(required = false) Integer highlightQuestionId,
+            Model model,
+            Principal principal,
+            HttpServletRequest request) {
+        String roleString = "";
+        Pageable pageable = PageRequest.of(page, 10);
+        Page<Question> questionPage = questionService.searchAndFilterQuestions(
+                departmentId, fieldId, keyword, sortBy, pageable);
+        if (principal != null) {
+            String username = principal.getName();
+            Account account = accountService.findUserByUsername(username);
+            roleString = account.getRole().name();
+            model.addAttribute("account", account);
+
+            if (account != null && account.getProfile() != null) {
+                User user = userService.findByProfileId(account.getProfile().getProfileID()).orElse(null);
+                if (user != null) {
+                    model.addAttribute("likedQuestions", questionPage.getContent().stream()
+                            .collect(Collectors.toMap(
+                                    Question::getQuestionID,
+                                    q -> questionLikeService.isLikedByUser(q.getQuestionID(), user)
+                            )));
+                }
+            }
+        }
+
+        model.addAttribute("questionDTO", new QuestionDTO());
+        model.addAttribute("questions", questionPage.getContent());
+        model.addAttribute("totalPages", questionPage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("departments", questionService.getAllDepartments());
+        model.addAttribute("fields", questionService.getAllFields());
+
+        // Giữ trạng thái filter
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("selectedFieldId", fieldId);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("sortBy", sortBy);
+
+        if (highlightQuestionId != null) {
+            model.addAttribute("highlightQuestionId", highlightQuestionId);
+        }
+        List<HotTopicDTO> hotTopics = questionService.getTop5HotTopics();
+        model.addAttribute("hotTopics", hotTopics);
+        String requestedWithHeader = request.getHeader("X-Requested-With");
+
+        if(roleString.equals(Account.Role.Consultant.name())){
+            return "pages/consultant/questions-answer";
+        }
+
+        if ("fetch".equals(requestedWithHeader)) {
+            // Nếu là yêu cầu AJAX, chỉ trả về fragment nội dung
+            return "pages/user/questions :: contentFragment";
+        }
+        return "pages/user/questions";
     }
 }

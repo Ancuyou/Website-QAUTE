@@ -2,7 +2,7 @@
 <!-- User info for WebSocket (hidden) -->
 
 
-<div id="user-info" 
+<div id="user-info"
      th:data-user-id="${account?.profile?.profileID}"
      th:data-is-consultant="${#strings.equals(account?.role, 'Consultant')}"
      th:data-role="${account?.role}"
@@ -78,13 +78,13 @@
         word-wrap: break-word;
         white-space: pre-wrap;
     }
-    
+
     /* Đảm bảo chat container không bị tràn */
     #chat-bubble .card-body {
         overflow-y: auto;
         overflow-x: hidden;
     }
-    
+
     /* Căn chỉnh avatar cho tin nhắn dài */
     #chat-messages .user-avatar {
         align-self: flex-start;

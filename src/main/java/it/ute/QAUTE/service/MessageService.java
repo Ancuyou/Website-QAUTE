@@ -1,10 +1,14 @@
 package it.ute.QAUTE.service;
 
 import it.ute.QAUTE.dto.MessageDTO;
+import it.ute.QAUTE.entity.Account;
+import it.ute.QAUTE.entity.Conversation;
 import it.ute.QAUTE.entity.Messages;
 import it.ute.QAUTE.entity.Messages.MessageType;
 import it.ute.QAUTE.entity.Profiles;
+import it.ute.QAUTE.repository.ConversationRepository;
 import it.ute.QAUTE.repository.MessageRepository;
+import it.ute.QAUTE.repository.ProfilesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +24,10 @@ public class MessageService {
 
     @Autowired
     private MessageRepository messageRepository;
+    @Autowired
+    private ProfilesRepository profilesRepository;
+    @Autowired
+    private ConversationRepository conversationRepository;
     
     public Messages saveMessage(MessageDTO messageDTO) {
         Messages message = new Messages();
@@ -50,7 +59,26 @@ public class MessageService {
     public List<Messages> getRecentChats(Integer profileId) {
         return messageRepository.findRecentChats(profileId);
     }
-
+    public Account.Role getRole(Integer id){
+        Profiles profiles=profilesRepository.findById(id).get();
+        return profiles.getAccount().getRole();
+    }
+    public void createMessage(Integer userId, Integer consultantId){
+        if(!conversationRepository.exitsConversationByUserIdAndConsultantId(Long.valueOf(userId), Long.valueOf(consultantId))) {
+            Conversation conversation = new Conversation();
+            conversation.setUserProfileId(Math.toIntExact(userId));
+            conversation.setConsultantProfileId(consultantId);
+            conversationRepository.save(conversation);
+        }
+    }
+    public void updateConversation(Integer messageId,String status) {
+        if ("unsatisfied".equalsIgnoreCase(status)) {
+            Optional<Messages> message = messageRepository.findById(Long.valueOf(messageId));
+            Conversation conversation = conversationRepository.findByUserIdAndConsultantId(Long.valueOf(message.get().getReceiverID()), Long.valueOf(message.get().getSenderID()));
+            conversation.setAiEnabled(false);
+            conversationRepository.save(conversation);
+        }
+    }
     public List<Profiles> getAllChatUsers(int profileID) {
         System.out.println("Fetching chat users for profile ID: " + profileID);
        List<Messages> recentChats = getRecentChats(profileID);
