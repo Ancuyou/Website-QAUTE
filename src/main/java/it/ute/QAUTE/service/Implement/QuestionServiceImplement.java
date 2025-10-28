@@ -1,5 +1,6 @@
 package it.ute.QAUTE.service.Implement;
 
+import it.ute.QAUTE.api.FastApiClient;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionDTO;
 import it.ute.QAUTE.entity.Department;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +48,11 @@ public class QuestionServiceImplement implements QuestionService {
     private DepartmentRepository departmentRepository;
     @Autowired
     private FieldRepository fieldRepository;
+    @Autowired
+    private FastApiClient fastApiClient;
+
+    @Autowired
+    private AiFilterToxicServiceImplement aiFilterToxicService;
 
     public List<Question> getAllQuestions() {
         return questionRepository.findAll(Sort.by(Sort.Direction.DESC, "dateSend"));
@@ -64,9 +71,22 @@ public class QuestionServiceImplement implements QuestionService {
     }
 
     public void saveQuestion(Question question) {
-        questionRepository.save(question);
+        question.setToxic(false);
+        Question saved = questionRepository.save(question);
+
+        aiFilterToxicService.predictAsync(saved.getContent())
+                .thenAccept(result -> {
+                    boolean isToxic = (result == 1);
+                    saved.setToxic(isToxic);
+                    questionRepository.save(saved);
+                    log.info("[AI] ✅ Cập nhật toxic cho Question {} = {}", saved.getQuestionID(), isToxic);
+                })
+                .exceptionally(ex -> {
+                    log.error("[AI] ❌ Lỗi khi gọi AI toxic cho Question {}: {}", saved.getQuestionID(), ex.getMessage());
+                    return null;
+                });
     }
-    
+
     public Question getQuestionById(Integer questionId) {
         return questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Câu hỏi không tồn tại với ID: " + questionId));
@@ -109,6 +129,8 @@ public class QuestionServiceImplement implements QuestionService {
     }
 
     public Question save(Question question) {
+        question.setToxic(fastApiClient.predictToxic(question.getContent()) == 1);
+        log.info("Set IsToxic : " + question.isToxic());
         return questionRepository.save(question);
     }
 

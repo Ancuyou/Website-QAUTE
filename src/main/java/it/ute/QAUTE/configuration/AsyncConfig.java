@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Configuration
 @EnableAsync
 public class AsyncConfig {
+
     @Bean(name = "mailExecutor")
     public Executor mailExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
@@ -21,13 +22,14 @@ public class AsyncConfig {
         ex.initialize();
         return ex;
     }
+
     @Bean(name = "aiExecutor")
     public Executor aiExecutor() {
         ThreadPoolTaskExecutor ex = new ThreadPoolTaskExecutor();
         ex.setCorePoolSize(8);
-        ex.setMaxPoolSize(16);
-        ex.setQueueCapacity(200);
-        ex.setThreadNamePrefix("ai-");
+        ex.setMaxPoolSize(32); // tăng thêm vì AI task thường IO-bound
+        ex.setQueueCapacity(500);
+        ex.setThreadNamePrefix("AIWorker-");
         ex.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         ex.setWaitForTasksToCompleteOnShutdown(true);
         ex.setAwaitTerminationSeconds(60);
