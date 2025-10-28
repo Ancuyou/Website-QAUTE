@@ -19,4 +19,5 @@ public class AnswerQuestionDTO {
     private Integer userID;
     private String consultantName;
     private String userName;
+    private boolean isWithdrawn;
 }

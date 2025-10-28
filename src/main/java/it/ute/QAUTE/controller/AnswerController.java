@@ -11,6 +11,7 @@ import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -134,6 +135,39 @@ public class AnswerController {
         } catch (Exception e) {
             System.err.println("Lỗi gửi thông báo QID " + question.getQuestionID() + ": " + e.getMessage());
         }
+    }
+
+    @PostMapping("/answers/withdraw/{id}")
+    public String withdrawAnswer(
+            @PathVariable("id") Integer answerId,
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
+
+        if (principal == null) return "redirect:/auth/login";
+
+
+        try {
+            Consultant consultant = consultantService.findByProfileId(
+                    accountService.findUserByUsername(principal.getName()).getProfile().getProfileID()
+            ).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            Integer questionId = answerService.findById(answerId).getQuestion().getQuestionID();
+
+            answerService.withdrawAnswer(answerId, consultant);
+
+            redirectAttributes.addFlashAttribute("success", "true");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã thu hồi câu trả lời thành công.");
+            redirectAttributes.addAttribute("highlightQuestionId", questionId);
+
+        } catch (AppException e) {
+             redirectAttributes.addFlashAttribute("error", "true");
+             redirectAttributes.addFlashAttribute("errorMessage", "Thu hồi thất bại: " + e.getMessage());
+    
+        } catch (Exception e) {
+             redirectAttributes.addFlashAttribute("error", "true");
+             redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi không mong muốn khi thu hồi.");
+        }
+
+        return "redirect:/consultant/questions";
     }
 
 }

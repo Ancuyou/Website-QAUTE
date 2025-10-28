@@ -260,6 +260,7 @@ public class ConsultantController {
                 dto.setConsultantName(account.getProfile().getFullName());
                 dto.setContentAnswer(answer.getContent());
                 dto.setAnswerAt(answer.getDateAnswered());
+                dto.setWithdrawn(answer.isWithdrawn());
 
                 if (answer.getQuestion() != null) {
                     dto.setQuestionID(answer.getQuestion().getQuestionID());

@@ -135,6 +135,9 @@
                                                     Bạn đã trả lời lúc <cite class="fw-semibold"
                                                         th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời gian trả lời</cite>
                                                 </footer>
+                                                <span th:if="${answer.isWithdrawn}" class="text-danger fst-italic small d-block mt-1">
+                                                    (Đã thu hồi)
+                                                </span>
                                             </blockquote>
                                         </div>
                                     </div>

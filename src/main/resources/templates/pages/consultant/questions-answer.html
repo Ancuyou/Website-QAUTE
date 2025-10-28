@@ -256,9 +256,20 @@
                                                             th:attr="data-type='answer', data-id=${answer.answerID}">
                                                             <i class="bi bi-flag"></i> Báo cáo
                                                         </button>
+                                                        <button type="button"
+                                                            th:if="${answer.consultant.profile.account != null and answer.consultant.profile.account.username == #authentication.name}"
+                                                            class="btn btn-outline-warning btn-sm btn-withdraw"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#withdrawConfirmModal"
+                                                            th:data-action-url="@{/consultant/answers/withdraw/{id}(id=${answer.answerID})}">
+                                                            <i class="fas fa-undo me-1"></i> Thu hồi
+                                                        </button>
                                                     </div>
-                                                    <p class="mb-0 mt-2" th:text="${answer.content}">Nội dung câu trả
-                                                        lời.</p>
+                                                    <p class="mb-0 mt-2 answer-content"
+                                                        th:text="${answer.isWithdrawn ? 'Câu trả lời đã thu hồi' : answer.content}"
+                                                        th:classappend="${answer.isWithdrawn ? 'fst-italic text-danger' : ''}">
+                                                        Nội dung câu trả lời.
+                                                    </p>
                                                 </div>
                                             </div>
                                         </div>
@@ -406,6 +417,28 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="withdrawConfirmModal" tabindex="-1" aria-labelledby="withdrawConfirmModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning border-0">
+                        <h5 class="modal-title" id="withdrawConfirmModalLabel"><i
+                                class="fas fa-exclamation-triangle me-2"></i>Xác nhận Thu hồi</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Bạn có chắc chắn muốn thu hồi câu trả lời này không? Nội dung sẽ bị thay thế bằng "Đã thu hồi"
+                        và **không thể hoàn tác**.
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                        <button type="button" class="btn btn-warning" id="confirmWithdrawButton">Xác nhận Thu
+                            hồi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form id="withdrawForm" method="post" style="display: none;"></form>
         <div th:replace="~{fragments/report :: reportModal}"></div>
         <div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
 
@@ -704,6 +737,44 @@
                             console.error('Error loading fields (modal):', e);
                             fieldSelect.innerHTML = '<option value="">-- Lỗi khi tải --</option>';
                         }
+                    });
+                }
+                const withdrawModalElement = document.getElementById('withdrawConfirmModal');
+                const withdrawConfirmButton = document.getElementById('confirmWithdrawButton');
+                const withdrawForm = document.getElementById('withdrawForm'); // Form ẩn để submit
+
+                if (withdrawModalElement && withdrawConfirmButton && withdrawForm) {
+                    let actionUrlToSubmit = ''; // Biến lưu URL action của form
+
+                    // Lắng nghe sự kiện KHI MODAL ĐƯỢC MỞ
+                    withdrawModalElement.addEventListener('show.bs.modal', function (event) {
+                        const button = event.relatedTarget;
+                        actionUrlToSubmit = button.getAttribute('data-action-url');
+                        console.log("Withdraw action URL set:", actionUrlToSubmit);
+                    });
+
+                    // Lắng nghe sự kiện click nút XÁC NHẬN trong modal
+                    withdrawConfirmButton.addEventListener('click', function () {
+                        if (actionUrlToSubmit) {
+                            withdrawForm.action = actionUrlToSubmit;
+                            console.log("Submitting withdraw form to:", withdrawForm.action);
+                            withdrawForm.submit();
+                            const modalInstance = bootstrap.Modal.getInstance(withdrawModalElement);
+                            if (modalInstance) modalInstance.hide();
+                        } else {
+                            console.error("Action URL for withdrawal is not set!");
+                            // Hiển thị lỗi cho người dùng (ví dụ dùng toast)
+                            if (typeof window.showToast === 'function') {
+                                window.showToast('error', 'Lỗi', 'Không thể xác định hành động thu hồi.');
+                            } else {
+                                alert('Lỗi: Không thể xác định hành động thu hồi.');
+                            }
+                        }
+                    });
+
+                    // Reset URL khi modal đóng
+                    withdrawModalElement.addEventListener('hidden.bs.modal', function () {
+                        actionUrlToSubmit = '';
                     });
                 }
 

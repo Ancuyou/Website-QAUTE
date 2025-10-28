@@ -30,4 +30,7 @@ public class Answer {
 
     @Column(name = "DateAnswered", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateAnswered;
+
+    @Column(name = "IsWithdrawn", nullable = false)
+    private boolean isWithdrawn = false;
 }
