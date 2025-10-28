@@ -663,6 +663,7 @@
                         // Đóng modal
                         const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
                         if (modal) modal.hide();
+                        form.reset();
 
                         // Hiển thị toast (nếu có window.showToast từ toast fragment)
                         if (typeof window.showToast === 'function') {

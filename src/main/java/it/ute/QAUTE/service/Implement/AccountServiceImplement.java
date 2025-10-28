@@ -11,7 +11,6 @@ import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,17 +39,21 @@ public class AccountServiceImplement implements AccountService {
     @Autowired
     private ProfilesRepository profilesRepository;
 
-    public void changePassword(String email,String password){
+    @Override
+    public void changePassword(String email, String password){
         Account account=accountRepository.findByEmail(email);
         account.setPassword(authenticationService.hashed(password));
         accountRepository.save(account);
     }
+    @Override
     public Account findById(int id){
         return accountRepository.findByAccountID(id);
     }
+    @Override
     public void updateAccount(Account account){
         accountRepository.save(account);
     }
+    @Override
     public void createAccount(String username, String password, String email) {
         Profiles profiles = new Profiles();
         profiles.setFullName("user" + (1000 + new Random().nextInt(9000)));
@@ -72,10 +75,12 @@ public class AccountServiceImplement implements AccountService {
         accountRepository.save(account);
     }
 
+    @Override
     public Account findUserByUsername(String username){
         return accountRepository.findByUsername(username);
     }
     
+    @Override
     public Profiles getProfileByUsername(String username) {
         Account account = accountRepository.findByUsername(username);
         if (account != null) {
@@ -84,21 +89,26 @@ public class AccountServiceImplement implements AccountService {
         return null;
     }
 
+    @Override
     public Account findByUsername(String username) {
         return accountRepository.findByUsername(username);
     }
 
+    @Override
     public Page<Account> searchByKeywordAndRole(String search, Account.Role role, Pageable pageable){
         return accountRepository.searchByKeywordAndRole(search, role, pageable);
     }
 
+    @Override
     public Page<Account> searchUserByKeywordAndRoleName(String search, Pageable pageable){
         return accountRepository.searchUserByKeywordAndRoleName(search, Account.Role.User, pageable);
     }
+    @Override
     public Page<Account> findAccountByRoleAndUserRole(User.Role roleName, Pageable pageable){
         return accountRepository.findAccountByRoleAndUserRole(roleName, pageable);
     }
     // ??? wtf
+    @Override
     public Page<Account> findAccountByRole(Account.Role role, Pageable pageable){
         if (role == Account.Role.User) {
             return accountRepository.findAccountByUser(role, pageable);
@@ -106,10 +116,12 @@ public class AccountServiceImplement implements AccountService {
         return accountRepository.getListAccount(role, pageable);
     }
 
+    @Override
     public Account insertAccount(Account account){
         account.setCreatedDate(new Date());
         return accountRepository.save(account);
     }
+    @Override
     public Account blockOrOpenAccount(Integer id){
         Account acc = accountRepository.findByAccountID(id);
         if (acc.isBlock()){
@@ -123,11 +135,13 @@ public class AccountServiceImplement implements AccountService {
             return acc;
         }
     }
+    @Override
     public Account findAccountByID(Integer id){
         return accountRepository.findByAccountID(id);
     }
 
     @Transactional
+    @Override
     public Account createManagerOrConsultant(Account account, String password, MultipartFile avatarFile) {
         if (accountRepository.findByUsername(account.getUsername()) != null) {
             throw new AppException(ErrorCode.USERNAME_EXISTED);
@@ -148,7 +162,8 @@ public class AccountServiceImplement implements AccountService {
     }
 
     @Transactional
-    public Account editManagerOrConsultant(Account account,String pass, MultipartFile avatarFile) {
+    @Override
+    public Account editManagerOrConsultant(Account account, String pass, MultipartFile avatarFile) {
         if (accountRepository.existsByUsernameAndAccountIDNot(account.getUsername(), account.getAccountID())) {
             throw new AppException(ErrorCode.USERNAME_EXISTED);
         }
@@ -163,6 +178,7 @@ public class AccountServiceImplement implements AccountService {
         }
         return accountRepository.save(account);
     }
+    @Override
     public void deleteAccount(Integer id) {
         try {
             accountRepository.deleteById(id);
@@ -171,14 +187,17 @@ public class AccountServiceImplement implements AccountService {
         }
     }
 
+    @Override
     public void save(Account account) {
         accountRepository.save(account);
     }
+    @Override
     public void updateAccountOffline(Integer id){
         Profiles profiles=profilesRepository.findByAccountId(Long.valueOf(id));
         profiles.setOnlineAt(new Date());
         profilesRepository.save(profiles);
     }
+    @Override
     public String isAccountOnline(Integer id){
         Boolean status = onlineCache.getIfPresent(id);
         if (status != null && status) {
@@ -204,10 +223,12 @@ public class AccountServiceImplement implements AccountService {
             return "Offline " + days + " ngày trước";
         }
     }
+    @Override
     public List<Integer> listUserOnline(){
         List<Integer> allUserIds = new ArrayList<>(onlineCache.asMap().keySet());
         return allUserIds;
     }
+    @Override
     public long countAll_User() {
         return accountRepository.countByRole(Account.Role.User);
     }

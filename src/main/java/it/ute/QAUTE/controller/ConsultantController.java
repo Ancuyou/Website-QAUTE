@@ -10,7 +10,7 @@ import it.ute.QAUTE.entity.Profiles;
 import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 
-import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -40,37 +40,37 @@ import it.ute.QAUTE.entity.Field;
 @RequestMapping("/consultant")
 public class ConsultantController {
     @Autowired
-    private MessageServiceImplement messageService;
+    private MessageService messageService;
     
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private ConsultantServiceImplement consultantService;
+    private ConsultantService consultantService;
 
     @Autowired
-    private QuestionServiceImplement questionService;
+    private QuestionService questionService;
 
     @Autowired
-    private AnswerServiceImplement answerService;
+    private AnswerService answerService;
 
     @Autowired
-    private EventServiceImplement eventService;
+    private EventService eventService;
 
     @Autowired
-    private FileStorageServiceImplement fileStorageService;
+    private FileStorageService fileStorageService;
 
     @Autowired
-    private UserServiceImplement userService;
+    private UserService userService;
 
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
-    private FieldServiceImplement fieldService;
+    private FieldService fieldService;
 
     @Autowired
-    private QuestionLikeServiceImplement questionLikeService;
+    private QuestionLikeService questionLikeService;
     @GetMapping({"", "/"})
     public String consultantRoot() {
         return "redirect:/consultant/home";

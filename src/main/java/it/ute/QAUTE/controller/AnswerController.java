@@ -4,11 +4,7 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
 import it.ute.QAUTE.entity.Question;
-import it.ute.QAUTE.service.Implement.ConsultantServiceImplement;
-import it.ute.QAUTE.service.Implement.NotificationServiceImplement;
-import it.ute.QAUTE.service.Implement.QuestionServiceImplement;
-import it.ute.QAUTE.service.Implement.AccountServiceImplement;
-import it.ute.QAUTE.service.Implement.AnswerServiceImplement;
+import it.ute.QAUTE.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,19 +20,19 @@ import java.time.LocalDateTime;
 public class AnswerController {
 
     @Autowired
-    private AnswerServiceImplement answerService;
+    private AnswerService answerService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private ConsultantServiceImplement consultantService;
+    private ConsultantService consultantService;
 
     @Autowired
-    private NotificationServiceImplement notificationService;
+    private NotificationService notificationService;
 
     @Autowired
-    private QuestionServiceImplement questionService;
+    private QuestionService questionService;
 
      @PostMapping("/questions/answer")
     public String handlePostAnswer(@RequestParam("questionId") Integer questionId,

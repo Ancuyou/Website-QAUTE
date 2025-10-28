@@ -25,19 +25,23 @@ public class UserServiceImplement implements UserService {
     @Autowired
     private AccountRepository accountRepository;
     
+    @Override
     public Optional<User> findByProfileId(Integer profileId) {
         return userRepository.findByProfile_ProfileID(profileId);
     }
+    @Override
     public Profiles getCurrentUserProfile(String username) {
         Account account = accountRepository.findByUsername(username);
         Profiles profiles = account.getProfile();
         return profiles;
     }
     
+    @Override
     public Profiles getProfileById(Integer profileId) {
         return profilesRepository.findById(profileId)
             .orElseThrow(() -> new RuntimeException("Profile not found with ID: " + profileId));
     }
+    @Override
     public Map<String,String> mapRole(){
         Map<String,String> roleLabels = new LinkedHashMap<>();
         roleLabels.put(User.Role.SinhVien.name(),   "Sinh viên");

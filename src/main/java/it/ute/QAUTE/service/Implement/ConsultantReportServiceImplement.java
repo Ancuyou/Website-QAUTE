@@ -1,8 +1,8 @@
-package it.ute.QAUTE.service;
+package it.ute.QAUTE.service.Implement;
 
 import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.repository.ConsultantRepository;
-import lombok.RequiredArgsConstructor;
+import it.ute.QAUTE.service.ConsultantReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +15,12 @@ public class ConsultantReportServiceImplement implements ConsultantReportService
     @Autowired
     private ConsultantRepository consultantRepository;
 
+    @Override
     public long getTotalConsultants() {
         return consultantRepository.countAllConsultants();
     }
 
+    @Override
     public List<ConsultantReportDTO> getPerformance(LocalDateTime startDate, LocalDateTime endDate) {
         return consultantRepository.getConsultantPerformance(startDate, endDate);
     }

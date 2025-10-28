@@ -1,7 +1,8 @@
-package it.ute.QAUTE.service;
+package it.ute.QAUTE.service.Implement;
 
 import it.ute.QAUTE.dto.AnswerReportDTO;
 import it.ute.QAUTE.repository.AnswerRepository;
+import it.ute.QAUTE.service.AnswerReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,19 +16,23 @@ public class AnswerReportServiceImplement implements AnswerReportService {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Override
     public long getTotalAnswers(LocalDateTime startDate, LocalDateTime endDate) {
         return answerRepository.countAllAnswers(startDate, endDate);
     }
 
+    @Override
     public double getAverageResponseTime(LocalDateTime startDate, LocalDateTime endDate) {
         Double avg = answerRepository.averageResponseTime(startDate, endDate);
         return avg != null ? avg : 0.0;
     }
 
+    @Override
     public List<AnswerReportDTO> getAnswersByConsultant(LocalDateTime startDate, LocalDateTime endDate) {
         return answerRepository.getAnswersByConsultant(startDate, endDate);
     }
 
+    @Override
     public List<AnswerReportDTO> getAnswersByDate(LocalDateTime startDate, LocalDateTime endDate) {
         List<Object[]> results = answerRepository.getAnswersByDateRaw(startDate, endDate);
         return results.stream()
@@ -39,6 +44,7 @@ public class AnswerReportServiceImplement implements AnswerReportService {
                 .toList();
     }
 
+    @Override
     public double answerChange() {
         LocalDateTime now = LocalDateTime.now();
 

@@ -4,8 +4,7 @@ import it.ute.QAUTE.dto.ConsultantDTO;
 import it.ute.QAUTE.dto.MessageDTO;
 import it.ute.QAUTE.dto.UserDTO;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.Implement.AIServiceImplement;
-import it.ute.QAUTE.service.Implement.MessageServiceImplement;
+import it.ute.QAUTE.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -22,12 +21,12 @@ import java.util.stream.Collectors;
 @Controller
 public class ChatController {
     @Autowired
-    private MessageServiceImplement messageService;
+    private MessageService messageService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private AIServiceImplement aiService;
+    private AIService aiService;
   
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(@Payload MessageDTO messageDTO) {

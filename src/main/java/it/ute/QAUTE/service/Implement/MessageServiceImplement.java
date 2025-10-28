@@ -30,6 +30,7 @@ public class MessageServiceImplement implements MessageService {
     @Autowired
     private ConversationRepository conversationRepository;
     
+    @Override
     public Messages saveMessage(MessageDTO messageDTO) {
         Messages message = new Messages();
         message.setSenderID(messageDTO.getSenderID());
@@ -53,17 +54,21 @@ public class MessageServiceImplement implements MessageService {
         return messageRepository.save(message);
     }
     
+    @Override
     public List<Messages> getChatHistory(Integer senderId, Integer receiverId) {
         return messageRepository.findChatHistory(senderId, receiverId);
     }
 
+    @Override
     public List<Messages> getRecentChats(Integer profileId) {
         return messageRepository.findRecentChats(profileId);
     }
+    @Override
     public Account.Role getRole(Integer id){
         Profiles profiles=profilesRepository.findById(id).get();
         return profiles.getAccount().getRole();
     }
+    @Override
     public void createMessage(Integer userId, Integer consultantId){
         if(!conversationRepository.exitsConversationByUserIdAndConsultantId(Long.valueOf(userId), Long.valueOf(consultantId))) {
             Conversation conversation = new Conversation();
@@ -72,7 +77,8 @@ public class MessageServiceImplement implements MessageService {
             conversationRepository.save(conversation);
         }
     }
-    public void updateConversation(Integer messageId,String status) {
+    @Override
+    public void updateConversation(Integer messageId, String status) {
         if ("unsatisfied".equalsIgnoreCase(status)) {
             Optional<Messages> message = messageRepository.findById(Long.valueOf(messageId));
             Conversation conversation = conversationRepository.findByUserIdAndConsultantId(Long.valueOf(message.get().getReceiverID()), Long.valueOf(message.get().getSenderID()));
@@ -80,6 +86,7 @@ public class MessageServiceImplement implements MessageService {
             conversationRepository.save(conversation);
         }
     }
+    @Override
     public List<Profiles> getAllChatUsers(int profileID) {
         System.out.println("Fetching chat users for profile ID: " + profileID);
        List<Messages> recentChats = getRecentChats(profileID);
@@ -93,10 +100,12 @@ public class MessageServiceImplement implements MessageService {
         return result;
     }
 
+    @Override
     public Messages findById(Long messageId) {
         return messageRepository.findById(messageId).orElse(null);
     }
 
+    @Override
     public Messages save(Messages message) {
         return messageRepository.save(message);
     }

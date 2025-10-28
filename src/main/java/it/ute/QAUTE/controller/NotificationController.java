@@ -3,8 +3,7 @@ package it.ute.QAUTE.controller;
 import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.entity.Notification;
 import it.ute.QAUTE.entity.NotificationReceiver;
-import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
-import it.ute.QAUTE.service.Implement.NotificationServiceImplement;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -20,9 +19,9 @@ import java.util.List;
 @RequestMapping("/notifications")
 public class NotificationController {
     @Autowired
-    private NotificationServiceImplement notificationService;
+    private NotificationService notificationService;
     @Autowired
-    private AuthenticationServiceImplement authenticationService;
+    private AuthenticationService authenticationService;
     @GetMapping("/user")
     public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request, HttpServletResponse response)
             throws ParseException, JOSEException {

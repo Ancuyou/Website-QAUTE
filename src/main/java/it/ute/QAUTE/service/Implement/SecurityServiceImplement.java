@@ -34,10 +34,11 @@ public class SecurityServiceImplement implements SecurityService {
     @Autowired
     private BlackListRepository blackListRepository;
     @Autowired
-    private EmailServiceImplement emailService;
+    private EmailService emailService;
     private static final int ramThreshold = 4;
     private static final int dbLockThreshold=2;
     private static final int downgradeCircle=7;
+    @Override
     public void initData(String username){
         Map<String, Integer> data = securityLimiterCache.getIfPresent(username);
         Account account=accountRepository.findByUsername(username);
@@ -48,6 +49,7 @@ public class SecurityServiceImplement implements SecurityService {
             securityLimiterCache.put(username, data);
         }
     }
+    @Override
     public void handleFailedLogin(String username){
         initData(username);
         Map<String, Integer> data = securityLimiterCache.getIfPresent(username);
@@ -76,6 +78,7 @@ public class SecurityServiceImplement implements SecurityService {
         data.put("level", level);
         securityLimiterCache.put(username, data);
     }
+    @Override
     public Account unlock(Account account){
         if(account.getSecurityLevel()>=2 && account.getLockUntil()!=null && account.getLockUntil().before(new Date()) && account.isBlock()){
             System.out.println("đã mở khoá");
@@ -84,6 +87,7 @@ public class SecurityServiceImplement implements SecurityService {
         }
         return account;
     }
+    @Override
     public void reduceLevelSecurity(Account account){
         initData(account.getUsername());
         if (account.getLevelEventAt() == null) {
@@ -119,7 +123,8 @@ public class SecurityServiceImplement implements SecurityService {
             }
         }
     }
-    private void lockOnRAM(String username, int level) {
+    @Override
+    public void lockOnRAM(String username, int level) {
         LocalDateTime lockUntil=levelLockTime(level);
         long lockUntilMillis = lockUntil.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         temporaryLockCache.put(username, lockUntilMillis);
@@ -127,6 +132,7 @@ public class SecurityServiceImplement implements SecurityService {
         System.out.println(String.format("🔒 KHÓA TRÊN RAM - %s (Level %d) - Khóa %d phút (đến %s)",
                 username, level, lockMinutes, lockUntil.format(DateTimeFormatter.ofPattern("HH:mm:ss"))));
     }
+    @Override
     public String isAccountLocked(Account account){
         initData(account.getUsername());
         Long lockUntilMillis = temporaryLockCache.getIfPresent(account.getUsername());
@@ -151,7 +157,8 @@ public class SecurityServiceImplement implements SecurityService {
         accountRepository.save(account);
         return "";
     }
-    public void loginFailed(String username,String deviceId,String deviceName){
+    @Override
+    public void loginFailed(String username, String deviceId, String deviceName){
         Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
         if (usernameAttempts== null) {
             usernameAttempts = new HashMap<>();
@@ -160,7 +167,8 @@ public class SecurityServiceImplement implements SecurityService {
         deviceAttemptCache.put(deviceId, usernameAttempts);
         handleBlockDevice(deviceId,deviceName);
     }
-    public void handleBlockDevice(String deviceId,String deviceName){
+    @Override
+    public void handleBlockDevice(String deviceId, String deviceName){
         Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
         List<String> targetUsernames = new ArrayList<>(usernameAttempts.keySet());
         Long failCount=usernameAttempts.values().stream().filter(count -> count >= 0).count();
@@ -189,7 +197,8 @@ public class SecurityServiceImplement implements SecurityService {
             }
         }
     }
-    public boolean isDeviceBlock(String deviceId,String deviceName){
+    @Override
+    public boolean isDeviceBlock(String deviceId, String deviceName){
         BlackList blackList=blackListRepository.findByDeviceIdAndDeviceName(deviceId,deviceName);
         if (blackList!=null){
             boolean unlock=unblockDevice(blackList);
@@ -197,6 +206,7 @@ public class SecurityServiceImplement implements SecurityService {
         }
         return false;
     }
+    @Override
     public boolean unblockDevice(BlackList blackList){
         if(blackList.getUnblockAt()!=null&&blackList.getUnblockAt().before(new Date())){
             blackListRepository.deleteByDeviceIdAndDeviceName(blackList.getDeviceId(),blackList.getDeviceName());
@@ -204,6 +214,7 @@ public class SecurityServiceImplement implements SecurityService {
         }
         return false;
     }
+    @Override
     public LocalDateTime levelLockTime(int level){
         return switch (level) {
             case 0 -> LocalDateTime.now().plusMinutes(1);
@@ -217,6 +228,7 @@ public class SecurityServiceImplement implements SecurityService {
             default -> null;
         };
     }
+    @Override
     public String getClientIP(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isEmpty() && !"unknown".equalsIgnoreCase(xForwardedFor)) {
@@ -248,6 +260,7 @@ public class SecurityServiceImplement implements SecurityService {
         }
         return remoteAddr;
     }
+    @Override
     public String getDeviceFingerprint(HttpServletRequest request) {
         StringBuilder fingerprint = new StringBuilder();
 

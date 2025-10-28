@@ -3,7 +3,7 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.*;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,19 +27,19 @@ import java.util.List;
 public class ConsultantEventController {
 
     @Autowired
-    private EventServiceImplement eventService;
+    private EventService eventService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private ConsultantServiceImplement consultantService;
+    private ConsultantService consultantService;
 
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
-    private FieldServiceImplement fieldService;
+    private FieldService fieldService;
 
     @GetMapping("")
     public String listEvents(

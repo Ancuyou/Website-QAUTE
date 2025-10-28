@@ -32,6 +32,7 @@ public class AIServiceImplement implements AIService {
     @Autowired
     private FastApiClient fastApiClient;
     @Async("aiExecutor")
+    @Override
     public void replyMessage(Messages userMsg){
         if (userMsg.getType() != Messages.MessageType.text) return;
         if (Boolean.TRUE.equals(userMsg.getAi())) return;
@@ -61,6 +62,7 @@ public class AIServiceImplement implements AIService {
             messagingTemplate.convertAndSend(rCh, saved);
         }
     }
+    @Override
     public String aiReply(String text){
         System.out.println("gọi AI");
         return fastApiClient.chatBlocking(text, java.time.Duration.ofSeconds(30));

@@ -1,8 +1,9 @@
-package it.ute.QAUTE.service;
+package it.ute.QAUTE.service.Implement;
 
 
 import it.ute.QAUTE.dto.UserReportDTO;
 import it.ute.QAUTE.repository.UserRepository;
+import it.ute.QAUTE.service.UserReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -17,23 +18,28 @@ public class UserReportServiceImplement implements UserReportService {
     @Autowired
     private UserRepository userRepository;
 
+    @Override
     public Long getTotalUsers(LocalDateTime startDate, LocalDateTime endDate) {
         return userRepository.countAllUsers(startDate, endDate);
     }
 
+    @Override
     public List<UserReportDTO> getUsersByRole(LocalDateTime startDate, LocalDateTime endDate) {
         return userRepository.getUsersByRole(startDate, endDate);
     }
 
+    @Override
     public Long getActiveUsers() {
         LocalDateTime cutoff = LocalDateTime.now().minusDays(30);  // 30 ngay gan nhat
         return userRepository.countActiveUsers(cutoff);
     }
 
+    @Override
     public List<UserReportDTO> getTop10Users(LocalDateTime startDate, LocalDateTime endDate) {
         return userRepository.getTopUsersByQuestions(PageRequest.of(0, 10));
     }
 
+    @Override
     public double userChange() {
         LocalDateTime now = LocalDateTime.now();
 

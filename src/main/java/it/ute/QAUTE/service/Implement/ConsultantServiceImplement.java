@@ -41,6 +41,7 @@ public class ConsultantServiceImplement implements ConsultantService {
     @Autowired
     private Cache<Integer, Boolean> onlineCache; // Inject Online Cache
 
+    @Override
     public List<ConsultantDTO> getAllConsultants() {
         List<Consultant> consultants = consultantRepository.findAllWithProfiles();
 
@@ -82,21 +83,26 @@ public class ConsultantServiceImplement implements ConsultantService {
             return dto;
         }).collect(Collectors.toList());
     }
+    @Override
     public Optional<Consultant> findByProfileId(Integer profileId) {
         return Optional.ofNullable(consultantRepository.findByProfile_ProfileID(profileId));
     }
+    @Override
     public List<Consultant> findAllConsultants() {
         return consultantRepository.findAllWithProfiles();
     }
 
+    @Override
     public void updateConsultant(Consultant consultant) {
         consultantRepository.save(consultant);
     }
     
+    @Override
     public void saveConsultant(Consultant consultant) {
         consultantRepository.save(consultant);
     }
 
+    @Override
     public List<ConsultantDTO> getConsultantsWithSortingAndFilter(
             String sortBy,
             String timeRange) { // Mặc định là 'all' hoặc null
@@ -152,7 +158,8 @@ public class ConsultantServiceImplement implements ConsultantService {
     }
 
     // Hàm hỗ trợ tính ngày bắt đầu
-    private LocalDateTime calculateStartDate(String timeRange) {
+    @Override
+    public LocalDateTime calculateStartDate(String timeRange) {
         if (timeRange == null) {
             // Mặc định, ví dụ lấy tất cả hoặc 30 ngày gần nhất
             return LocalDateTime.now().minusDays(30); // Ví dụ mặc định 30 ngày
@@ -167,7 +174,8 @@ public class ConsultantServiceImplement implements ConsultantService {
     }
 
     // Hàm hỗ trợ sắp xếp danh sách DTO
-    private void sortConsultants(List<ConsultantDTO> dtos, String sortBy) {
+    @Override
+    public void sortConsultants(List<ConsultantDTO> dtos, String sortBy) {
         if (sortBy == null) return;
         Comparator<ConsultantDTO> comparator = switch (sortBy) {
             case "answers_desc" -> Comparator.comparing(ConsultantDTO::getTotalAnswers).reversed();

@@ -3,7 +3,7 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.dto.*;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.exception.AppException;
-import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +31,22 @@ import java.util.stream.Collectors;
 public class UserQuestionController {
 
     @Autowired
-    private QuestionServiceImplement questionService;
+    private QuestionService questionService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private UserServiceImplement userService;
+    private UserService userService;
 
     @Autowired
-    private AnswerServiceImplement answerService;
+    private AnswerService answerService;
 
     @Autowired
-    private ConsultantServiceImplement consultantService;
+    private ConsultantService consultantService;
 
     @Autowired
-    private QuestionLikeServiceImplement questionLikeService;
+    private QuestionLikeService questionLikeService;
 
     @GetMapping({""})
     public String showQuestionPage(
