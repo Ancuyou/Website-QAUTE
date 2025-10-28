@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -330,5 +331,17 @@ public class QuestionServiceImplement implements QuestionService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         return questionRepository.findAll(spec, pageable); // Dùng findAll với Specification
+
+    }
+    public long countAll() {
+        return questionRepository.count();
+    }
+
+    public long countByStatus(Question.QuestionStatus status) {
+        return questionRepository.countByStatus(status);
+    }
+
+    public long countAnwer_Questions(LocalDateTime start, LocalDateTime end){
+        return questionRepository.countAnsweredQuestionsByQuestionDate(start, end);
     }
 }

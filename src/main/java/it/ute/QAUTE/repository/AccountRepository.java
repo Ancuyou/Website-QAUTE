@@ -28,6 +28,9 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
             "LOWER(a.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
             "LOWER(p.phone) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Account> searchByKeywordAndRole(String keyword, Account.Role role, Pageable pageable);
+
+
+
     // search User
     @EntityGraph(attributePaths = {"profile", "profile.user"})
     @Query("SELECT a FROM Account a JOIN a.profile p JOIN p.user u " +
@@ -67,7 +70,10 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     List<Account> findUserAndConsultant();
     @Query("SELECT a FROM Account a WHERE a.profile.profileID = :profileId")
     Account findByProfile_ProfileID(@Param("profileId") Integer profileId);
+    @Query("SELECT a FROM Account a WHERE a.role = 'Admin'")
+    List<Account> findAllAdmin();
 
+    long countByRole(Account.Role role);
     /*@Modifying
     @Transactional
     @Query("UPDATE Account a SET a.isBlock = true WHERE a.accountID = :id")

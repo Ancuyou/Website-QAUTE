@@ -38,4 +38,8 @@ public class FieldServiceImplement implements FieldService {
     public List<Field> getAllFields() {
         return fieldRepository.findAll();
     }
+
+    public long countAll() {
+        return fieldRepository.count();
+    }
 }

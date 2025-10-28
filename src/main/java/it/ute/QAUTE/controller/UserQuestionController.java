@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/user/questions")
-public class QuestionController {
+public class UserQuestionController {
 
     @Autowired
     private QuestionServiceImplement questionService;

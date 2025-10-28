@@ -1,8 +1,8 @@
-package it.ute.QAUTE.service.Implement;
+package it.ute.QAUTE.service;
 
 import it.ute.QAUTE.dto.ConsultantReportDTO;
 import it.ute.QAUTE.repository.ConsultantRepository;
-import it.ute.QAUTE.service.ConsultantReportService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

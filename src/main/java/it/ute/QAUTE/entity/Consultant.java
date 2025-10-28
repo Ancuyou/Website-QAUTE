@@ -15,8 +15,8 @@ public class Consultant {
     
     @Column(name = "ExperienceYears", columnDefinition = "INT DEFAULT 0")
     private int experienceYears = 0;
-    
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @OneToOne
     @JoinColumn(name = "ProfileID", referencedColumnName = "ProfileID")
     private Profiles profile;
 }

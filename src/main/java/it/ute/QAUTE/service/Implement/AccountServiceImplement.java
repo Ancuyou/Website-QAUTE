@@ -11,6 +11,7 @@ import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.service.AccountService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -86,6 +87,7 @@ public class AccountServiceImplement implements AccountService {
     public Account findByUsername(String username) {
         return accountRepository.findByUsername(username);
     }
+
     public Page<Account> searchByKeywordAndRole(String search, Account.Role role, Pageable pageable){
         return accountRepository.searchByKeywordAndRole(search, role, pageable);
     }
@@ -206,4 +208,8 @@ public class AccountServiceImplement implements AccountService {
         List<Integer> allUserIds = new ArrayList<>(onlineCache.asMap().keySet());
         return allUserIds;
     }
+    public long countAll_User() {
+        return accountRepository.countByRole(Account.Role.User);
+    }
+
 }

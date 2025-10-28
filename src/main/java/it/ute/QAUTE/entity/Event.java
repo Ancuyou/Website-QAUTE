@@ -1,5 +1,10 @@
 package it.ute.QAUTE.entity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -21,16 +26,21 @@ public class Event {
     @JoinColumn(name = "ConsultantID", referencedColumnName = "ConsultantID")
     private Consultant consultant;
 
+    @NotBlank(message = "Tiêu đề không được để trống.")
+    @Size(max = 200, message = "Tiêu đề không được vượt quá 200 ký tự.")
     @Column(name = "Title", nullable = false, length = 200)
     private String title;
 
+    @NotBlank(message = "Mô tả không được để trống.")
     @Column(name = "Description", columnDefinition = "TEXT")
     private String description;
 
+    @NotNull(message = "Loại sự kiện không được để trống.")
     @Enumerated(EnumType.STRING)
     @Column(name = "Type", nullable = false)
     private EventType type;
 
+    @NotNull(message = "Hình thức sự kiện không được để trống.")
     @Enumerated(EnumType.STRING)
     @Column(name = "Mode", nullable = false)
     private EventMode mode;
@@ -41,12 +51,17 @@ public class Event {
     @Column(name = "MeetingLink", length = 500)
     private String meetingLink;
 
+    @NotNull(message = "Thời gian bắt đầu không được để trống.")
+    @Future(message = "Thời gian bắt đầu phải ở trong tương lai.")
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
 
+    @NotNull(message = "Thời gian kết thúc không được để trống.")
+    @Future(message = "Thời gian kết thúc phải sau thời gian hiện tại.")
     @Column(name = "EndTime", nullable = false)
     private LocalDateTime endTime;
 
+    @Min(value = 1, message = "Số lượng tham gia tối đa phải lớn hơn 0.")
     @Column(name = "MaxParticipants")
     private Integer maxParticipants;
 

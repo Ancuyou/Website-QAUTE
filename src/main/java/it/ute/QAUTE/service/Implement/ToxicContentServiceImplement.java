@@ -38,4 +38,5 @@ public class ToxicContentServiceImplement implements ToxicContentService {
         question.setToxic(true);
         questionRepository.save(question);
     }
+
 }

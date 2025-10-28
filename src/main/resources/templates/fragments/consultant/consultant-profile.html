@@ -7,7 +7,7 @@
             </div>
         </div>
 
-        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <!-- <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i> <span th:text="${successMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
@@ -15,7 +15,7 @@
         <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+        </div> -->
 
         <form th:action="@{/consultant/profile/update}" method="post" enctype="multipart/form-data" novalidate>
             <input type="hidden" id="resetAvatarFlag" name="resetAvatar" value="false">

@@ -2,7 +2,6 @@
     <th:block th:fragment="questions_content">
         <div class="container-fluid py-4">
 
-            <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h2 class="h3 mb-1 text-dark fw-bold">
@@ -17,10 +16,9 @@
                 </div>
             </div>
 
-            <!-- Bộ lọc thời gian -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-body">
-                    <form th:action="@{/manager/reports/answers}" method="get" class="row g-3 align-items-end">
+                    <form th:action="@{/manager/reports/questions}" method="get" class="row g-3 align-items-end">
                         <div class="col-md-5">
                             <label class="form-label fw-semibold text-dark">
                                 <i class="fas fa-calendar-day me-1"></i> Từ ngày
@@ -44,9 +42,7 @@
                 </div>
             </div>
 
-            <!-- Tổng quan -->
             <div class="row g-4 mb-4">
-                <!-- Tổng số câu hỏi -->
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-lg h-100 overflow-hidden position-relative"
                          style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
@@ -74,7 +70,6 @@
                     </div>
                 </div>
 
-                <!-- Tỉ lệ câu hỏi được trả lời -->
                 <div class="col-lg-6">
                     <div class="card border-0 shadow-lg h-100 overflow-hidden position-relative"
                          style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
@@ -105,7 +100,6 @@
                 </div>
             </div>
 
-            <!-- Biểu đồ -->
             <div class="row g-4">
                 <div class="col-lg-6">
                     <div class="card shadow-sm border-0 h-100">
@@ -172,31 +166,23 @@
 
         </div>
 
-        <!-- Style (reuse style từ AnswerReport) -->
         <style>
             body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-            .card { transition: transform 0.2s, box-shadow 0.2s; }
-            .card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important; }
+            .card { /* transition: transform 0.2s, box-shadow 0.2s; <-- Đã xóa */ }
+            /* .card:hover { ... } <-- Đã xóa */
             .form-control:focus {
                 border-color: #667eea; box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
             }
             .btn-primary {
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border: none; transition: all 0.3s;
+                border: none; /* transition: all 0.3s; <-- Đã xóa */
             }
-            .btn-primary:hover {
-                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-                transform: translateY(-2px);
-                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-            }
+            /* .btn-primary:hover { ... } <-- Đã xóa */
             .btn-outline-primary {
-                border-color: #667eea; color: #667eea; transition: all 0.3s;
+                border-color: #667eea; color: #667eea; /* transition: all 0.3s; <-- Đã xóa */
             }
-            .btn-outline-primary:hover {
-                background: #667eea; color: #fff; transform: translateY(-2px);
-            }
+            /* .btn-outline-primary:hover { ... } <-- Đã xóa */
         </style>
-
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script th:inline="javascript">
             /*<![CDATA[*/

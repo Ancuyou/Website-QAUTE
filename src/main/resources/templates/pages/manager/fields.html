@@ -1,140 +1,149 @@
 <th:block th:replace="~{pages/manager/layout-manager :: layout(~{::field_list_content}, 'fields')}">
     <th:block th:fragment="field_list_content">
 
-        <div class="container-fluid py-3">
+        <div class="py-4">
             <!-- Tiêu đề trang -->
-            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-                <h2 class="h4 mb-0"><i class="fas fa-layer-group me-2 text-primary"></i>Danh sách lĩnh vực</h2>
-                <a th:href="@{/manager/fields/new}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>Thêm lĩnh vực
-                </a>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-1">
+                        <i class="fas fa-layer-group text-primary me-2"></i>Quản lý Lĩnh vực
+                    </h2>
+                    <p class="text-muted mb-0">Quản lý tất cả lĩnh vực trong hệ thống</p>
+                </div>
+                <div>
+                    <a th:href="@{/manager/fields/new}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Thêm lĩnh vực
+                    </a>
+                </div>
             </div>
 
             <!-- Bộ lọc tìm kiếm -->
-            <form th:action="@{/manager/fields}" method="get" class="row gy-2 gx-3 align-items-center mb-4">
-                <!-- Department -->
-                <div class="col-md-3">
-                    <label for="departmentSelect" class="form-label fw-semibold">Khoa/Ngành</label>
-                    <select id="departmentSelect" name="departmentId" class="form-select">
-                        <option value="">-- Tất cả khoa/ngành --</option>
-                        <option th:each="d : ${departments}"
-                                th:value="${d.departmentID}"
-                                th:text="${d.departmentName}"
-                                th:selected="${d.departmentID == selectedDepartmentId}">
-                        </option>
-                    </select>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <form th:action="@{/manager/fields}" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Khoa/Ngành</label>
+                            <select name="departmentId" class="form-select">
+                                <option value="">Tất cả</option>
+                                <option th:each="d : ${departments}"
+                                        th:value="${d.departmentID}"
+                                        th:text="${d.departmentName}"
+                                        th:selected="${d.departmentID == selectedDepartmentId}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Tìm theo tên lĩnh vực</label>
+                            <input type="text" name="keyword" class="form-control"
+                                   th:value="${keyword}" placeholder="Nhập tên lĩnh vực...">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-filter me-2"></i>Lọc
+                            </button>
+                        </div>
+                    </form>
                 </div>
-
-                <div class="d-flex align-items-end gap-2">
-                    <div class="flex-grow-1">
-                        <label for="keyword" class="form-label fw-semibold">Tìm theo tên lĩnh vực</label>
-                        <input type="text" id="keyword" name="keyword" class="form-control"
-                               th:value="${keyword}" placeholder="Nhập tên lĩnh vực...">
-                    </div>
-                    <div>
-                        <button type="submit" class="btn btn-primary fw-semibold px-3">
-                            <i class="fas fa-search me-1"></i> Lọc kết quả
-                        </button>
-                    </div>
-                </div>
-            </form>
+            </div>
 
             <!-- Bảng danh sách lĩnh vực -->
-            <div class="card shadow-sm">
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-primary">
-                            <tr>
-                                <th class="text-center" style="width: 10%;">ID</th>
-                                <th style="width: 30%;">Tên lĩnh vực</th>
-                                <th style="width: 45%;">Khoa/Ngành</th>
-                                <th class="text-center" style="width: 15%;">Hành động</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="f : ${fields}">
-                                <!-- ID -->
-                                <td class="text-center" th:text="${f.fieldID}"></td>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div th:if="${fields != null and !fields.isEmpty()}">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                <tr>
+                                    <th style="width: 10%;">ID</th>
+                                    <th style="width: 30%;">Tên lĩnh vực</th>
+                                    <th style="width: 45%;">Khoa/Ngành</th>
+                                    <th class="text-end" style="width: 15%;">Thao tác</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="f : ${fields}">
+                                    <td th:text="${f.fieldID}"></td>
+                                    <td class="fw-semibold" th:text="${f.fieldName}"></td>
+                                    <td>
+                                            <span th:each="dept : ${f.departments}"
+                                                  th:text="${dept.departmentName}"
+                                                  class="badge bg-info text-dark me-1"></span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a th:href="@{/manager/fields/edit/{id}(id=${f.fieldID})}"
+                                               class="btn btn-outline-primary" title="Chỉnh sửa">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-outline-danger"
+                                                    title="Xóa"
+                                                    th:data-field-id="${f.fieldID}"
+                                                    th:data-field-name="${f.fieldName}"
+                                                    onclick="confirmDelete(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        <nav th:if="${totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <!-- Nút Trước -->
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/fields(
+                    page=${currentPage - 1},
+                    departmentId=${selectedDepartmentId},
+                    keyword=${keyword}
+               )}">
+                                        Trước
+                                    </a>
+                                </li>
 
-                                <!-- Tên lĩnh vực -->
-                                <td th:text="${f.fieldName}" class="fw-semibold"></td>
+                                <!-- Danh sách số trang -->
+                                <li class="page-item"
+                                    th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/fields(
+                    page=${i},
+                    departmentId=${selectedDepartmentId},
+                    keyword=${keyword}
+               )}"
+                                       th:text="${i + 1}">1</a>
+                                </li>
 
-                                <!-- Khoa/Ngành -->
-                                <td>
-                                    <span th:each="dept : ${f.departments}"
-                                          th:text="${dept.departmentName}"
-                                          class="badge bg-info text-dark me-1"></span>
-                                </td>
+                                <!-- Nút Sau -->
+                                <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/manager/fields(
+                    page=${currentPage + 1},
+                    departmentId=${selectedDepartmentId},
+                    keyword=${keyword}
+               )}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
 
-                                <!-- Hành động -->
-                                <td class="text-center">
-                                    <div class="btn-group" role="group">
-                                        <a th:href="@{/manager/fields/edit/{id}(id=${f.fieldID})}"
-                                           class="btn btn-sm btn-outline-primary"
-                                           title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <button type="button"
-                                                class="btn btn-sm btn-outline-danger"
-                                                title="Xóa"
-                                                th:data-field-id="${f.fieldID}"
-                                                th:data-field-name="${f.fieldName}"
-                                                onclick="confirmDelete(this)">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                        <!-- Pagination Info -->
+                        <div class="text-center mt-2 text-muted">
+                            <small>
+                                Trang <span th:text="${currentPage + 1}">1</span> /
+                                <span th:text="${totalPages}">1</span>
+                                (Tổng <span th:text="${totalElements}">0</span> lĩnh vực)
+                            </small>
+                        </div>
 
-                            <!-- Trường hợp không có dữ liệu -->
-                            <tr th:if="${#lists.isEmpty(fields)}">
-                                <td colspan="4" class="text-center text-muted py-4">Không có lĩnh vực nào phù hợp.</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Phân trang -->
-                <div class="card-footer" th:if="${totalPages > 0}">
-                    <nav aria-label="Phân trang lĩnh vực">
-                        <ul class="pagination justify-content-center mb-0">
-                            <!-- Nút Previous -->
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/manager/fields(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, keyword=${keyword})}"
-                                   aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
-                            </li>
-
-                            <!-- Số trang -->
-                            <li class="page-item"
-                                th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{/manager/fields(page=${i}, departmentId=${selectedDepartmentId}, keyword=${keyword})}"
-                                   th:text="${i + 1}">1</a>
-                            </li>
-
-                            <!-- Nút Next -->
-                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/manager/fields(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, keyword=${keyword})}"
-                                   aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-
-                    <!-- Thông tin phân trang -->
-                    <div class="text-center mt-2 text-muted">
-                        <small>
-                            Trang <span th:text="${currentPage + 1}">1</span> / <span th:text="${totalPages}">1</span>
-                            (Tổng <span th:text="${totalElements}">0</span> lĩnh vực)
-                        </small>
+                        <!-- Trường hợp không có dữ liệu -->
+                    <div th:if="${fields == null or fields.isEmpty()}" class="text-center py-5">
+                        <i class="fas fa-layer-group fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">Không có lĩnh vực nào</h5>
                     </div>
                 </div>
             </div>
@@ -142,25 +151,21 @@
 
         <!-- Modal xác nhận xóa -->
         <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title" id="deleteModalLabel">
-                            <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-sm">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title fw-semibold" id="deleteModalLabel">Xác nhận xóa</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Bạn có chắc chắn muốn xóa lĩnh vực:</p>
-                        <p class="fw-bold text-danger" id="fieldTitle"></p>
-                        <p class="text-muted mb-0">Hành động này không thể hoàn tác!</p>
+                        <p class="mb-2">Bạn có chắc chắn muốn xóa lĩnh vực:</p>
+                        <p class="fw-semibold mb-2" id="fieldTitle"></p>
+                        <p class="text-muted small mb-0">Hành động này không thể hoàn tác.</p>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                         <form id="deleteForm" method="post" style="display: inline;">
-                            <button type="submit" class="btn btn-danger">
-                                <i class="fas fa-trash me-1"></i>Xóa
-                            </button>
+                            <button type="submit" class="btn btn-danger">Xóa</button>
                         </form>
                     </div>
                 </div>
@@ -182,6 +187,7 @@
                 deleteModal.show();
             }
         </script>
+        </div>
 
     </th:block>
 </th:block>

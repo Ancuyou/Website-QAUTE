@@ -44,4 +44,7 @@ public class AnswerServiceImplement implements AnswerService {
     public long countAnswersForUser(it.ute.QAUTE.entity.User user) {
         return answerRepository.countByQuestionUser(user);
     }
+    public long countAll() {
+        return answerRepository.count();
+    }
 }

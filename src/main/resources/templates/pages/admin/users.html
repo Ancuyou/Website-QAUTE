@@ -15,6 +15,10 @@
             </div>
             <div class="col-md-3">
                 <select name="roleName" class="form-select">
+                    <option value=""
+                            th:selected="${selectedRole == null or #strings.isEmpty(selectedRole)}">
+                        Tất cả
+                    </option>
                     <option th:each="r : ${userRoles}"
                             th:value="${r.name()}"
                             th:text="${r.name()}"

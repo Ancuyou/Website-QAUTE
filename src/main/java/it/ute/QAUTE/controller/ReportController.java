@@ -4,9 +4,8 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.repository.AnswerRepository;
-import it.ute.QAUTE.repository.MessageRepository;
-import it.ute.QAUTE.repository.QuestionRepository;
+import it.ute.QAUTE.service.Implement.AccountServiceImplement;
+import it.ute.QAUTE.service.Implement.ReportServiceImplement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,29 +16,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import it.ute.QAUTE.service.Implement.AccountServiceImplement;
-import it.ute.QAUTE.service.Implement.ReportServiceImplement;
 
 @Controller
 public class ReportController {
-    
+
     @Autowired
     private ReportServiceImplement reportService;
 
     @Autowired
     private AccountServiceImplement accountService;
 
-    @Autowired
-    private QuestionRepository questionRepository;
-
-    @Autowired
-    private AnswerRepository answerRepository;
-
-    @Autowired
-    private MessageRepository  messageRepository;
-
-
-    
     @PostMapping("/reports/create")
     public String createReport(
             @RequestParam String contentType,
@@ -62,12 +48,12 @@ public class ReportController {
                     .build();
             reportService.save(report);
             redirectAttributes.addFlashAttribute("success", true);
-            redirectAttributes.addFlashAttribute("successMessage", 
-                "Báo cáo của bạn đã được gửi. Chúng tôi sẽ xem xét trong thời gian sớm nhất.");
-            
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Báo cáo của bạn đã được gửi. Chúng tôi sẽ xem xét trong thời gian sớm nhất.");
+
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", 
-                "Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại.");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại.");
         }
         if(reporter.getRole().equals(Account.Role.Consultant)) {
             return "redirect:/consultant/questions";
@@ -78,7 +64,7 @@ public class ReportController {
     @GetMapping("/manager/user-reports")
     public String listReports(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(defaultValue = "5") int size,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
             @RequestParam(required = false) String contentType,
@@ -104,6 +90,7 @@ public class ReportController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("contentType", contentType);
+        model.addAttribute("totalElements", reportPage.getTotalElements());
         model.addAttribute("reason", reason);
         model.addAttribute("status", status);
 
