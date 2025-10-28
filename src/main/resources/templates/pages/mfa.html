@@ -234,7 +234,7 @@
     /*<![CDATA[*/
     document.addEventListener("DOMContentLoaded", function () {
         const cid = /*[[${cid}]]*/ '';
-
+        const clearStorage = /*[[${clearStorage}]]*/ false;
         /* ===========================
            1) OTP FORM AUTO FOCUS
            =========================== */
@@ -250,7 +250,10 @@
 
         const SS_KEY_OTP_START = "qaute_mfa_otp_start";
         const SS_KEY_RESEND_START = "qaute_mfa_resend_start";
-
+        if (clearStorage) {
+            sessionStorage.removeItem(SS_KEY_OTP_START);
+            sessionStorage.removeItem(SS_KEY_RESEND_START);
+        }
         function nowMs() { return Date.now(); }
 
         function startCountdown(totalSec, onTick, onEnd) {

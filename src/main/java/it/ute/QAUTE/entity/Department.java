@@ -42,7 +42,8 @@ public class Department {
             orphanRemoval = true
     )
     private Set<Question> questions;
-
+    @OneToMany(mappedBy = "department", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Set<Consultant> consultants;
     public enum DepartmentType {
         Faculty, Department
     }

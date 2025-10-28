@@ -155,21 +155,7 @@ public class NotificationServiceImplement implements NotificationService {
 
     @Override
     public Account getSystemSender() {
-        // Cố gắng tìm Manager đầu tiên
-        List<Account> managers = accountRepository.findAll().stream()
-                .filter(acc -> acc.getRole() == Account.Role.Manager)
-                .toList();
-        if (!managers.isEmpty()) {
-            return managers.get(0);
-        }
-        // Nếu không có, tìm Admin đầu tiên
-        List<Account> admins = accountRepository.findAll().stream()
-                .filter(acc -> acc.getRole() == Account.Role.Admin)
-                .toList();
-        if (!admins.isEmpty()) {
-            return admins.get(0);
-        }
-        throw new RuntimeException("Không tìm thấy tài khoản Admin/Manager để gửi thông báo hệ thống.");
+        return accountRepository.findFirstSystem();
     }
 
     @Override
@@ -219,11 +205,10 @@ public class NotificationServiceImplement implements NotificationService {
     }
     
     public void notifyUserViolation(Account receiver, String titleQuestion, String question, LocalDateTime senderDate){
-        Account accountSystem= accountRepository.findFirstSystem();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         String title="Cảnh báo vi phạm trong ngôn ngữ";
         String body="Bạn vùa đặt đặt câu hỏi có tiêu đề là: "+titleQuestion+" và nội dung là: "+question+" có ngày gửi là: "+senderDate.format(formatter);
-        createNotificationForSpecificUser(accountSystem,receiver,title,body,false);
+        createNotificationForSpecificUser(getSystemSender(),receiver,title,body,false);
     }
 
     @Override

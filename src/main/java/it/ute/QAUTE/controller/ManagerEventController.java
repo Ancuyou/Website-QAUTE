@@ -95,7 +95,7 @@ public class ManagerEventController {
         model.addAttribute("eventStatuses", Arrays.asList(Event.EventStatus.values()));
         model.addAttribute("eventTypes", Arrays.asList(Event.EventType.values()));
         model.addAttribute("departments", departmentService.findAll());
-        model.addAttribute("consultants", consultantService.getAllConsultants());
+        model.addAttribute("consultants", consultantService.getAllConsultants(false));
 
         return "pages/manager/events/list";
     }

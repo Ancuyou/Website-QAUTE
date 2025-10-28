@@ -42,10 +42,10 @@ public class ConsultantServiceImplement implements ConsultantService {
     private Cache<Integer, Boolean> onlineCache; // Inject Online Cache
 
     @Override
-    public List<ConsultantDTO> getAllConsultants() {
+    public List<ConsultantDTO> getAllConsultants(boolean limitToThree) {
         List<Consultant> consultants = consultantRepository.findAllWithProfiles();
 
-        return consultants.stream().map(consultant -> {
+        List<ConsultantDTO> consultantDTOs= consultants.stream().map(consultant -> {
             Profiles profile = consultant.getProfile();
             Account account = accountRepository.findByProfile_ProfileID(profile.getProfileID()); // Lấy Account từ ProfileID
 
@@ -82,6 +82,11 @@ public class ConsultantServiceImplement implements ConsultantService {
             }
             return dto;
         }).collect(Collectors.toList());
+        consultantDTOs.sort((a, b) -> Boolean.compare(b.getIsOnline(), a.getIsOnline()));
+        if (limitToThree && consultantDTOs.size() > 3) {
+            consultantDTOs = consultantDTOs.subList(0, 3);
+        }
+        return consultantDTOs;
     }
     @Override
     public Optional<Consultant> findByProfileId(Integer profileId) {

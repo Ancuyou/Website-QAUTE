@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ConsultantService {
-    List<ConsultantDTO> getAllConsultants();
+    List<ConsultantDTO> getAllConsultants(boolean limitToThree);
 
     Optional<Consultant> findByProfileId(Integer profileId);
 

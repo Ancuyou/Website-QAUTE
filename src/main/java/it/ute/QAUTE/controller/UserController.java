@@ -91,7 +91,7 @@ public class UserController {
             List<Question> communityQuestions = questionService.getTop5RecentCommunityQuestions();
             model.addAttribute("communityQuestions", communityQuestions);
 
-            List<ConsultantDTO> consultants = consultantService.getAllConsultants();
+            List<ConsultantDTO> consultants = consultantService.getAllConsultants(true);
             model.addAttribute("consultants", consultants);
 
             List<Profiles> chatConsultants = messageService.getAllChatUsers(account.getProfile().getProfileID());
