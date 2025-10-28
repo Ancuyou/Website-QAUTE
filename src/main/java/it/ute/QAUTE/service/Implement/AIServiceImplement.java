@@ -45,7 +45,7 @@ public class AIServiceImplement implements AIService {
         Boolean status = onlineCache.getIfPresent(consultantProfiles.get().getAccount().getAccountID());
         if(status!=null) return;
         Conversation conversation=conversationRepository.findByUserIdAndConsultantId(Long.valueOf(userId), Long.valueOf(consultantId));
-        if(conversation.getAiEnabled() && !conversation.getConsultantJoined()){
+        if(conversation.getAiEnabled()){
             String text=aiReply(userMsg.getContent());
             Messages message = new Messages();
             message.setSenderID(consultantId);

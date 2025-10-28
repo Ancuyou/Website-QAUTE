@@ -130,45 +130,6 @@ public class ApplicationInitConfig {
                 accountRepository.save(account);
                 log.warn("✅ User account created: username=user, password=user. Please change it!");
             }
-            // --- TẠO KHOA VÀ LĨNH VỰC ---
-            if (departmentRepository.count() == 0) {
-                log.info("Seeding Departments and Fields...");
-
-                // 1. Tạo các Khoa
-                Department cntt = new Department();
-                cntt.setDepartmentName("Khoa Công nghệ thông tin");
-                cntt.setType(Department.DepartmentType.Faculty);
-                departmentRepository.save(cntt);
-
-                Department ckctm = new Department();
-                ckctm.setDepartmentName("Khoa Cơ khí Chế tạo máy");
-                ckctm.setType(Department.DepartmentType.Faculty);
-                departmentRepository.save(ckctm);
-
-                Department ddt = new Department();
-                ddt.setType(Department.DepartmentType.Faculty);
-                ddt.setDepartmentName("Khoa Điện - Điện tử");
-                departmentRepository.save(ddt);
-
-                // 2. Tạo các Lĩnh vực và liên kết với Khoa
-                createField("Công nghệ phần mềm", Set.of(cntt), fieldRepository);
-                createField("Hệ thống thông tin", Set.of(cntt), fieldRepository);
-                createField("An toàn thông tin", Set.of(cntt), fieldRepository);
-
-                createField("Cơ điện tử", Set.of(ckctm, ddt), fieldRepository);
-                createField("Kỹ thuật cơ khí", Set.of(ckctm), fieldRepository);
-
-                createField("Kỹ thuật điều khiển và tự động hóa", Set.of(ddt), fieldRepository);
-                createField("Hệ thống nhúng", Set.of(ddt), fieldRepository);
-
-                log.info("✅ Departments and Fields seeded successfully.");
-            }
         };
-    }
-    private void createField(String fieldName, Set<Department> departments, FieldRepository fieldRepository) {
-        Field field = new Field();
-        field.setFieldName(fieldName);
-        field.setDepartments(new HashSet<>(departments));
-        fieldRepository.save(field);
     }
 }

@@ -21,7 +21,7 @@ public class Field {
 
     @ManyToMany
     @JoinTable(
-            name = "Field_Department",
+            name = "FieldDepartment",
             joinColumns = @JoinColumn(name = "FieldID"),
             inverseJoinColumns = @JoinColumn(name = "DepartmentID")
     )
