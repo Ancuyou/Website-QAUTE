@@ -52,10 +52,10 @@ public class Messages {
     private Profiles receiver;
 
     // Trường này bạn đã có - Lombok sẽ tạo getAi() và setAi()
-    @Column(name="isAi")
+    @Column(name="IsAi")
     private Boolean ai = false;
 
-    @Column(name = "is_recalled")
+    @Column(name = "IsRecalled")
     private Boolean isRecalled = false;
 
     public enum MessageType {

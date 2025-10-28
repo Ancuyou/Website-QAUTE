@@ -13,16 +13,14 @@ import java.time.LocalDateTime;
 public class Conversation {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="Id")
     private Long id;
-    @Column(name="userProfileId", nullable=false)
+    @Column(name="UserProfileId", nullable=false)
     private Integer userProfileId;
 
-    @Column(name="consultantProfileId", nullable=false)
+    @Column(name="ConsultantProfileId", nullable=false)
     private Integer consultantProfileId;
 
-    @Column(name="consultantJoined", nullable=false)
-    private Boolean consultantJoined = false;
-
-    @Column(name="aiEnabled", nullable=false)
+    @Column(name="AIEnabled", nullable=false)
     private Boolean aiEnabled=true; // cho phép AI trả lời
 }

@@ -14,15 +14,16 @@ import java.util.Date;
 public class BlackList {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
+    @Column(name="Id")
     private int id;
-    @Column(nullable = false)
+    @Column(name="DeviceId",nullable = false)
     private String deviceId;
-    @Column(nullable = false)
+    @Column(name="DeviceName",nullable = false)
     private String deviceName;
-    @Column(nullable = false)
+    @Column(name="UnblockAt",nullable = false)
     private Date unblockAt;
-    @Column(nullable = false)
+    @Column(name="Block",nullable = false)
     private boolean block=false;
-    @Column(nullable = false)
+    @Column(name="BlockAt",nullable = false)
     private Date blockAt;
 }

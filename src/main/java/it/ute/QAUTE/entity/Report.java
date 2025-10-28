@@ -15,30 +15,31 @@ import lombok.*;
 public class Report {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="Id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reason", nullable = false, length = 500)
+    @Column(name = "Reason", nullable = false, length = 500)
     private ReportReason reason;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name="Description",columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "contentType")
+    @Column(name = "ContentType")
     private String contentType;
 
-    @Column(name = "contentId")
+    @Column(name = "ContentId")
     private Long contentId;
 
     @ManyToOne
-    @JoinColumn(name = "reporter_id", nullable = false)
+    @JoinColumn(name = "ReporterId", nullable = false)
     private Account reporter;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name="Status",nullable = false)
     private ReportStatus status;
 
-    @Column(nullable = false)
+    @Column(name="CreatedAt",nullable = false)
     private LocalDateTime createdAt;
 
     @Transient
