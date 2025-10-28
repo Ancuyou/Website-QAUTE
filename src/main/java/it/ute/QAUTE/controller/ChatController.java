@@ -52,8 +52,8 @@ public class ChatController {
         if(messages.isEmpty()){
             if(messageService.getRole(senderId)== Account.Role.User && messageService.getRole(receiverId)== Account.Role.Consultant){
                 Messages message = new Messages();
-                message.setSenderID(senderId);
-                message.setReceiverID(receiverId);
+                message.setSenderID(receiverId);
+                message.setReceiverID(senderId);
                 message.setContent("Xin chào! Tôi có thể giúp gì cho bạn?");
                 message.setType(Messages.MessageType.text);
                 message.setCreatedAt(LocalDateTime.now());

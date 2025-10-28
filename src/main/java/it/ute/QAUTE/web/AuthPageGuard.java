@@ -93,7 +93,6 @@ public class AuthPageGuard implements HandlerInterceptor {
     }
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String requestURI = request.getRequestURI();
         String contextPath = request.getContextPath();
         String deviceId = securityService.getClientIP(request);
         String deviceName = securityService.getDeviceFingerprint(request);
