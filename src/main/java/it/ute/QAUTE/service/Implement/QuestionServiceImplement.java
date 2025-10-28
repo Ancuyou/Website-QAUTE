@@ -1,5 +1,6 @@
 package it.ute.QAUTE.service.Implement;
 
+import it.ute.QAUTE.api.FastApiClient;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionDTO;
 import it.ute.QAUTE.entity.Department;
@@ -46,6 +47,8 @@ public class QuestionServiceImplement implements QuestionService {
     private DepartmentRepository departmentRepository;
     @Autowired
     private FieldRepository fieldRepository;
+    @Autowired
+    private FastApiClient fastApiClient;
 
     public List<Question> getAllQuestions() {
         return questionRepository.findAll(Sort.by(Sort.Direction.DESC, "dateSend"));
@@ -64,6 +67,8 @@ public class QuestionServiceImplement implements QuestionService {
     }
 
     public void saveQuestion(Question question) {
+        question.setToxic(fastApiClient.predictToxic(question.getContent()) == 1);
+        System.out.println("Set IsToxic : " + question.isToxic());
         questionRepository.save(question);
     }
     
