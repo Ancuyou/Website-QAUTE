@@ -19,4 +19,7 @@ public class Consultant {
     @OneToOne
     @JoinColumn(name = "ProfileID", referencedColumnName = "ProfileID")
     private Profiles profile;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="DepartmentId",referencedColumnName = "DepartmentId")
+    private Department department;
 }

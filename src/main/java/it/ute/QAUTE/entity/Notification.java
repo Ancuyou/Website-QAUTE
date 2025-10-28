@@ -8,7 +8,7 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-@Table(name="notifications")
+@Table(name="Notifications")
 public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +28,8 @@ public class Notification {
     private Date createdDate;
     @Column(name = "Status", length = 20)
     private String status; //Nháp, xuất bản,hết hiệu lực
-    private boolean is_priority;
+    @Column(name="IsPriority")
+    private boolean is_priority=false;
     public enum NotificationTarget {
         ALL, Manager, Consultant, User
     }

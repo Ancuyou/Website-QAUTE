@@ -11,8 +11,9 @@ import lombok.Setter;
 public class Manager {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="ManagerId")
     private int managerId;
-    @Column(name="secretPin", nullable = false)
+    @Column(name="SecretPin", nullable = false)
     private String secretPin;
     @OneToOne
     @JoinColumn(name = "ProfileID", referencedColumnName = "ProfileID")

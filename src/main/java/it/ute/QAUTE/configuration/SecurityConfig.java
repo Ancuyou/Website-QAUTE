@@ -33,6 +33,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import java.time.Duration;
 
@@ -151,7 +152,10 @@ public class SecurityConfig {
             try {
                 auth = authenticationService.authentication(Account.builder().email(email).build(),deviceId, deviceName, true);
             } catch (ParseException e) {
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
+                ErrorCode errorCode = ErrorCode.ACCOUNT_EXISTED;
+                String base = request.getContextPath();
+                response.sendRedirect(base + "/app-error?errorCode=" + errorCode.getCode() +
+                        "&message=" + URLEncoder.encode(errorCode.getMessage()+ " " + e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
             }
             if (auth != null) {
                 HttpSession session = request.getSession(true);
@@ -170,7 +174,10 @@ public class SecurityConfig {
                 response.sendRedirect(request.getContextPath() + resolveRedirectByRole("ROLE_" + auth.getRole().toString()));
             }
             else {
-                response.sendRedirect(request.getContextPath() + "/auth/login");  // fix lai tra ve loi tai khoan nay khong ton tai trong db
+                ErrorCode errorCode = ErrorCode.ACCOUNT_EXISTED;
+                String base = request.getContextPath();
+                response.sendRedirect(base + "/app-error?errorCode=" + errorCode.getCode() +
+                        "&message=" + URLEncoder.encode(errorCode.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
             }
         };
     }

@@ -7,9 +7,11 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name="NotificationReceiver")
 public class NotificationReceiver {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="Id")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "NotificationID", referencedColumnName = "NotificationID")

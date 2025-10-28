@@ -87,6 +87,7 @@ public class AuthenticationController {
         model.addAttribute("cid", cid);
         session.setAttribute("otp", ch.getOTP());
         session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
+        model.addAttribute("clearStorage", true);
         return "pages/mfa";
     }
     @PostMapping("/auth/login/MFA/resendOTP")

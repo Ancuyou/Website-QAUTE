@@ -62,7 +62,7 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     @EntityGraph(attributePaths = "profile")
     @Query("SELECT a FROM Account a WHERE a.accountID=:id")
     Account findByAccountIDWithProfiles(int id);
-    @Query("SELECT a FROM Account a JOIN a.profile p WHERE a.role != 'Admin' AND a.role = :role")
+    @Query("SELECT a FROM Account a JOIN a.profile p WHERE a.role = :role")
     List<Account> findByRoleExcludeAdmin(Account.Role role);
     @Query("SELECT a FROM Account a WHERE a.role != 'Admin'")
     List<Account> findAllExcludeAdmin();

@@ -14,9 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 @Configuration
@@ -87,88 +85,72 @@ public class ApplicationInitConfig {
                 accountRepository.save(account);
                 log.warn("Manager account created: username=manager, password=manager. Please change it!");
             }
-            // tạo consultant
-            if(accountRepository.findByUsername("consultant") == null){
-                Profiles profile = new Profiles();
-                profile.setFullName("Consultant");
-                profile.setPhone("0000000000");
-                profile.setAvatar(null);
-                Account account = new Account();
-                account.setUsername("consultant");
-                account.setPassword(passwordEncoder.encode("consultant"));
-                account.setEmail("consultant@gmail.com");
-                account.setCreatedDate(new Date());
-                account.setRole(Account.Role.Consultant);
-                Consultant consultant = new Consultant();
-                consultant.setExperienceYears(1);
-                consultant.setProfile(profile);
-                profile.setConsultant(consultant);
-                profile.setAccount(account);
-                account.setProfile(profile);
-                accountRepository.save(account);
-                log.warn("✅ Consultant account created: username=consultant, password=consultant. Please change it!");
-            }
-            if(accountRepository.findByUsername("user") == null) {
-                Profiles profile = new Profiles();
-                profile.setFullName("User");
-                profile.setPhone("0000000000");
-                profile.setAvatar(null);
-                Account account = new Account();
-                account.setUsername("user");
-                account.setPassword(passwordEncoder.encode("user"));
-                account.setEmail("23112074@student.hcmute.edu.vn");
-                account.setRole(Account.Role.User);
-                account.setCreatedDate(new Date());
-                account.setProfile(profile);
-                User user = new User();
-                user.setStudentCode("23112074");
-                user.setProfile(profile);
-                //user.setRoleName("Sinh Viên");
-                user.setRoleName(User.Role.SinhVien);
-                profile.setUser(user);
-                profile.setAccount(account);
-                accountRepository.save(account);
-                log.warn("✅ User account created: username=user, password=user. Please change it!");
-            }
-            // --- TẠO KHOA VÀ LĨNH VỰC ---
+
             if (departmentRepository.count() == 0) {
-                log.info("Seeding Departments and Fields...");
+                Department dept1 = new Department();
+                dept1.setDepartmentName("Khoa Công nghệ thông tin");
+                dept1.setType(Department.DepartmentType.Department);
+                dept1.setDescription("CNTT");
+                departmentRepository.save(dept1);
 
-                // 1. Tạo các Khoa
-                Department cntt = new Department();
-                cntt.setDepartmentName("Khoa Công nghệ thông tin");
-                cntt.setType(Department.DepartmentType.Faculty);
-                departmentRepository.save(cntt);
+                Department dept2 = new Department();
+                dept2.setDepartmentName("Khoa Cơ khí");
+                dept2.setType(Department.DepartmentType.Department);
+                dept2.setDescription("CK");
+                departmentRepository.save(dept2);
+                log.warn("✅ Created sample departments.");
 
-                Department ckctm = new Department();
-                ckctm.setDepartmentName("Khoa Cơ khí Chế tạo máy");
-                ckctm.setType(Department.DepartmentType.Faculty);
-                departmentRepository.save(ckctm);
-
-                Department ddt = new Department();
-                ddt.setType(Department.DepartmentType.Faculty);
-                ddt.setDepartmentName("Khoa Điện - Điện tử");
-                departmentRepository.save(ddt);
-
-                // 2. Tạo các Lĩnh vực và liên kết với Khoa
-                createField("Công nghệ phần mềm", Set.of(cntt), fieldRepository);
-                createField("Hệ thống thông tin", Set.of(cntt), fieldRepository);
-                createField("An toàn thông tin", Set.of(cntt), fieldRepository);
-
-                createField("Cơ điện tử", Set.of(ckctm, ddt), fieldRepository);
-                createField("Kỹ thuật cơ khí", Set.of(ckctm), fieldRepository);
-
-                createField("Kỹ thuật điều khiển và tự động hóa", Set.of(ddt), fieldRepository);
-                createField("Hệ thống nhúng", Set.of(ddt), fieldRepository);
-
-                log.info("✅ Departments and Fields seeded successfully.");
+            }
+            // tạo consultant
+            if(accountRepository.findByUsername("consultant1") == null){
+                List<Department> departments = departmentRepository.findAll();
+                Random random = new Random();
+                for (int i=0;i<20;i++) {
+                    Profiles profile = new Profiles();
+                    profile.setFullName("Consultant"+i);
+                    profile.setPhone("000000000"+i);
+                    profile.setAvatar(null);
+                    Account account = new Account();
+                    account.setUsername("consultant"+i);
+                    account.setPassword(passwordEncoder.encode("consultant"+i));
+                    account.setEmail("consultant"+i+"@gmail.com");
+                    account.setCreatedDate(new Date());
+                    account.setRole(Account.Role.Consultant);
+                    Consultant consultant = new Consultant();
+                    consultant.setExperienceYears(random.nextInt(5) + 1);
+                    consultant.setProfile(profile);
+                    Department randomDept = departments.get(random.nextInt(departments.size()));
+                    consultant.setDepartment(randomDept);
+                    profile.setConsultant(consultant);
+                    profile.setAccount(account);
+                    account.setProfile(profile);
+                    accountRepository.save(account);
+                    log.warn("✅ Consultant account created: username={}, password={}", account.getUsername(), "consultant" + i);
+                }
+            }
+            if(accountRepository.findByUsername("user1") == null) {
+                for (int i=0;i<10;i++) {
+                    Profiles profile = new Profiles();
+                    profile.setFullName("User"+i);
+                    profile.setPhone("000000000"+i);
+                    profile.setAvatar(null);
+                    Account account = new Account();
+                    account.setUsername("user"+i);
+                    account.setPassword(passwordEncoder.encode("user"+i));
+                    account.setEmail("user"+i+"@gmail.com");
+                    account.setRole(Account.Role.User);
+                    account.setCreatedDate(new Date());
+                    account.setProfile(profile);
+                    User user = new User();
+                    user.setStudentCode("2311025"+i);
+                    user.setProfile(profile);
+                    user.setRoleName(User.Role.SinhVien);
+                    profile.setUser(user);
+                    profile.setAccount(account);
+                    accountRepository.save(account);
+                    log.warn("✅ User account created: username={}, password={}", account.getUsername(), "user" + i);
+                }
             }
         };
-    }
-    private void createField(String fieldName, Set<Department> departments, FieldRepository fieldRepository) {
-        Field field = new Field();
-        field.setFieldName(fieldName);
-        field.setDepartments(new HashSet<>(departments));
-        fieldRepository.save(field);
     }
 }

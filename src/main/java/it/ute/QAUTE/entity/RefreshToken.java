@@ -17,21 +17,21 @@ import java.util.Date;
 @Table(name = "RefreshToken")
 public class RefreshToken {
     @Id
-    @Column(name = "Refresh_id")
+    @Column(name = "RefreshId")
     String refreshId;
 
-    @Column(name = "Sign_key", nullable = false, length = 128, unique = true)
+    @Column(name = "SignKey", nullable = false, length = 128, unique = true)
     String signKey;
 
-    @Column(name = "Device_name", length = 100)
+    @Column(name = "DeviceName", length = 100)
     String deviceName;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "Created_at", nullable = false, updatable = false)
+    @Column(name = "CreatedAt", nullable = false, updatable = false)
     Date createdAt;
 
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "Expires_at", nullable = false)
+    @Column(name = "ExpiresAt", nullable = false)
     Date expiresAt;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

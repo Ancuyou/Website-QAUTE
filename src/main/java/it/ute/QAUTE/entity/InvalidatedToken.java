@@ -2,8 +2,7 @@ package it.ute.QAUTE.entity;
 
 import java.util.Date;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,9 +14,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name="InvalidatedToken")
 public class InvalidatedToken {
     @Id
+    @Column(name="InvalidatedTokenId")
     String invalidatedTokenId;
-
+    @Column(name="ExpiryTime")
     Date expiryTime;
 }

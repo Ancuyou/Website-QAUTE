@@ -155,21 +155,7 @@ public class NotificationServiceImplement implements NotificationService {
 
     @Override
     public Account getSystemSender() {
-        // Cố gắng tìm Manager đầu tiên
-        List<Account> managers = accountRepository.findAll().stream()
-                .filter(acc -> acc.getRole() == Account.Role.Manager)
-                .toList();
-        if (!managers.isEmpty()) {
-            return managers.get(0);
-        }
-        // Nếu không có, tìm Admin đầu tiên
-        List<Account> admins = accountRepository.findAll().stream()
-                .filter(acc -> acc.getRole() == Account.Role.Admin)
-                .toList();
-        if (!admins.isEmpty()) {
-            return admins.get(0);
-        }
-        throw new RuntimeException("Không tìm thấy tài khoản Admin/Manager để gửi thông báo hệ thống.");
+        return accountRepository.findFirstSystem();
     }
 
     @Override
@@ -217,7 +203,6 @@ public class NotificationServiceImplement implements NotificationService {
             System.err.println("123456- Lỗi khi gửi thông báo: " + e.getMessage());
         }
     }
-
     public void notifyUserViolation(Account receiver, String titleQuestion, String question, LocalDateTime senderDate) {
         Account accountSystem = accountRepository.findFirstSystem();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy");
@@ -225,18 +210,18 @@ public class NotificationServiceImplement implements NotificationService {
         String title = "⚠️ Cảnh báo: Phát hiện nội dung vi phạm chính sách";
 
         String body = """
-    Hệ thống QAUTE vừa phát hiện nội dung bạn đăng có dấu hiệu vi phạm nguyên tắc cộng đồng.
-
-    📌 **Thông tin chi tiết:**
-    • Tiêu đề câu hỏi: %s
-    • Nội dung: "%s"
-    • Thời gian gửi: %s
-
-    🚫 Vui lòng xem xét và chỉnh sửa lại câu hỏi của bạn để đảm bảo phù hợp với quy tắc ứng xử trong hệ thống.
-    Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ với ban quản trị để được hỗ trợ.
-
-    — QAUTE System
-    """.formatted(titleQuestion, question, senderDate.format(formatter));
+                Hệ thống QAUTE vừa phát hiện nội dung bạn đăng có dấu hiệu vi phạm nguyên tắc cộng đồng.
+                
+                📌 **Thông tin chi tiết:**
+                • Tiêu đề câu hỏi: %s
+                • Nội dung: "%s"
+                • Thời gian gửi: %s
+                
+                🚫 Vui lòng xem xét và chỉnh sửa lại câu hỏi của bạn để đảm bảo phù hợp với quy tắc ứng xử trong hệ thống.
+                Nếu bạn cho rằng đây là nhầm lẫn, hãy liên hệ với ban quản trị để được hỗ trợ.
+                
+                — QAUTE System
+                """.formatted(titleQuestion, question, senderDate.format(formatter));
 
         createNotificationForSpecificUser(accountSystem, receiver, title, body, false);
     }
