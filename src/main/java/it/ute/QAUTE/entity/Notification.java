@@ -31,6 +31,6 @@ public class Notification {
     @Column(name="IsPriority")
     private boolean is_priority=false;
     public enum NotificationTarget {
-        ALL, Manager, Consultant, User
+        ALL, Manager, Consultant, User,Admin
     }
 }

@@ -21,7 +21,6 @@ public interface AccountService {
 
     Account findUserByUsername(String username);
 
-    Profiles getProfileByUsername(String username);
 
     Account findByUsername(String username);
 
@@ -34,7 +33,6 @@ public interface AccountService {
     // ??? wtf
     Page<Account> findAccountByRole(Account.Role role, Pageable pageable);
 
-    Account insertAccount(Account account);
 
     Account blockOrOpenAccount(Integer id);
 
@@ -54,7 +52,6 @@ public interface AccountService {
 
     String isAccountOnline(Integer id);
 
-    List<Integer> listUserOnline();
 
     long countAll_User();
 }

@@ -185,6 +185,7 @@
                 // Ẩn nút X
                 const btn = event.target.closest('button');
                 if (btn) btn.style.display = 'none';
+                event.target.closest('form').submit();
             }
         }
     </script>

@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.EventRepository;
 import it.ute.QAUTE.repository.EventRegistrationRepository;
 import it.ute.QAUTE.service.EventService;
+import it.ute.QAUTE.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,7 +31,7 @@ public class EventServiceImplement implements EventService {
     private EventRegistrationRepository registrationRepository;
 
     @Autowired
-    private FileStorageServiceImplement fileStorageService;
+    private FileStorageService fileStorageService;
 
     @Autowired
     private NotificationServiceImplement notificationService;

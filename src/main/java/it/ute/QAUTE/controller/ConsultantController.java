@@ -200,6 +200,7 @@ public class ConsultantController {
         @RequestParam("phone") String phone,
         @RequestParam(value = "experienceYears", required = false) Integer experienceYears,
         @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+        @RequestParam(value = "resetAvatar", required = false) String resetAvatar,
         Principal principal,
         RedirectAttributes redirectAttributes
     ) throws IOException {
@@ -215,7 +216,11 @@ public class ConsultantController {
         account.getProfile().setPhone(phone);
         account.getProfile().getConsultant().setExperienceYears(experienceYears);
         String oldAvatar = account.getProfile().getAvatar();
-        if (avatarFile != null && !avatarFile.isEmpty()) {
+        if("true".equals(resetAvatar) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+            fileStorageService.deleteFile(oldAvatar);
+            account.getProfile().setAvatar(null);
+        }
+        else if (avatarFile != null && !avatarFile.isEmpty()) {
             String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
             account.getProfile().setAvatar(newAvatarUrl);
         }

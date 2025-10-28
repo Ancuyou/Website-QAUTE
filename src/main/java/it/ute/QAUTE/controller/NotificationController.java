@@ -1,6 +1,7 @@
 package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
+import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Notification;
 import it.ute.QAUTE.entity.NotificationReceiver;
 import it.ute.QAUTE.service.*;
@@ -22,15 +23,21 @@ public class NotificationController {
     private NotificationService notificationService;
     @Autowired
     private AuthenticationService authenticationService;
+    @Autowired
+    private AccountService accountService;
     @GetMapping("/user")
     public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request, HttpServletResponse response)
             throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
         int accountId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
+        Account account=accountService.findById(accountId);
         List<NotificationReceiver> notifications = notificationService.findNotificationByAccountId(accountId);
         long unreadCount = notifications.stream()
                 .filter(n -> !n.isRead())
                 .count();
+        System.out.println("Avatar " + account.getProfile().getAvatar());
+        System.out.println("account.getRole(): " + account.getRole());
+        model.addAttribute("account", account);
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("accountId", accountId);

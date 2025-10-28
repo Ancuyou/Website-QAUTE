@@ -9,6 +9,7 @@ import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.ProfilesRepository;
 import it.ute.QAUTE.service.AccountService;
+import it.ute.QAUTE.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,7 @@ public class AccountServiceImplement implements AccountService {
     @Autowired
     private Cache<Integer, Boolean> onlineCache;
     @Autowired
-    private FileStorageServiceImplement fileStorageService;
+    private FileStorageService fileStorageService;
     @Autowired
     private ProfilesRepository profilesRepository;
 
@@ -79,15 +80,6 @@ public class AccountServiceImplement implements AccountService {
     public Account findUserByUsername(String username){
         return accountRepository.findByUsername(username);
     }
-    
-    @Override
-    public Profiles getProfileByUsername(String username) {
-        Account account = accountRepository.findByUsername(username);
-        if (account != null) {
-            return account.getProfile();
-        }
-        return null;
-    }
 
     @Override
     public Account findByUsername(String username) {
@@ -116,11 +108,6 @@ public class AccountServiceImplement implements AccountService {
         return accountRepository.getListAccount(role, pageable);
     }
 
-    @Override
-    public Account insertAccount(Account account){
-        account.setCreatedDate(new Date());
-        return accountRepository.save(account);
-    }
     @Override
     public Account blockOrOpenAccount(Integer id){
         Account acc = accountRepository.findByAccountID(id);
@@ -170,13 +157,19 @@ public class AccountServiceImplement implements AccountService {
         if (accountRepository.existsByEmailIgnoreCaseAndAccountIDNot(account.getEmail(), account.getAccountID())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
-
-        account.setPassword(passwordEncoder.encode(pass));
-        if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile,account.getProfile().getAvatar(), account.getAccountID());
-            account.getProfile().setAvatar( avatarFileName);
+        Account updatedAccount = accountRepository.findByAccountID(account.getAccountID());
+        String oldAvatar = updatedAccount.getProfile().getAvatar();
+        if(oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+            fileStorageService.deleteFile(oldAvatar);
+            updatedAccount.getProfile().setAvatar(null);
         }
-        return accountRepository.save(account);
+        if (!pass.isBlank()) updatedAccount.setPassword(passwordEncoder.encode(pass));
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            String avatarFileName = fileStorageService.storeFile(avatarFile,updatedAccount.getProfile().getAvatar(), updatedAccount.getAccountID());
+            System.out.println("FilePath: "+avatarFileName);
+            updatedAccount.getProfile().setAvatar(avatarFileName);
+        }
+        return accountRepository.save(updatedAccount);
     }
     @Override
     public void deleteAccount(Integer id) {
@@ -222,11 +215,6 @@ public class AccountServiceImplement implements AccountService {
             long days = diffInMinutes / 1440;
             return "Offline " + days + " ngày trước";
         }
-    }
-    @Override
-    public List<Integer> listUserOnline(){
-        List<Integer> allUserIds = new ArrayList<>(onlineCache.asMap().keySet());
-        return allUserIds;
     }
     @Override
     public long countAll_User() {

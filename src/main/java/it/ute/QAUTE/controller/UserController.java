@@ -225,7 +225,7 @@ public class UserController {
         String otp=authenticationService.changePassword(account.getEmail());
         session.setAttribute("otp", otp);
         session.setAttribute("otpExpiry", System.currentTimeMillis() + (3 * 60 * 1000));
-        return "redirect:/home/profile";
+        return "redirect:/user/profile";
     }
     @PostMapping("/profile/verify-otp")
     public String verifyOTP(@RequestParam("otp") String inputOTP,RedirectAttributes ra, HttpSession session){
@@ -255,7 +255,7 @@ public class UserController {
             session.removeAttribute("failCount");
             ra.addAttribute("otpVerified", 1);
         }
-        return "redirect:/home/profile";
+        return "redirect:/user/profile";
     }
     @PostMapping("/profile/update")
     public String update(@RequestParam String fullName,
@@ -264,6 +264,7 @@ public class UserController {
                          @RequestParam(required = false) String studentCode,
                          @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                          @RequestParam(value = "newPassword", required = false) String newPassword,
+                         @RequestParam(value = "resetAvatar", required = false) String resetAvatar,
                          HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
         int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
@@ -275,17 +276,17 @@ public class UserController {
         account.getProfile().getUser().setRoleName(roleName);
         account.getProfile().getUser().setStudentCode(studentCode);
         String oldAvatar = account.getProfile().getAvatar();
-        if((avatarFile== null || avatarFile.isEmpty()) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
+        if("true".equals(resetAvatar) && oldAvatar != null && oldAvatar.contains("cloudinary.com")){
             fileStorageService.deleteFile(oldAvatar);
             account.getProfile().setAvatar(null);
         }
         else if (avatarFile != null && !avatarFile.isEmpty()) {
-            String newAvatarUrl = fileStorageService.storeFile(avatarFile,oldAvatar, id);
+            String newAvatarUrl = String.valueOf(fileStorageService.storeFile(avatarFile, oldAvatar, id));
             account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.save(account);
         System.out.println("lưu thành công");
-        return "redirect:/home/profile";
+        return "redirect:/user/home";
     }
     @GetMapping("/consultants")
     public String showConsultantsPage(

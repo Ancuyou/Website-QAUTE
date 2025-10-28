@@ -147,7 +147,6 @@ public class NotificationServiceImplement implements NotificationService {
             System.out.println("lưu nháp");
         }
     }
-
     @Override
     public Notification findNotificationById(Integer id) {
         return notificationRepository.findById(id).orElse(null);
@@ -225,8 +224,6 @@ public class NotificationServiceImplement implements NotificationService {
 
         createNotificationForSpecificUser(accountSystem, receiver, title, body, false);
     }
-
-
     @Override
     public void notifyManagersNewEvent(Event event) {
         List<Account> managers = accountRepository.findAll().stream()

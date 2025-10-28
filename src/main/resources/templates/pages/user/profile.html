@@ -550,15 +550,13 @@
     }
     function resetAvatar() {
         if (confirm('Bạn có chắc muốn xóa ảnh đại diện và đặt về mặc định?')) {
-            // Đổi preview về ảnh mặc định
             const img = document.getElementById('avatarPreview');
             if (img) img.src = DEFAULT_AVATAR_URL;
 
-            // Clear file input
             const fileInput = document.getElementById('avatarInput');
             if (fileInput) fileInput.value = '';
 
-            // Tạo input hidden để báo controller reset avatar
+            // Tạo input hidden báo controller reset avatar
             let resetFlag = document.querySelector('input[name="resetAvatar"]');
             if (!resetFlag) {
                 resetFlag = document.createElement('input');
@@ -568,12 +566,9 @@
                 if (form) form.appendChild(resetFlag);
             }
             resetFlag.value = 'true';
-
-            // Ẩn nút X
-            const btn = event.target.closest('button');
-            if (btn) btn.style.display = 'none';
         }
     }
+
     (function () {
         const form = document.querySelector('form[action$="/user/profile/update"]');
         if (!form) return;
