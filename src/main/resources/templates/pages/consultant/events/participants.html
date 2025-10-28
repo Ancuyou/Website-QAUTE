@@ -84,14 +84,14 @@
                             <h5 class="mb-0 fw-semibold">
                                 Danh sách chi tiết (<span th:text="${#lists.size(participants)}">0</span> người)
                             </h5>
-                            <div class="btn-group btn-group-sm d-print-none"> <button type="button"
+                            <!-- <div class="btn-group btn-group-sm d-print-none"> <button type="button"
                                     class="btn btn-outline-primary" onclick="exportToExcel()">
                                     <i class="fas fa-file-excel me-1"></i>Xuất Excel
                                 </button>
                                 <button type="button" class="btn btn-outline-secondary" onclick="exportToPDF()">
                                     <i class="fas fa-print me-1"></i>In
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="card-body p-0">
                             <div th:if="${not #lists.isEmpty(participants)}">
@@ -112,7 +112,7 @@
                                                 <td class="px-3" th:text="${iterStat.count}">1</td>
                                                 <td class="px-3">
                                                     <div class="d-flex align-items-center py-2"> <img
-                                                            th:src="${reg.user?.profile?.avatar ?: '/images/default-avatar.jpg'}"
+                                                            th:src="${reg.user?.profile?.avatar ?: '/qaute/images/default_avatar.png'}"
                                                             class="rounded-circle me-3 flex-shrink-0" alt="Avatar"
                                                             width="40" height="40" style="object-fit: cover;">
                                                         <div class="flex-grow-1">
