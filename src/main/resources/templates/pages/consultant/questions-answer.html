@@ -44,13 +44,20 @@
 
         <main style="background-color: #f8f9fa; min-height: 100vh;">
             <div class="container py-5">
-                <div class="card border-0 shadow-sm mb-4 text-center p-4 rounded-3"
-                    style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
-                    <h1 class="fw-bold display-5">Trả lời câu hỏi cộng đồng</h1>
+                <div class="card border-0 shadow-lg mb-4 text-center p-5 rounded-4 overflow-hidden position-relative"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="position-absolute top-0 start-0 w-100 h-100"
+                        style="background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%);">
+                    </div>
+                    <h1 class="fw-bold display-4 mb-2 position-relative"
+                        style="text-shadow: 2px 4px 8px rgba(0,0,0,0.2); color: white; letter-spacing: -0.5px;">
+                        Trả lời câu hỏi cộng đồng
+                    </h1>
+                    <p class="mb-0 position-relative" style="color: rgba(255,255,255,0.9); font-size: 1.1rem;">
+                        Chia sẻ kiến thức, kết nối cộng đồng
+                    </p>
                 </div>
-
                 <div id="content-wrapper" th:fragment="contentFragment">
-                    <!-- Form Tìm kiếm & Sắp xếp -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body">
                             <form id="searchForm" th:action="@{/consultant/questions}" method="get"
@@ -78,7 +85,6 @@
                         </div>
                     </div>
 
-                    <!-- Form Lọc -->
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-white">
                             <h6 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-primary"></i>Lọc theo chủ đề</h6>
@@ -119,7 +125,6 @@
                         </div>
                     </div>
 
-                    <!-- ALERTS -->
                     <div id="alertsContainer">
                         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show"
                             role="alert">
@@ -131,11 +136,15 @@
                             <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
+                        <div th:if="${warningMessage}" class="alert alert-warning alert-dismissible fade show"
+                            role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${warningMessage}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col-lg-8">
-                            <!-- QUESTIONS LIST -->
                             <div id="questionsWrapper">
                                 <div th:each="question, iterStat : ${questions}"
                                     class="card border-0 shadow-sm mb-4 question-card"
@@ -159,7 +168,6 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <h5 class="fw-bold mb-0" th:text="${question.title}">Tiêu đề câu hỏi</h5>
-                                            <!-- REPORT BUTTON với data attributes -->
                                             <button type="button" class="btn btn-outline-danger btn-sm btn-report"
                                                 th:attr="data-type='question', data-id=${question.questionID}">
                                                 <i class="bi bi-flag"></i> Báo cáo
@@ -171,17 +179,17 @@
                                         <div th:if="${question.fileAttachment != null and question.fileAttachment != ''}"
                                             class="mt-3">
                                             <div th:if="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
+                                                 or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
+                                                 or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
+                                                 or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
                                                 <img th:src="@{${question.fileAttachment}}" alt="Ảnh đính kèm"
                                                     style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
                                             </div>
                                             <div
                                                 th:unless="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
-                                                    or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
-                                                    or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
-                                                    or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
+                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
+                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
+                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
                                                 <a th:href="@{${question.fileAttachment}}" target="_blank"
                                                     class="btn btn-outline-secondary btn-sm mt-2">
                                                     <i class="fas fa-paperclip me-1"></i> Tải tệp đính kèm
@@ -199,7 +207,9 @@
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
                                                 <button class="btn btn-sm btn-outline-primary me-2">
-                                                    <i class="fas fa-thumbs-up me-1"></i>0
+                                                    <i class="fas fa-thumbs-up me-1">
+                                                        <span th:text="${question.likes}">0</span>
+                                                    </i>
                                                 </button>
                                                 <button
                                                     class="btn btn-sm btn-outline-secondary me-2 btn-toggle-comments"
@@ -221,7 +231,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- ANSWERS SECTION -->
                                     <div class="card-footer bg-light" th:id="|comments${iterStat.count}|"
                                         style="display: none;">
                                         <h6 class="mb-3 small text-uppercase fw-bold">
@@ -259,7 +268,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- ANSWER FORM -->
                                     <div class="card-footer answer-form" th:id="|answerForm${iterStat.count}|">
                                         <form th:action="@{/consultant/questions/answer}" method="post">
                                             <input type="hidden" name="questionId" th:value="${question.questionID}" />
@@ -279,7 +287,6 @@
                                     </div>
                                 </div>
 
-                                <!-- EMPTY STATE -->
                                 <div th:if="${questions == null or #lists.isEmpty(questions)}"
                                     class="card border-0 shadow-sm">
                                     <div class="card-body p-5 text-center">
@@ -289,7 +296,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- ====== THÊM PHÂN TRANG TỪ ĐÂY ====== -->
                             <nav id="paginationContainer" th:if="${totalPages > 1}" aria-label="Question pagination">
                                 <ul class="pagination justify-content-center">
                                     <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
@@ -318,7 +324,6 @@
                             </nav>
                         </div>
 
-                        <!-- SIDEBAR -->
                         <div class="col-lg-4">
                             <div class="sticky-sidebar">
                                 <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp"
@@ -350,78 +355,60 @@
                                     </div>
                                 </div>
 
-                                <!-- Online Users Card -->
-                                <div class="card border-0 shadow-sm animate__animated animate__fadeInUp"
-                                    style="animation-delay: 0.3s;">
-                                    <div class="card-header text-white py-3 border-0"
-                                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                                        <h6 class="mb-0 fw-semibold">
-                                            <i class="fas fa-users me-2"></i>Đang Online
-                                            <span class="badge bg-white text-success ms-2">127</span>
-                                        </h6>
-                                    </div>
-                                    <div class="card-body p-4">
-                                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                                            <div class="position-relative">
-                                                <img src="https://via.placeholder.com/35" class="rounded-circle"
-                                                    alt="User" style="width: 35px; height: 35px;">
-                                                <span
-                                                    class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle"
-                                                    style="width: 10px; height: 10px;"></span>
-                                            </div>
-                                            <div class="ms-3 flex-grow-1">
-                                                <div class="fw-medium text-dark mb-0">Lê Văn Cường</div>
-                                                <small class="text-muted">Sinh viên K18</small>
-                                            </div>
-                                            <span
-                                                class="badge bg-success-subtle text-success px-2 py-1 small">Online</span>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                                            <div class="position-relative">
-                                                <img src="https://via.placeholder.com/35" class="rounded-circle"
-                                                    alt="User" style="width: 35px; height: 35px;">
-                                                <span
-                                                    class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle"
-                                                    style="width: 10px; height: 10px;"></span>
-                                            </div>
-                                            <div class="ms-3 flex-grow-1">
-                                                <div class="fw-medium text-dark mb-0">Phạm Thị Dung</div>
-                                                <small class="text-muted">Sinh viên K19</small>
-                                            </div>
-                                            <span
-                                                class="badge bg-success-subtle text-success px-2 py-1 small">Online</span>
-                                        </div>
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="position-relative">
-                                                <img src="https://via.placeholder.com/35" class="rounded-circle"
-                                                    alt="User" style="width: 35px; height: 35px;">
-                                                <span
-                                                    class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle"
-                                                    style="width: 10px; height: 10px;"></span>
-                                            </div>
-                                            <div class="ms-3 flex-grow-1">
-                                                <div class="fw-medium text-dark mb-0">Hoàng Minh Tuấn</div>
-                                                <small class="text-muted">Tư vấn viên</small>
-                                            </div>
-                                            <span
-                                                class="badge bg-success-subtle text-success px-2 py-1 small">Online</span>
-                                        </div>
-                                        <div class="text-center pt-3 border-top">
-                                            <small class="text-muted">và <strong>124 người</strong> khác đang
-                                                online...</small>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+        <div class="modal fade" id="confirmToxicModal" tabindex="-1" aria-labelledby="confirmToxicModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header bg-warning text-dark border-0">
+                        <h5 class="modal-title fw-bold" id="confirmToxicModalLabel">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Cảnh báo nội dung
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="alert alert-warning border-0 mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Nội dung của bạn có thể không phù hợp hoặc vi phạm quy định cộng đồng.</strong>
+                        </div>
 
+                        <p class="mb-3">Nội dung câu trả lời:</p>
+                        <div class="bg-light p-3 rounded border" style="max-height: 200px; overflow-y: auto;">
+                            <p id="toxicContentPreview" class="mb-0"></p>
+                        </div>
+
+                        <div class="mt-3">
+                            <p class="text-muted small mb-2">
+                                <i class="fas fa-lightbulb me-1"></i>
+                                <strong>Gợi ý:</strong> Vui lòng kiểm tra lại nội dung và đảm bảo:
+                            </p>
+                            <ul class="text-muted small mb-0">
+                                <li>Không chứa ngôn từ thô tục, xúc phạm</li>
+                                <li>Không có nội dung phân biệt đối xử</li>
+                                <li>Tôn trọng người hỏi và cộng đồng</li>
+                                <li>Mang tính xây dựng và hữu ích</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-edit me-2"></i>Chỉnh sửa lại
+                        </button>
+                        <button type="button" class="btn btn-warning" id="confirmSendToxic">
+                            <i class="fas fa-paper-plane me-2"></i>Vẫn gửi câu trả lời
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div th:replace="~{fragments/report :: reportModal}"></div>
+        <div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
 
-        <!-- JAVASCRIPT -->
         <script th:inline="javascript">
             (function () {
                 'use strict';
@@ -452,6 +439,13 @@
                         reportModal.addEventListener('hidden.bs.modal', () => document.getElementById('reportForm').reset());
                     }
 
+                    const confirmToxic = /*[[${confirmToxic}]]*/ false;
+                    if (confirmToxic) {
+                        const toxicContent = /*[[${toxicContent}]]*/ '';
+                        const toxicQuestionId = /*[[${toxicQuestionId}]]*/ null;
+
+                        showToxicConfirmModal(toxicContent, toxicQuestionId);
+                    }
 
                     // Khởi tạo các dropdown phụ thuộc
                     initDepartmentFieldCascade();
@@ -471,6 +465,43 @@
                     history.replaceState({ path: window.location.href }, '');
                 }
 
+                function showToxicConfirmModal(content, questionId) {
+                    const modal = new bootstrap.Modal(document.getElementById('confirmToxicModal'));
+                    const previewElement = document.getElementById('toxicContentPreview');
+                    const confirmButton = document.getElementById('confirmSendToxic');
+
+                    if (previewElement) {
+                        previewElement.textContent = content;
+                    }
+
+                    // Xử lý khi nhấn "Vẫn gửi"
+                    confirmButton.onclick = function () {
+                        // Tìm form tương ứng với questionId
+                        const answerForm = document.querySelector(`form[action*="/consultant/questions/answer"] input[name="questionId"][value="${questionId}"]`)?.closest('form');
+
+                        if (answerForm) {
+                            // Thêm input hidden để đánh dấu đã confirm
+                            const confirmedInput = document.createElement('input');
+                            confirmedInput.type = 'hidden';
+                            confirmedInput.name = 'confirmed';
+                            confirmedInput.value = 'true';
+                            answerForm.appendChild(confirmedInput);
+
+                            // Set lại nội dung
+                            const textarea = answerForm.querySelector('textarea[name="content"]');
+                            if (textarea) {
+                                textarea.value = content;
+                            }
+
+                            // Submit form
+                            answerForm.submit();
+                        }
+
+                        modal.hide();
+                    };
+
+                    modal.show();
+                }
                 /**
                  * Gắn lại các event listener cho nội dung được tải động qua AJAX.
                  * Phải được gọi mỗi khi #content-wrapper được cập nhật.
@@ -577,7 +608,7 @@
                 }
 
                 /**
-                 * Xử lý submit form đặt câu hỏi.
+                 * Xử lý submit form đặt câu hỏi. (Vô hại, để lại)
                  */
                 async function handleAskQuestionSubmit(event) {
                     event.preventDefault();
@@ -628,7 +659,7 @@
                     }
                 }
 
-                // --- CÁC HÀM HELPER (Giữ nguyên từ script cũ) ---
+                // --- CÁC HÀM HELPER ---
 
                 function openReportModal(contentType, contentId) {
                     const modal = new bootstrap.Modal(document.getElementById('reportModal'));
@@ -661,6 +692,7 @@
                         }
 
                         try {
+                            // Đổi API path
                             const fields = await fetchJsonArray(`${ctx}api/fields/${departmentId}`);
                             fieldSelect.disabled = false;
                             fieldSelect.innerHTML = '<option value="">-- Chọn lĩnh vực (tùy chọn) --</option>';
@@ -683,6 +715,7 @@
                     departmentFilter.addEventListener('change', async function () {
                         const departmentId = this.value.trim();
                         fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>';
+                        // Đổi API path
                         const url = departmentId ? `${ctx}api/fields/${departmentId}` : `${ctx}api/fields/all`;
 
                         try {
@@ -703,6 +736,7 @@
                     const fieldFilter = document.getElementById('fieldFilter');
                     if (!fieldFilter) return;
 
+                    // Đổi API path
                     const url = selectedDeptId ? `${ctx}api/fields/${selectedDeptId}` : `${ctx}api/fields/all`;
 
                     fetchJsonArray(url)

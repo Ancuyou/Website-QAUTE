@@ -114,7 +114,7 @@ public class ConsultantEventController {
     @PostMapping("/create")
     public String createEvent(
             @Valid @ModelAttribute Event event,
-            BindingResult bindingResult, // BindingResult phải đi ngay sau @Valid
+            BindingResult bindingResult, 
             @RequestParam(value = "bannerFile", required = false) MultipartFile bannerFile,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer fieldId,
