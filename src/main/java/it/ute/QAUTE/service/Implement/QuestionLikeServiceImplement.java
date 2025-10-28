@@ -21,6 +21,7 @@ public class QuestionLikeServiceImplement implements QuestionLikeService {
     private final QuestionRepository questionRepository;
 
     @Transactional
+    @Override
     public boolean toggleLike(Integer questionId, User user) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
@@ -46,6 +47,7 @@ public class QuestionLikeServiceImplement implements QuestionLikeService {
         }
     }
 
+    @Override
     public long getLikeCount(Integer questionId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found with ID: " + questionId));
@@ -55,6 +57,7 @@ public class QuestionLikeServiceImplement implements QuestionLikeService {
         // return questionLikeRepository.countByQuestion(question);
     }
 
+    @Override
     public boolean isLikedByUser(Integer questionId, User user) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
@@ -62,6 +65,7 @@ public class QuestionLikeServiceImplement implements QuestionLikeService {
     }
 
     @Transactional
+    @Override
     public void incrementViews(Integer questionId) {
         Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found"));
@@ -69,6 +73,7 @@ public class QuestionLikeServiceImplement implements QuestionLikeService {
         questionRepository.save(question);
     }
 
+    @Override
     public long getTotalLikesForUser(User user) {
         Long totalLikes = questionRepository.sumLikesByUser(user);
         return totalLikes != null ? totalLikes : 0L; // Trả về 0 nếu user chưa có câu hỏi nào

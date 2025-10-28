@@ -4,9 +4,7 @@ import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.configuration.CustomJwtDecoder;
 import it.ute.QAUTE.dto.response.MFAResponse;
 import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.service.Implement.AccountServiceImplement;
-import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
-import it.ute.QAUTE.service.Implement.SecurityServiceImplement;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -37,11 +35,11 @@ import java.util.Map;
 public class AuthenticationController {
 
     @Autowired
-    private AuthenticationServiceImplement authenticationService;
+    private AuthenticationService authenticationService;
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
     @Autowired
-    private SecurityServiceImplement securityService;
+    private SecurityService securityService;
     //Post
     @GetMapping("/auth/login")
     public String loginForm(@ModelAttribute("account") Account account,

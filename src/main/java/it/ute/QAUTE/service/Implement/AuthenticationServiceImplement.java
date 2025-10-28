@@ -20,6 +20,7 @@ import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.InvalidatedTokenRepository;
 import it.ute.QAUTE.repository.RefreshTokenRepository;
 import it.ute.QAUTE.service.AuthenticationService;
+import it.ute.QAUTE.service.EmailService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -65,7 +66,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
     @Autowired
     RefreshTokenRepository refreshTokenRepository;
     @Autowired
-    private EmailServiceImplement emailService;
+    private EmailService emailService;
     @Autowired
     private SecurityServiceImplement securityService;
     @NonFinal
@@ -80,15 +81,18 @@ public class AuthenticationServiceImplement implements AuthenticationService {
     @NonFinal
     @Value("${openweather.apikey}")
     protected String APIKEY;
-    public boolean check(String text,String hasedText){
+    @Override
+    public boolean check(String text, String hasedText){
         return passwordEncoder.matches(text,hasedText);
     }
 
+    @Override
     public String hashed(String text){
         return passwordEncoder.encode(text);
     }
 
-    public AuthenticationResponse authentication(Account account,String deviceId, String name_device, boolean isGoogle) throws ParseException {
+    @Override
+    public AuthenticationResponse authentication(Account account, String deviceId, String name_device, boolean isGoogle) throws ParseException {
         Account accountRep;
         boolean authenticated;
         if(!isGoogle){
@@ -159,12 +163,14 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                 .build();
     }
 
-    private String builtScope(Account account){
+    @Override
+    public String builtScope(Account account){
         StringJoiner stringJoiner = new StringJoiner(" ");
         stringJoiner.add("ROLE_" + account.getRole().name());
         return stringJoiner.toString();
     }
 
+    @Override
     public String generateToken(Account account, String signKey, boolean isRefresh){
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -199,6 +205,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         }
     }
 
+    @Override
     public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
         SignedJWT signedJWT = SignedJWT.parse(token);
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
@@ -239,6 +246,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         return signedJWT;
     }
 
+    @Override
     public void logout(String token, String tokenRefresh) throws ParseException, JOSEException{
         try {
             if (tokenRefresh == null){
@@ -262,6 +270,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         }
     }
 
+    @Override
     public String forgetPassword(String email) {
         if (accountRepository.existsByEmail(email)) {
             String otp= emailService.sendForgetPasswordEmail(email);
@@ -272,7 +281,8 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         }
     }
 
-    public String register(String username,String email){
+    @Override
+    public String register(String username, String email){
         if (accountRepository.existsByUsername(username) || accountRepository.existsByEmail(email)){
             return null;
         }else {
@@ -281,6 +291,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             return hashed(otp);
         }
     }
+    @Override
     public String changePassword(String email){
         if (accountRepository.existsByEmail(email)) {
             String otp= emailService.sendChangePassword(email);
@@ -290,6 +301,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             return null;
         }
     }
+    @Override
     public String MFA(String email){
         if (accountRepository.existsByEmail(email)) {
             String otp= emailService.sendMFAOTP(email);
@@ -300,6 +312,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         }
     }
     // Func call in func Authenticated after check user, pass
+    @Override
     public RefreshTokenResponse refreshToken(Account account, String deviceName) throws ParseException {
         String signKey = generateSignMaxSecurity();
 
@@ -330,6 +343,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                 .build();
     }
 
+    @Override
     public String generateSignMaxSecurity() {
         try {
             String city = "Ho Chi Minh City";
@@ -361,17 +375,20 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             return fallbackSecureRandom128();
         }
     }
-    private String fallbackSecureRandom128() {
+    @Override
+    public String fallbackSecureRandom128() {
         byte[] buf = new byte[64];
         new SecureRandom().nextBytes(buf);
         return toHex(buf);
     }
 
-    private String toHex(byte[] bytes) {
+    @Override
+    public String toHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder(bytes.length * 2);
         for (byte b : bytes) sb.append(String.format("%02x", b));
         return sb.toString();
     }
+    @Override
     public int getCurrentUserId(Object tokenObj, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         if (tokenObj instanceof String token && !token.isBlank()) {
             try {
@@ -412,6 +429,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             return 0;
         }
     }
+    @Override
     public Account getCurrentAccount() {
         HttpServletRequest request = null;
         try {
@@ -441,11 +459,13 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         }
     }
 
+    @Override
     public String createMFACache(MFAResponse mfaResponse) {
         String cid=java.util.UUID.randomUUID().toString();
         temporaryMFACache.put(cid, mfaResponse);
         return cid;
     }
+    @Override
     public MFAResponse get(String cid) { return temporaryMFACache.getIfPresent(cid); }
 }
 

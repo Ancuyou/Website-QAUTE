@@ -394,7 +394,7 @@
                 fieldFilter.disabled = true;
                 fieldFilter.innerHTML = '<option value="">-- Đang tải... --</option>';
 
-                const url = departmentId ? `${ctx}api/fields/${departmentId}` : `${ctx}api/fields/all`;
+                const url = departmentId ? `${ctx}api/questions/fields/${departmentId}` : `${ctx}api/questions/fields/all`;
 
                 try {
                     const response = await fetch(url);
@@ -424,7 +424,7 @@
             if (!departmentFilter || !fieldFilter) return;
 
             const selectedDeptId = departmentFilter.value;
-            const url = selectedDeptId ? `${ctx}api/fields/${selectedDeptId}` : `${ctx}api/fields/all`;
+            const url = selectedDeptId ? `${ctx}api/questions/fields/${selectedDeptId}` : `${ctx}api/questions/fields/all`;
             fieldFilter.disabled = true;
             fieldFilter.innerHTML = '<option value="">-- Đang tải... --</option>';
 

@@ -3,7 +3,7 @@ package it.ute.QAUTE.controller;
 import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -30,17 +30,17 @@ import java.util.List;
 @RequestMapping("/admin")
 public class AdminController {
     @Autowired
-    private AdminServiceImplement adminService;
+    private AdminService adminService;
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
     @Autowired
-    private UserServiceImplement userService;
+    private UserService userService;
     @Autowired
-    private AuthenticationServiceImplement authenticationService;
+    private AuthenticationService authenticationService;
     @Autowired
-    private NotificationServiceImplement notificationService;
+    private NotificationService notificationService;
 
 
     @GetMapping("/consultants")

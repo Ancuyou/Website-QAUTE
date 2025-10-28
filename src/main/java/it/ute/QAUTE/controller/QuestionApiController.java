@@ -9,7 +9,7 @@ import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.entity.User;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
-import it.ute.QAUTE.service.Implement.*;
+import it.ute.QAUTE.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,11 +27,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class QuestionApiController {
 
-    private final QuestionLikeServiceImplement questionLikeService;
-    private final AccountServiceImplement accountService;
-    private final UserServiceImplement userService;
-    private final DepartmentServiceImplement departmentService;
-    private final QuestionServiceImplement questionService;
+    private final QuestionLikeService questionLikeService;
+    private final AccountService accountService;
+    private final UserService userService;
+    private final DepartmentService departmentService;
+    private final QuestionService questionService;
 
     @PostMapping("/{questionId}/like")
     public ResponseEntity<Map<String, Object>> toggleLike(
@@ -122,24 +122,19 @@ public class QuestionApiController {
             dto.setContent(question.getContent());
             dto.setFileAttachment(question.getFileAttachment());
             dto.setCanEdit(question.getAnswers().isEmpty() && question.getLikes() == 0 && question.getStatus() == Question.QuestionStatus.Pending); // Logic kiểm tra quyền sửa
-
-
             if (question.getDepartment() != null) {
                 dto.setDepartment(new DepartmentDTO(question.getDepartment().getDepartmentID(), question.getDepartment().getDepartmentName()));
             }
             if (question.getField() != null) {
                 dto.setField(new FieldDTO(question.getField().getFieldID(), question.getField().getFieldName()));
             }
-
-
             return ResponseEntity.ok(dto);
         } catch (AppException e) {
             if (e.getErrorCode() == ErrorCode.UNAUTHORIZED) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // Hoặc mã lỗi khác
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         } catch (Exception e) {
-            // Log lỗi ở đây
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

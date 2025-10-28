@@ -3,10 +3,7 @@ package it.ute.QAUTE.controller;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.Implement.AccountServiceImplement;
-import it.ute.QAUTE.service.Implement.DepartmentServiceImplement;
-import it.ute.QAUTE.service.Implement.EventServiceImplement;
-import it.ute.QAUTE.service.Implement.UserServiceImplement;
+import it.ute.QAUTE.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,16 +26,16 @@ public class UserEventController {
     private static final Logger log = LoggerFactory.getLogger(UserEventController.class);
 
     @Autowired
-    private EventServiceImplement eventService;
+    private EventService eventService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private UserServiceImplement userService;
+    private UserService userService;
 
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
 
     // Hàm Helper (kiểm tra Enum hợp lệ)
     private <E extends Enum<E>> boolean isValidEnum(Class<E> enumClass, String value) {

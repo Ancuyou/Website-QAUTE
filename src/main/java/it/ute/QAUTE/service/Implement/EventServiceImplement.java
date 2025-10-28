@@ -40,8 +40,9 @@ public class EventServiceImplement implements EventService {
             Event.EventStatus.Ongoing,
             Event.EventStatus.Completed);
 
+    @Override
     public Page<Event> findEventsByConsultantAndFilters(Consultant consultant, Event.EventType type,
-            Event.EventStatus status, Pageable pageable) {
+                                                        Event.EventStatus status, Pageable pageable) {
         if (type != null && status != null) {
             return eventRepository.findByConsultantAndTypeAndStatus(consultant, type, status, pageable);
         } else if (type != null) {
@@ -53,15 +54,18 @@ public class EventServiceImplement implements EventService {
         }
     }
 
+    @Override
     public long countConsultantEventsByStatus(Consultant consultant, Event.EventStatus status) {
         return eventRepository.countByConsultantAndStatus(consultant, status);
     }
 
+    @Override
     public long countConsultantEventsByStatusIn(Consultant consultant, List<Event.EventStatus> statuses) {
         return eventRepository.countByConsultantAndStatusIn(consultant, statuses);
     }
 
     @Transactional
+    @Override
     public Event createEvent(Event event, MultipartFile bannerFile) {
 
         validateEventTime(event);
@@ -89,6 +93,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public Event updateEvent(Integer eventId, Event updatedEvent, MultipartFile bannerFile) {
         Event existingEvent = findById(eventId);
 
@@ -129,6 +134,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public void deleteEvent(Integer eventId) {
         Event event = findById(eventId);
 
@@ -149,6 +155,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public Event approveEvent(Integer eventId, Integer managerId) {
         Event event = findById(eventId);
 
@@ -168,6 +175,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public Event rejectEvent(Integer eventId, Integer managerId, String reason) {
         Event event = findById(eventId);
 
@@ -189,6 +197,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public Event cancelEvent(Integer eventId, String reason) {
         Event event = findById(eventId);
 
@@ -217,27 +226,33 @@ public class EventServiceImplement implements EventService {
         return cancelledEvent;
     }
 
+    @Override
     public Event findById(Integer eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
     }
 
+    @Override
     public Page<Event> findAllEvents(Pageable pageable) {
         return eventRepository.findAll(pageable);
     }
 
+    @Override
     public Page<Event> findEventsByConsultant(Consultant consultant, Pageable pageable) {
         return eventRepository.findByConsultant(consultant, pageable);
     }
 
+    @Override
     public Page<Event> findEventsByStatus(Event.EventStatus status, Pageable pageable) {
         return eventRepository.findByStatus(status, pageable);
     }
 
+    @Override
     public Page<Event> findUpcomingEvents(Pageable pageable) {
         return eventRepository.findUpcomingEvents(LocalDateTime.now(), pageable);
     }
 
+    @Override
     public Page<Event> searchEvents(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return findUpcomingEvents(pageable);
@@ -245,6 +260,7 @@ public class EventServiceImplement implements EventService {
         return eventRepository.searchEvents(keyword, pageable);
     }
 
+    @Override
     public Page<Event> filterEvents(
             Event.EventType type,
             Event.EventMode mode,
@@ -256,6 +272,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public EventRegistration registerForEvent(Integer eventId, User user, String note) {
         Event event = findById(eventId);
 
@@ -297,6 +314,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public void cancelRegistration(Integer registrationId, String reason) {
         EventRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
@@ -323,28 +341,34 @@ public class EventServiceImplement implements EventService {
         log.info("Registration {} cancelled", registrationId);
     }
 
+    @Override
     public Page<EventRegistration> findUserRegistrations(User user, Pageable pageable) {
         return registrationRepository.findByUser(user, pageable);
     }
 
+    @Override
     public List<EventRegistration> findEventParticipants(Integer eventId) {
         Event event = findById(eventId);
         return registrationRepository.findActiveRegistrations(event);
     }
 
+    @Override
     public long countPendingEvents() {
         return eventRepository.countByStatus(Event.EventStatus.Pending);
     }
 
+    @Override
     public long countApprovedEvents() {
         return eventRepository.countByStatus(Event.EventStatus.Approved);
     }
 
+    @Override
     public long countConsultantEvents(Consultant consultant) {
         return eventRepository.countByConsultant(consultant);
     }
 
-    private void validateEventTime(Event event) {
+    @Override
+    public void validateEventTime(Event event) {
         if (event.getEndTime().isBefore(event.getStartTime())) {
             ErrorCode errorCode = ErrorCode.INVALID_EVENT_TIME;
             throw new AppException(errorCode);
@@ -362,6 +386,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public void updateEventStatuses() {
         LocalDateTime now = LocalDateTime.now();
 
@@ -384,26 +409,31 @@ public class EventServiceImplement implements EventService {
         }
     }
 
+    @Override
     public long countEventsInDateRange(LocalDateTime start, LocalDateTime end) {
         return eventRepository.countByCreatedAtBetween(start, end);
     }
 
+    @Override
     public long countPendingEventsInDateRange(LocalDateTime start, LocalDateTime end) {
         return eventRepository.countByStatusAndCreatedAtBetween(Event.EventStatus.Pending, start, end);
     }
 
+    @Override
     public long countApprovedEventsInDateRange(LocalDateTime start, LocalDateTime end) {
         return eventRepository.countByStatusInAndCreatedAtBetween(APPROVED_STATUSES, start, end);
     }
 
+    @Override
     public List<Event> findTop3UpcomingEvents() {
         Pageable topThree = PageRequest.of(0, 3);
         return eventRepository.findTop3UpcomingApprovedEvents(LocalDateTime.now(), topThree);
     }
 
     @Transactional(readOnly = true)
+    @Override
     public Page<EventRegistration> findUserRegistrations(User user, EventRegistration.RegistrationStatus status,
-            Pageable pageable) {
+                                                         Pageable pageable) {
         if (status != null) {
             return registrationRepository.findByUserAndStatus(user, status, pageable);
         } else {
@@ -412,6 +442,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public void submitFeedback(Integer registrationId, User user, Integer rating, String feedback) {
         EventRegistration registration = registrationRepository.findByRegistrationIDAndUser(registrationId, user)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
@@ -434,6 +465,7 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public void cancelRegistration(Integer registrationId, User user, String reason) {
 
         EventRegistration registration = registrationRepository.findByRegistrationIDAndUser(registrationId, user)
@@ -462,9 +494,10 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional
+    @Override
     public EventRegistration updateRegistrationStatus(Integer registrationId,
-            EventRegistration.RegistrationStatus newStatus,
-            Consultant consultant) {
+                                                      EventRegistration.RegistrationStatus newStatus,
+                                                      Consultant consultant) {
      
         EventRegistration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new AppException(ErrorCode.REGISTRATION_NOT_FOUND));
@@ -502,12 +535,14 @@ public class EventServiceImplement implements EventService {
     }
 
     @Transactional(readOnly = true)
+    @Override
     public boolean isUserRegistered(Event event, User user) {
         // Dùng Repository để kiểm tra trực tiếp, loại trừ trạng thái Cancelled
         return registrationRepository.existsByEventAndUserAndStatusNot(
                 event, user, EventRegistration.RegistrationStatus.Cancelled);
     }
 
+    @Override
     public List<Event> findUpcomingEventsByConsultant(Consultant consultant) {
         LocalDateTime now = LocalDateTime.now();
         List<Event> events = eventRepository.findByConsultant(consultant, Pageable.unpaged()).getContent();
@@ -521,6 +556,7 @@ public class EventServiceImplement implements EventService {
                 
     }
 
+    @Override
     public long countAll() {
         return eventRepository.count();
     }

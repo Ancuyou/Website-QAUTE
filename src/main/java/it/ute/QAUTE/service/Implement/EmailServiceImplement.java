@@ -19,8 +19,9 @@ public class EmailServiceImplement implements EmailService {
     @Autowired
     private ApplicationContext context;
     @Autowired @org.springframework.context.annotation.Lazy
-    private EmailServiceImplement self;
-    private String createOTP(){
+    private EmailService self;
+    @Override
+    public String createOTP(){
         SecureRandom random = new SecureRandom();
         String DIGITS = "0123456789";
         int OTP_LENGTH = 6;
@@ -31,6 +32,7 @@ public class EmailServiceImplement implements EmailService {
         return otp.toString();
     }
     @org.springframework.scheduling.annotation.Async("mailExecutor")
+    @Override
     public void sendEmail(String toEmail, String subject, String body){
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
@@ -38,6 +40,7 @@ public class EmailServiceImplement implements EmailService {
         message.setText(body);
         mailSender.send(message);
     }
+    @Override
     public String sendForgetPasswordEmail(String toEmail) {
         String otp = createOTP();
         try {
@@ -49,6 +52,7 @@ public class EmailServiceImplement implements EmailService {
         }
         return otp;
     }
+    @Override
     public String sendRegisterEmail(String toEmail) {
         String otp = createOTP();
         try {
@@ -59,6 +63,7 @@ public class EmailServiceImplement implements EmailService {
         }
         return otp;
     }
+    @Override
     public String sendChangePassword(String toEmail){
         String otp = createOTP();
         try {
@@ -71,6 +76,7 @@ public class EmailServiceImplement implements EmailService {
         }
         return otp;
     }
+    @Override
     public String sendMFAOTP(String toEmail){
         String otp = createOTP();
         try {
@@ -83,6 +89,7 @@ public class EmailServiceImplement implements EmailService {
         }
         return otp;
     }
+    @Override
     public void sendNotification(String toEmail, String header, String body) {
         try {
             String htmlContent = getEmailTemplate(header, getSystemNotificationContent(header, body));
@@ -91,7 +98,8 @@ public class EmailServiceImplement implements EmailService {
             self.sendEmail(toEmail, header, "Xin chào,\n\n" + body + "\n\nTrân trọng,\nQAUTE");
         }
     }
-    public void sendSuspiciousActivityAlert(String toEmail,String ipAddress,String deviceName, String activity, String reason ) {
+    @Override
+    public void sendSuspiciousActivityAlert(String toEmail, String ipAddress, String deviceName, String activity, String reason) {
         try {
             String htmlContent = getEmailTemplate("🔍 HOẠT ĐỘNG BẤT THƯỜNG",
                     getSuspiciousActivityContent(ipAddress, deviceName, activity, reason));
@@ -110,6 +118,7 @@ public class EmailServiceImplement implements EmailService {
         }
     }
     @org.springframework.scheduling.annotation.Async("mailExecutor")
+    @Override
     public void sendEmailHtml(String toEmail, String subject, String htmlBody)
             throws MessagingException {
         MimeMessage mime = mailSender.createMimeMessage();
@@ -119,7 +128,8 @@ public class EmailServiceImplement implements EmailService {
         helper.setText(htmlBody, true);
         mailSender.send(mime);
     }
-    private String getSuspiciousActivityContent(String ipAddress,String deviceName, String activity, String reason) {
+    @Override
+    public String getSuspiciousActivityContent(String ipAddress, String deviceName, String activity, String reason) {
         return "<h2 style='color: #ffc107;'>🔍 Hoạt Động Bất Thường</h2>" +
                 "<p>Hệ thống phát hiện hoạt động khả nghi cần xem xét!</p>" +
                 "<div class='otp-box' style='background: linear-gradient(135deg, #fffbea 0%, #fffef0 100%); border: 3px solid #ffc107;'>" +
@@ -140,7 +150,8 @@ public class EmailServiceImplement implements EmailService {
                 "    <strong>QAUTE Activity Monitor</strong>" +
                 "</p>";
     }
-    private String getMFAOTPContent(String otp) {
+    @Override
+    public String getMFAOTPContent(String otp) {
         return "<h2>Xác thực đăng nhập</h2>" +
                 "<p>Xin chào! 👋</p>" +
                 "<p>Chúng tôi phát hiện một yêu cầu đăng nhập vào tài khoản của bạn tại <strong>QAUTE</strong>. " +
@@ -164,7 +175,8 @@ public class EmailServiceImplement implements EmailService {
                 "    Luôn bật xác thực 2 yếu tố và không chia sẻ mã OTP với bất kỳ ai" +
                 "</p>";
     }
-    private String getEmailTemplate(String title, String content) {
+    @Override
+    public String getEmailTemplate(String title, String content) {
         return "<!DOCTYPE html>" +
                 "<html lang='vi'>" +
                 "<head>" +
@@ -228,7 +240,8 @@ public class EmailServiceImplement implements EmailService {
     }
 
     // Template cho email OTP đăng ký
-    private String getRegisterOTPContent(String otp) {
+    @Override
+    public String getRegisterOTPContent(String otp) {
         return "<h2>Xác nhận đăng ký tài khoản</h2>" +
                 "<p>Xin chào! 👋</p>" +
                 "<p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>QAUTE</strong>. Để hoàn tất quá trình đăng ký, vui lòng sử dụng mã OTP bên dưới:</p>" +
@@ -249,7 +262,8 @@ public class EmailServiceImplement implements EmailService {
                 "    Liên hệ với chúng tôi qua email support@qaute.edu.vn" +
                 "</p>";
     }
-    private String getForgetPasswordOTPContent(String otp) {
+    @Override
+    public String getForgetPasswordOTPContent(String otp) {
         return "<h2>Lấy lại mật khẩu</h2>" +
                 "<p>Xin chào! 👋</p>" +
                 "<p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn tại <strong>QAUTE</strong>. Vui lòng sử dụng mã OTP bên dưới để tiếp tục:</p>" +
@@ -270,7 +284,8 @@ public class EmailServiceImplement implements EmailService {
                 "    Đừng chia sẻ mã OTP với bất kỳ ai, kể cả nhân viên QAUTE" +
                 "</p>";
     }
-    private String getChangePasswordOTPContent(String otp) {
+    @Override
+    public String getChangePasswordOTPContent(String otp) {
         return "<h2>Xác nhận đổi mật khẩu</h2>" +
                 "<p>Xin chào! 👋</p>" +
                 "<p>Bạn đang thực hiện thao tác <strong>đổi mật khẩu</strong> tại <strong>QAUTE</strong>. " +
@@ -294,6 +309,7 @@ public class EmailServiceImplement implements EmailService {
                 "    Sử dụng mật khẩu mạnh với ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt" +
                 "</p>";
     }
+    @Override
     public String getSystemNotificationContent(String title, String messageBody) {
         return "<h2>" + title + "</h2>" +
                 "<p>Xin chào bạn 👋</p>" +

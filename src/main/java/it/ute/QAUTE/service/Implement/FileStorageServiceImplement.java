@@ -21,7 +21,8 @@ public class FileStorageServiceImplement implements FileStorageService {
     @Autowired
     private Cloudinary cloudinary;
 
-    public String storeFile(MultipartFile file,String oldAvatar, int accountID) {
+    @Override
+    public String storeFile(MultipartFile file, String oldAvatar, int accountID) {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("File upload trống.");
         }
@@ -53,11 +54,13 @@ public class FileStorageServiceImplement implements FileStorageService {
         }
     }
 
-    private String extractExtension(String filename) {
+    @Override
+    public String extractExtension(String filename) {
         int idx = filename.lastIndexOf('.');
         if (idx < 0 || idx == filename.length() - 1) return null;
         return filename.substring(idx + 1).toLowerCase(Locale.ROOT);
     }
+    @Override
     public void deleteFile(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return;
@@ -75,7 +78,8 @@ public class FileStorageServiceImplement implements FileStorageService {
             System.err.println("Lỗi khi xóa ảnh: " + e.getMessage());
         }
     }
-    private String guessExtByContentType(String ct) {
+    @Override
+    public String guessExtByContentType(String ct) {
         if (ct == null) return null;
         ct = ct.toLowerCase(Locale.ROOT);
         if (ct.equals("image/png")) return "png";

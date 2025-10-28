@@ -4,8 +4,7 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import it.ute.QAUTE.entity.*;
-import it.ute.QAUTE.service.Implement.AccountServiceImplement;
-import it.ute.QAUTE.service.Implement.ReportServiceImplement;
+import it.ute.QAUTE.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,10 +20,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ReportController {
 
     @Autowired
-    private ReportServiceImplement reportService;
+    private ReportService reportService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @PostMapping("/reports/create")
     public String createReport(

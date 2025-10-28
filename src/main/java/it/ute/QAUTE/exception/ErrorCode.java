@@ -39,7 +39,8 @@ public enum ErrorCode {
     CONSULTANT_NOT_FOUND(443, "Consultant not found"),
     EVENT_NOT_FOUND(444, "Event not found") ,
     FEEDBACK_ALREADY_SUBMITTED(445, "Feedback has already been submitted for this registration"),
-    CONFLICTING_FEEDBACK(446, "Conflicting feedback submission"),;
+    CONFLICTING_FEEDBACK(446, "Conflicting feedback submission"),
+    INVALID_QUESTION_EDIT(415, "Question hss been answered and cannot be edited"),;
 
     ErrorCode(int code, String message) {
         this.code = code;
