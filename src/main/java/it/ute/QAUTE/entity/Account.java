@@ -61,6 +61,7 @@ public class Account {
     private Date levelEventAt;
 
     public enum Role {
+        System,
         Admin,
         Manager,
         Consultant,

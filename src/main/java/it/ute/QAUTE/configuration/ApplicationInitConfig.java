@@ -30,6 +30,22 @@ public class ApplicationInitConfig {
     ApplicationRunner applicationRunner(AccountRepository accountRepository, DepartmentRepository departmentRepository, FieldRepository fieldRepository){
         return args -> {
             // tạo admin
+            if(accountRepository.findByUsername("system")==null){
+                Profiles profile = new Profiles();
+                profile.setFullName("System");
+                profile.setPhone("0000000000");
+                profile.setAvatar(null);
+                Account account = new Account();
+                account.setUsername("system");
+                account.setPassword(passwordEncoder.encode("system"));
+                account.setEmail("system@gmail.com");
+                account.setCreatedDate(new Date());
+                account.setRole(Account.Role.System);
+                profile.setAccount(account);
+                account.setProfile(profile);
+                accountRepository.save(account);
+                log.warn("System account created: username=system, password=system. Please change it!");
+            }
             if(accountRepository.findByUsername("admin") == null){
                 Profiles profile = new Profiles();
                 profile.setFullName("Administrator");

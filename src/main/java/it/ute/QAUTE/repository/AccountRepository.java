@@ -72,7 +72,8 @@ public interface AccountRepository extends JpaRepository<Account, Integer> {
     Account findByProfile_ProfileID(@Param("profileId") Integer profileId);
     @Query("SELECT a FROM Account a WHERE a.role = 'Admin'")
     List<Account> findAllAdmin();
-
+    @Query(value = "SELECT * FROM Account WHERE Role = 'System' LIMIT 1", nativeQuery = true)
+    Account findFirstSystem();
     long countByRole(Account.Role role);
     /*@Modifying
     @Transactional

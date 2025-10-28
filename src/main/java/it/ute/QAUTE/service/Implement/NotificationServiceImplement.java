@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -201,6 +202,14 @@ public class NotificationServiceImplement implements NotificationService {
         } catch (Exception e) {
             System.err.println("123456- Lỗi khi gửi thông báo: " + e.getMessage());
         }
+    }
+    
+    public void notifyUserViolation(Account receiver, String titleQuestion, String question, LocalDateTime senderDate){
+        Account accountSystem= accountRepository.findFirstSystem();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        String title="Cảnh báo vi phạm trong ngôn ngữ";
+        String body="Bạn vùa đặt đặt câu hỏi có tiêu đề là: "+titleQuestion+" và nội dung là: "+question+" có ngày gửi là: "+senderDate.format(formatter);
+        createNotificationForSpecificUser(accountSystem,receiver,title,body,false);
     }
 
     public void notifyManagersNewEvent(Event event) {
