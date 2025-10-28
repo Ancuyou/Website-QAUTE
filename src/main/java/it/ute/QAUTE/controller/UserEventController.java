@@ -36,8 +36,6 @@ public class UserEventController {
 
     @Autowired
     private DepartmentService departmentService;
-
-    // Hàm Helper (kiểm tra Enum hợp lệ)
     private <E extends Enum<E>> boolean isValidEnum(Class<E> enumClass, String value) {
         if (value == null || value.isEmpty()) return false;
         try {
