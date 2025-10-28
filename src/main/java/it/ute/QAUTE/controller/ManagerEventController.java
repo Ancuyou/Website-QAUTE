@@ -2,6 +2,7 @@ package it.ute.QAUTE.controller;
 
 import com.nimbusds.jose.JOSEException;
 import it.ute.QAUTE.entity.*;
+import it.ute.QAUTE.service.*;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.service.Implement.*;
@@ -33,19 +34,19 @@ import lombok.extern.slf4j.Slf4j;
 public class ManagerEventController {
 
     @Autowired
-    private EventServiceImplement eventService;
+    private EventService eventService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private AuthenticationServiceImplement authenticationService;
+    private AuthenticationService authenticationService;
 
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
-    private ConsultantServiceImplement consultantService;
+    private ConsultantService consultantService;
 
     @GetMapping("")
     public String listAllEvents(

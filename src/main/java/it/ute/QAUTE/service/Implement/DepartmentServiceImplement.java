@@ -1,6 +1,5 @@
 package it.ute.QAUTE.service.Implement;
 
-import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.entity.Department;
@@ -22,6 +21,7 @@ public class DepartmentServiceImplement implements DepartmentService {  // done 
     @Autowired
     QuestionRepository questionRepository;
 
+    @Override
     public Page<Department> searchNameDepartment(String keyword, Pageable pageable) {
         if (keyword != null && !keyword.equals("")) {
             return departmentRepository.findByNameDepartment(keyword, pageable);
@@ -30,18 +30,22 @@ public class DepartmentServiceImplement implements DepartmentService {  // done 
         }
     }
 
+    @Override
     public List<Department> findAll(){
         return departmentRepository.findAll();
     }
 
+    @Override
     public Department findById(Integer id){
         return departmentRepository.findById(id).orElse(null);
     }
 
+    @Override
     public List<Department> findAllNoPaging(){
         return departmentRepository.findByType(Department.DepartmentType.Faculty);
     }
 
+    @Override
     public void updateDepartment(Department department) {
 
         if(departmentRepository.existsByDepartmentNameIsIgnoreCaseAndDepartmentIDNot(department.getDepartmentName(), department.getDepartmentID())){
@@ -54,10 +58,12 @@ public class DepartmentServiceImplement implements DepartmentService {  // done 
         }
     }
 
+    @Override
     public void deleteDepartment(Integer id) {
         departmentRepository.deleteById(id);
     }
 
+    @Override
     public List<Department> findAllById(List<Integer> departmentIds) {
         return departmentRepository.findAllById(departmentIds);
     }

@@ -20,10 +20,12 @@ public class AdminServiceImplement implements AdminService {
     private AccountRepository accountRepository;
     @Autowired
     private RefreshTokenRepository  refreshTokenRepository;
+    @Override
     public Account findById(Integer id) {
         return accountRepository.findByAccountIDWithProfiles(id);
     }
 
+    @Override
     public Page<RefreshToken> searchTokens(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return refreshTokenRepository.findAll(pageable);
@@ -31,6 +33,7 @@ public class AdminServiceImplement implements AdminService {
         return refreshTokenRepository.searchByKeyword(keyword.trim(), pageable);
     }
 
+    @Override
     public Page<RefreshToken> findActiveTokens(String keyword, Pageable pageable) {
         Date now = new Date();
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -39,6 +42,7 @@ public class AdminServiceImplement implements AdminService {
         return refreshTokenRepository.searchActiveTokensByKeyword(keyword.trim(), now, pageable);
     }
 
+    @Override
     public Page<RefreshToken> findExpiredTokens(String keyword, Pageable pageable) {
         Date now = new Date();
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -47,24 +51,29 @@ public class AdminServiceImplement implements AdminService {
         return refreshTokenRepository.searchExpiredTokensByKeyword(keyword.trim(), now, pageable);
     }
 
+    @Override
     public long countActiveTokens() {
         return refreshTokenRepository.countByExpiresAtAfter(new Date());
     }
 
+    @Override
     public long countExpiredTokens() {
         return refreshTokenRepository.countByExpiresAtBefore(new Date());
     }
 
+    @Override
     public long countAllTokens() {
         return refreshTokenRepository.count();
     }
 
 
+    @Override
     public Optional<RefreshToken> findById(String id) {
         return refreshTokenRepository.findById(id);
     }
 
     @Transactional
+    @Override
     public void revokeToken(String id) {
         if (!refreshTokenRepository.existsById(id)) {
             throw new RuntimeException("Token không tồn tại");
@@ -73,6 +82,7 @@ public class AdminServiceImplement implements AdminService {
     }
 
     @Transactional
+    @Override
     public int deleteExpiredTokens() {
         Date now = new Date();
         return refreshTokenRepository.deleteByExpiresAtBefore(now);

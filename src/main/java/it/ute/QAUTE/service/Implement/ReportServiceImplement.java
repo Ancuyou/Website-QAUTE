@@ -32,10 +32,12 @@ public class ReportServiceImplement implements ReportService {
     @Autowired
     private MessageRepository messageRepository;
 
+    @Override
     public void save(Report report) {
         reportRepository.save(report);
     }
 
+    @Override
     public Page<Report> searchReports(
             LocalDateTime startDate,
             LocalDateTime endDate,
@@ -63,7 +65,8 @@ public class ReportServiceImplement implements ReportService {
 
         return reportPage;
     }
-    private void populateContentDetails(List<Report> reports) {
+    @Override
+    public void populateContentDetails(List<Report> reports) {
         for (Report report : reports) {
 
             if (report.getContentId() == null || report.getContentType() == null || report.getContentType().isEmpty()) {
@@ -87,11 +90,13 @@ public class ReportServiceImplement implements ReportService {
         }
     }
 
+    @Override
     public long countByStatus(Report.ReportStatus status) {
         return reportRepository.countByStatus(status);
     }
 
     @Transactional
+    @Override
     public void approveReport(Long reportId, String contentType, Long contentId) {
         Report report = reportRepository.findById(reportId).orElse(null);
 
@@ -123,6 +128,7 @@ public class ReportServiceImplement implements ReportService {
 
 
     @Transactional
+    @Override
     public void rejectReport(Long reportId) {
         log.warn(reportId.toString());
         Report report = reportRepository.findById(reportId).orElse(null);

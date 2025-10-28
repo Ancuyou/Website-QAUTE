@@ -11,6 +11,7 @@ import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.EventRegistrationRepository;
 import it.ute.QAUTE.repository.NotificationReceiverRepository;
 import it.ute.QAUTE.repository.NotificationRepository;
+import it.ute.QAUTE.service.EmailService;
 import it.ute.QAUTE.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,16 +35,18 @@ public class NotificationServiceImplement implements NotificationService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private EmailServiceImplement emailService;
+    private EmailService emailService;
     @Autowired
     private Cache<Integer, Boolean> onlineCache;
     @Autowired
     private EventRegistrationRepository eventRegistrationRepository;
 
+    @Override
     public Page<Notification> findAllNotifications(Pageable pageable) {
         return notificationRepository.findAll(pageable);
     }
 
+    @Override
     public Notification findNotificationByNotificationReceiverId(Long id) {
         NotificationReceiver notificationReceiver = notificationReceiverRepository.findById(id);
         if (!notificationReceiver.isRead()) {
@@ -53,18 +56,22 @@ public class NotificationServiceImplement implements NotificationService {
         return notificationReceiver.getNotification();
     }
 
+    @Override
     public List<NotificationReceiver> findNotificationByAccountId(long receiverId) {
         return notificationReceiverRepository.findByAccountId(receiverId);
     }
 
+    @Override
     public Page<Notification> findNotificationsBySenderId(String q, String status, long senderId, Pageable pageable) {
         return notificationRepository.searchNotificationsBySenderId(q, status, senderId, pageable);
     }
 
+    @Override
     public Page<Notification> findNotifications(String q, String status, Pageable pageable) {
         return notificationRepository.searchNotifications(q, status, pageable);
     }
 
+    @Override
     public boolean deleteNotification(Long id) {
         Notification notification = notificationRepository.findById(Math.toIntExact(id)).orElse(null);
         if (notification == null || notification.getStatus().equals("PUBLISHED")) {
@@ -74,8 +81,9 @@ public class NotificationServiceImplement implements NotificationService {
         return true;
     }
 
+    @Override
     public void updateNotification(Long id, String title, String content, String targetType, String status,
-            boolean is_priority) {
+                                   boolean is_priority) {
         Notification notification = notificationRepository.findByNotificationID(id);
         notification.setTitle(title);
         notification.setContent(content);
@@ -89,12 +97,14 @@ public class NotificationServiceImplement implements NotificationService {
             deleteNotificationReceiverByNotificationId(id);
     }
 
+    @Override
     public void deleteNotificationReceiverByNotificationId(Long notificationId) {
         notificationReceiverRepository.deleteAllByNotificationId(notificationId);
     }
 
+    @Override
     public void createNotification(Account sender, String title, String content, String targetType, String status,
-            boolean is_priority) {
+                                   boolean is_priority) {
         Notification notification = new Notification();
         notification.setContent(content);
         notification.setSender(sender);
@@ -107,6 +117,7 @@ public class NotificationServiceImplement implements NotificationService {
         sendByRole(savedNotification, targetType, status, sender.getRole());
     }
 
+    @Override
     public void sendByRole(Notification savedNotification, String targetType, String status, Account.Role roleSender) {
         if ("PUBLISHED".equalsIgnoreCase(status)) {
             List<Account> receivers;
@@ -137,11 +148,13 @@ public class NotificationServiceImplement implements NotificationService {
         }
     }
 
+    @Override
     public Notification findNotificationById(Integer id) {
         return notificationRepository.findById(id).orElse(null);
     }
 
-    private Account getSystemSender() {
+    @Override
+    public Account getSystemSender() {
         // Cố gắng tìm Manager đầu tiên
         List<Account> managers = accountRepository.findAll().stream()
                 .filter(acc -> acc.getRole() == Account.Role.Manager)
@@ -159,9 +172,10 @@ public class NotificationServiceImplement implements NotificationService {
         throw new RuntimeException("Không tìm thấy tài khoản Admin/Manager để gửi thông báo hệ thống.");
     }
 
+    @Override
     public void createNotificationForSpecificUser(Account sender, Account receiver,
-            String title, String content,
-            boolean isPriority) {
+                                                  String title, String content,
+                                                  boolean isPriority) {
 
         // Thêm kiểm tra null để đảm bảo an toàn
         if (sender == null || receiver == null) {
@@ -212,6 +226,7 @@ public class NotificationServiceImplement implements NotificationService {
         createNotificationForSpecificUser(accountSystem,receiver,title,body,false);
     }
 
+    @Override
     public void notifyManagersNewEvent(Event event) {
         List<Account> managers = accountRepository.findAll().stream()
                 .filter(acc -> acc.getRole() == Account.Role.Manager)
@@ -236,6 +251,7 @@ public class NotificationServiceImplement implements NotificationService {
         }
     }
 
+    @Override
     public void notifyManagersEventUpdated(Event event) {
         List<Account> managers = accountRepository.findAll().stream()
                 .filter(acc -> acc.getRole() == Account.Role.Manager)
@@ -260,6 +276,7 @@ public class NotificationServiceImplement implements NotificationService {
         }
     }
 
+    @Override
     public void notifyConsultantEventApproved(Event event) {
         // Người nhận là Tư vấn viên
         Account consultantReceiver = event.getConsultant().getProfile().getAccount();
@@ -280,6 +297,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyConsultantEventRejected(Event event, String reason) {
         // Người nhận là Tư vấn viên
         Account consultantReceiver = event.getConsultant().getProfile().getAccount();
@@ -301,6 +319,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyConsultantNewRegistration(Event event, User user) {
         // Người nhận là Tư vấn viên
         Account consultantReceiver = event.getConsultant().getProfile().getAccount();
@@ -324,6 +343,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyUserRegistrationSuccess(User user, Event event) {
         // Người nhận là User
         Account userReceiver = user.getProfile().getAccount();
@@ -345,6 +365,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyUserEventCancelled(User user, Event event, String reason) {
         // Người nhận là User
         Account userReceiver = user.getProfile().getAccount();
@@ -366,6 +387,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyUserEventReminder(User user, Event event) {
         // Người nhận là User
         Account userReceiver = user.getProfile().getAccount();
@@ -387,6 +409,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public void notifyUsersEventStartingSoon(Event event) {
         List<EventRegistration> registrations = eventRegistrationRepository.findActiveRegistrations(event);
         // Người gửi là Hệ thống (Admin/Manager)
@@ -411,6 +434,7 @@ public class NotificationServiceImplement implements NotificationService {
         }
     }
 
+    @Override
     public void notifyUserRegistrationConfirmed(User user, Event event) {
         // Người nhận là User
         Account userReceiver = user.getProfile().getAccount();
@@ -432,6 +456,7 @@ public class NotificationServiceImplement implements NotificationService {
                 false);
     }
 
+    @Override
     public long countAll() {
         return notificationRepository.count();
     }

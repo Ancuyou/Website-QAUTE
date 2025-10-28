@@ -18,6 +18,7 @@ public class ToxicContentServiceImplement implements ToxicContentService {
     @Autowired
     private QuestionRepository questionRepository;
 
+    @Override
     public Page<Question> findToxicQuestionsByDateRange(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         if  (startDate == null || endDate == null) {
             startDate = LocalDateTime.now().minusDays(30);
@@ -26,12 +27,14 @@ public class ToxicContentServiceImplement implements ToxicContentService {
         return questionRepository.findToxicQuestionsByDateRange(startDate, endDate, pageable);
     }
 
+    @Override
     public void rejectedQuestion(Integer id) {
         Question question = questionRepository.findById(id).orElseThrow( () -> new AppException(ErrorCode.QUESTION_UNEXISTED));
         question.setStatus(Question.QuestionStatus.Rejected);
         questionRepository.save(question);
     }
 
+    @Override
     public void approvedQuestion(Integer id) {
         Question question = questionRepository.findById(id).orElseThrow( () -> new AppException(ErrorCode.QUESTION_UNEXISTED));
         question.setStatus(Question.QuestionStatus.Approved);

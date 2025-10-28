@@ -18,14 +18,17 @@ public class AnswerServiceImplement implements AnswerService {
     @Autowired
     private AnswerRepository answerRepository;
 
+    @Override
     public void saveAnswer(Answer answer) {
         answerRepository.save(answer);
     }
 
+    @Override
     public List<Answer> getAllAnswersByConsultant(Integer consultantId) {
         return answerRepository.findByConsultant_ConsultantID(consultantId);
     }
 
+    @Override
     public Page<Answer> getAnswersHistoryByConsultant(Integer consultantId, Integer departmentId, Integer fieldId, Integer timeRange, String keyword, Pageable pageable) {
         LocalDateTime cutoffDate = null;
         if (timeRange != null) {
@@ -34,16 +37,20 @@ public class AnswerServiceImplement implements AnswerService {
         return answerRepository.findAnswersHistoryByConsultant(consultantId, departmentId, fieldId, cutoffDate, keyword, pageable);
     }
 
+    @Override
     public List<Answer> getAnswersByQuestionId(Integer questionId) {
         return answerRepository.findByQuestion_QuestionID(questionId);
     }
 
+    @Override
     public List<Answer> getAllAnswers() {
         return answerRepository.findAll();
     }
+    @Override
     public long countAnswersForUser(it.ute.QAUTE.entity.User user) {
         return answerRepository.countByQuestionUser(user);
     }
+    @Override
     public long countAll() {
         return answerRepository.count();
     }

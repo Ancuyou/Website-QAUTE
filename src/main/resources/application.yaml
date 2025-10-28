@@ -12,9 +12,9 @@ spring:
   thymeleaf:
     cache: false
   datasource:
-    url: jdbc:mysql://localhost:3306/qaute
+    url: jdbc:mysql://localhost:3306/qaute1
     username: root
-    password: 123456
+    password: root
   jpa:
     show-sql: true
     database-platform: org.hibernate.dialect.MySQL8Dialect
@@ -90,4 +90,11 @@ event:
   duration:
     min:
       minutes: 30
+
+ai:
+  chat:
+    base-url: "http://100.77.190.21:8000"
+  toxic:
+    base-url: "http://100.91.96.76:6000"
+
 

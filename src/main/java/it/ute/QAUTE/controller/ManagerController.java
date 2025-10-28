@@ -9,14 +9,6 @@ import it.ute.QAUTE.dto.QuestionReportDTO;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.service.*;
-import it.ute.QAUTE.service.AnswerReportServiceImplement;
-import it.ute.QAUTE.service.ConsultantReportServiceImplement;
-import it.ute.QAUTE.service.Implement.*;
-import it.ute.QAUTE.service.QuestionReportServiceImplement;
-import it.ute.QAUTE.service.UserReportServiceImplement;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,45 +34,45 @@ import java.util.Set;
 @RequestMapping("/manager")
 public class ManagerController {
     @Autowired
-    private QuestionServiceImplement questionService;
+    private QuestionService questionService;
     @Autowired
     private FieldRepository fieldRepository;
 
     @Autowired
-    private DepartmentServiceImplement departmentService;
+    private DepartmentService departmentService;
 
     @Autowired
-    private FieldServiceImplement fieldService;
+    private FieldService fieldService;
 
     @Autowired
-    private AnswerReportServiceImplement answerReportService;
+    private AnswerReportService answerReportService;
 
     @Autowired
-    private QuestionReportServiceImplement questionReportService;
+    private QuestionReportService questionReportService;
 
     @Autowired
-    private UserReportServiceImplement userReportService;
+    private UserReportService userReportService;
 
     @Autowired
-    private ConsultantReportServiceImplement consultantReportService;
+    private ConsultantReportService consultantReportService;
 
     @Autowired
-    private ToxicContentServiceImplement toxicContentService;
+    private ToxicContentService toxicContentService;
 
     @Autowired
-    private NotificationServiceImplement notificationService;
+    private NotificationService notificationService;
 
     @Autowired
-    private AuthenticationServiceImplement authenticationService;
+    private AuthenticationService authenticationService;
 
     @Autowired
-    private AccountServiceImplement accountService;
+    private AccountService accountService;
 
     @Autowired
-    private AnswerServiceImplement answerService;
+    private AnswerService answerService;
 
     @Autowired
-    private EventServiceImplement eventService;
+    private EventService eventService;
 
     @GetMapping("/questions")
     public String listQuestions(@RequestParam(defaultValue = "0") int page,
