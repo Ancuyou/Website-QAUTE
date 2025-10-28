@@ -85,6 +85,22 @@ public class ApplicationInitConfig {
                 accountRepository.save(account);
                 log.warn("Manager account created: username=manager, password=manager. Please change it!");
             }
+
+            if (departmentRepository.count() == 0) {
+                Department dept1 = new Department();
+                dept1.setDepartmentName("Khoa Công nghệ thông tin");
+                dept1.setType(Department.DepartmentType.Department);
+                dept1.setDescription("CNTT");
+                departmentRepository.save(dept1);
+
+                Department dept2 = new Department();
+                dept2.setDepartmentName("Khoa Cơ khí");
+                dept2.setType(Department.DepartmentType.Department);
+                dept2.setDescription("CK");
+                departmentRepository.save(dept2);
+                log.warn("✅ Created sample departments.");
+
+            }
             // tạo consultant
             if(accountRepository.findByUsername("consultant1") == null){
                 List<Department> departments = departmentRepository.findAll();
@@ -128,7 +144,6 @@ public class ApplicationInitConfig {
                     User user = new User();
                     user.setStudentCode("2311025"+i);
                     user.setProfile(profile);
-                    //user.setRoleName("Sinh Viên");
                     user.setRoleName(User.Role.SinhVien);
                     profile.setUser(user);
                     profile.setAccount(account);

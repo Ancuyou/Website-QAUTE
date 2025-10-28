@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 @Table(name="InvalidatedToken")
 public class InvalidatedToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="InvalidatedTokenId")
     String invalidatedTokenId;
     @Column(name="ExpiryTime")

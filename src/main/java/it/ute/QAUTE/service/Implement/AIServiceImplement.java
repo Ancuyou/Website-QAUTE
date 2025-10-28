@@ -15,7 +15,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AIServiceImplement implements AIService {
@@ -66,5 +68,22 @@ public class AIServiceImplement implements AIService {
     public String aiReply(String text){
         System.out.println("gọi AI");
         return fastApiClient.chatBlocking(text, java.time.Duration.ofSeconds(30));
+    }
+
+    @Async("aiExecutor")
+    @Override
+    public CompletableFuture<Integer> predictAsync(String text) {
+        int result = fastApiClient.predictToxic(text);
+        return CompletableFuture.completedFuture(result);
+    }
+
+    @Override
+    public List<Integer> predictBatch(List<String> comments) {
+        List<CompletableFuture<Integer>> futures = comments.stream()
+                .map(this::predictAsync)
+                .toList();
+
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        return futures.stream().map(CompletableFuture::join).toList();
     }
 }
