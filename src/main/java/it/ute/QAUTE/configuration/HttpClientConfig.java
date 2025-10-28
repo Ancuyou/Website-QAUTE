@@ -20,7 +20,7 @@ public class HttpClientConfig {
 
     @Bean("fastApiWebClient")
     public WebClient fastApiWebClient(
-            @Value("${ai.chat.base-url:http://100.77.190.21:8000}") String baseUrl
+            @Value("${ai.chat.base-url:http://100.91.96.76:6000}") String baseUrl
     ) {
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5_000)

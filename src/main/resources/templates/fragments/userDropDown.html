@@ -101,7 +101,144 @@
         </ul>
     </li>
 </ul>
+<ul th:fragment="managerDropdown(userName, avatarUrl)"
+    class="navbar-nav ms-auto">
 
+    <!-- Notification Bell Icon -->
+    <li class="nav-item dropdown me-3">
+        <a class="nav-link position-relative d-flex align-items-center px-2 py-2"
+           href="#" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false"
+           id="notificationDropdown">
+
+            <span class="icon-32">
+                <img th:src="@{/images/bell.png}" alt="Bell" width="26" height="26">
+            </span>
+
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  id="notificationBadge"
+                  th:if="${unreadCount > 0}" th:text="${unreadCount}">
+                0
+            </span>
+        </a>
+
+        <!-- Dropdown menu cho notifications -->
+        <div class="dropdown-menu dropdown-menu-end notification-dropdown"
+             style="min-width: 350px; max-height: 500px; overflow-y: auto;">
+            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Thông báo</h6>
+                <span class="badge bg-primary" th:text="${unreadCount}">0</span>
+            </div>
+            <div class="dropdown-divider"></div>
+
+            <div id="notificationList">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </li>
+
+    <!-- Manager Dropdown -->
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center"
+           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{${avatarUrl != null ? avatarUrl : '/images/default_avatar.png'}}"
+                 class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+            <span class="fw-semibold" th:text="${userName} ?: 'Manager'">Manager</span>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+            <!-- Hồ sơ cá nhân -->
+            <li>
+                <a class="dropdown-item" th:href="@{/manager/profile}">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- Đăng xuất -->
+            <li>
+                <a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<!-- Fragment cho ADMIN dropdown -->
+<ul th:fragment="adminDropdown(userName, avatarUrl)"
+    class="navbar-nav ms-auto">
+
+    <!-- Notification Bell Icon -->
+    <li class="nav-item dropdown me-3">
+        <a class="nav-link position-relative d-flex align-items-center px-2 py-2"
+           href="#" role="button"
+           data-bs-toggle="dropdown" aria-expanded="false"
+           id="notificationDropdown">
+
+            <span class="icon-32">
+                <img th:src="@{/images/bell.png}" alt="Bell" width="26" height="26">
+            </span>
+
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  id="notificationBadge"
+                  th:if="${unreadCount > 0}" th:text="${unreadCount}">
+                0
+            </span>
+        </a>
+
+        <!-- Dropdown menu cho notifications -->
+        <div class="dropdown-menu dropdown-menu-end notification-dropdown"
+             style="min-width: 350px; max-height: 500px; overflow-y: auto;">
+            <div class="dropdown-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0">Thông báo</h6>
+                <span class="badge bg-primary" th:text="${unreadCount}">0</span>
+            </div>
+            <div class="dropdown-divider"></div>
+
+            <div id="notificationList">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </li>
+
+    <!-- Admin Dropdown -->
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center"
+           href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <img th:src="@{${avatarUrl != null ? avatarUrl : '/images/default_avatar.png'}}"
+                 class="rounded-circle me-2" alt="Avatar" width="32" height="32">
+            <span class="fw-semibold" th:text="${userName} ?: 'Admin'">Admin</span>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end">
+            <!-- Hồ sơ cá nhân -->
+            <li>
+                <a class="dropdown-item" th:href="@{/admin/profile}">
+                    <i class="fas fa-user me-2"></i>Hồ sơ cá nhân
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider"></li>
+
+            <!-- Đăng xuất -->
+            <li>
+                <a class="dropdown-item text-danger" th:href="@{/auth/logout}">
+                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                </a>
+            </li>
+        </ul>
+    </li>
+</ul>
 <!-- Fragment cho header của consultant -->
 <nav th:fragment="consultantHeader(userName, avatarUrl, isConsultant, active)"
      class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">

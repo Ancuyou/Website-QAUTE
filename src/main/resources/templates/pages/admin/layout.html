@@ -12,18 +12,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                        <span>Admin</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="/qaute/admin/profile"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li><a class="dropdown-item text-danger" href="/qaute/auth/logout"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
-                    </ul>
-                </li>
-            </ul>
+            <th:block th:replace="~{fragments/userDropDown :: adminDropdown(${userName}, ${avatarUrl})}"></th:block>
         </div>
     </div>
 </nav>
@@ -63,5 +52,7 @@
 </style>
 <div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/toast :: toast}"></div>
+<th:block th:replace="~{fragments/userDropDown :: notificationStyles}"></th:block>
+<th:block th:replace="~{fragments/userDropDown :: notificationScript}"></th:block>
 </body>
 </html>

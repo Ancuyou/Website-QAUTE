@@ -24,28 +24,8 @@
                         <span class="text-light small fw-semibold" id="greeting"></span>
                     </div>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center user-dropdown" href="#" role="button" data-bs-toggle="dropdown">
-                        <div class="user-avatar">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <span class="fw-semibold text-light ms-2">Manager</span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow modern-dropdown">
-                        <li>
-                            <a class="dropdown-item" href="/qaute/manager/profile">
-                                <i class="fas fa-user-circle me-2"></i>Hồ sơ cá nhân
-                            </a>
-                        </li>
-                        <li><hr class="dropdown-divider"/></li>
-                        <li>
-                            <a class="dropdown-item text-danger" href="/qaute/auth/logout">
-                                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
-                            </a>
-                        </li>
-                    </ul>
-                </li>
             </ul>
+            <th:block th:replace="~{fragments/userDropDown :: managerDropdown(${userName}, ${avatarUrl})}"></th:block>
         </div>
     </div>
 </nav>
@@ -519,6 +499,8 @@
     else if (hour < 18) greeting.textContent = 'Chào buổi chiều 🌤️, Manager!';
     else greeting.textContent = 'Chào buổi tối 🌙, Manager!';
 </script>
+<th:block th:replace="~{fragments/userDropDown :: notificationStyles}"></th:block>
+<th:block th:replace="~{fragments/userDropDown :: notificationScript}"></th:block>
 <div th:replace="~{fragments/footer :: footer}"></div>
 <div th:replace="~{fragments/toast :: toast}"></div>
 </body>
