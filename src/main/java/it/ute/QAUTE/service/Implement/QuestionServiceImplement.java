@@ -3,12 +3,10 @@ package it.ute.QAUTE.service.Implement;
 import it.ute.QAUTE.api.FastApiClient;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionDTO;
-import it.ute.QAUTE.entity.Department;
-import it.ute.QAUTE.entity.Field;
-import it.ute.QAUTE.entity.Question;
-import it.ute.QAUTE.entity.User;
+import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
+import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.DepartmentRepository;
 import it.ute.QAUTE.repository.FieldRepository;
 import it.ute.QAUTE.repository.QuestionRepository;
@@ -51,7 +49,11 @@ public class QuestionServiceImplement implements QuestionService {
     @Autowired
     private FastApiClient fastApiClient;
     @Autowired
-    private AiFilterToxicServiceImplement aiFilterToxicService;
+    private AIServiceImplement aIService;
+    @Autowired
+    private NotificationServiceImplement notificationService;
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Override
     public List<Question> getAllQuestions() {
@@ -78,19 +80,44 @@ public class QuestionServiceImplement implements QuestionService {
         question.setToxic(false);
         Question saved = questionRepository.save(question);
 
-        aiFilterToxicService.predictAsync(saved.getContent())
+        aIService.predictAsync(saved.getContent())
                 .thenAccept(result -> {
-                    boolean isToxic = (result == 1);
-                    saved.setToxic(isToxic);
-                    questionRepository.save(saved);
-                    log.info("[AI] ✅ Cập nhật toxic cho Question {} = {}", saved.getQuestionID(), isToxic);
+                    try {
+                        boolean isToxic = (result == 1);
+                        saved.setToxic(isToxic);
+                        questionRepository.save(saved);  // cập nhật trạng thái toxic
+
+                        log.info("[AI] ✅ Cập nhật toxic cho Question {} = {}", saved.getQuestionID(), isToxic);
+
+                        if (isToxic) {
+                            Account acc = accountRepository.findByAccountID(
+                                    saved.getUser().getProfile().getAccount().getAccountID()
+                            );
+                            log.info("Find acc: " + acc.getAccountID());
+
+                            if (acc != null) {
+                                notificationService.notifyUserViolation(
+                                        acc,
+                                        saved.getTitle(),
+                                        saved.getContent(),
+                                        saved.getDateSend()
+                                );
+                                log.info("[AI] 🚨 Đã gửi thông báo vi phạm cho user ID {}", acc.getAccountID());
+                            } else {
+                                log.warn("[AI] ⚠️ Không tìm thấy tài khoản cho Question {}", saved.getQuestionID());
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.error("[AI] ❌ Lỗi khi xử lý cập nhật Toxic cho Question {}: {}", saved.getQuestionID(), e.getMessage());
+                    }
                 })
                 .exceptionally(ex -> {
-                    log.error("[AI] ❌ Lỗi khi gọi AI toxic cho Question {}: {}", saved.getQuestionID(), ex.getMessage());
+                    log.error("[AI] ❌ Lỗi khi gọi AI Toxic cho Question {}: {}", saved.getQuestionID(), ex.getMessage());
                     return null;
                 });
     }
-    
+
+
     @Override
     public Question getQuestionById(Integer questionId) {
         return questionRepository.findById(questionId)
