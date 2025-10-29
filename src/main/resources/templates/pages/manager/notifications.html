@@ -75,8 +75,8 @@
                                     </td>
                                     <td>
                                             <span class="badge"
-                                                  th:classappend="${n.targetType == 'USER'} ? 'bg-info' : (${n.targetType == 'CONSULTANT'} ? 'bg-warning' : 'bg-secondary')"
-                                                  th:text="${n.targetType}">USER</span>
+                                                  th:classappend="${n.targetType.name() == 'User'} ? 'bg-info' : (${n.targetType.name() == 'ALL'} ? 'bg-warning' : 'bg-secondary')"
+                                                  th:text="${n.targetType}">User</span>
                                     </td>
                                     <td>
                                         <div class="text-truncate" style="max-width: 300px;" th:title="${n.title}">

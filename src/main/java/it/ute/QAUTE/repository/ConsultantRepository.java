@@ -26,21 +26,17 @@ public interface ConsultantRepository extends JpaRepository<Consultant, Integer>
         COUNT(DISTINCT a),
         COUNT(DISTINCT f),
         c.experienceYears,
-
-        CASE WHEN COUNT(DISTINCT q) = 0 THEN 0.0
-             ELSE (COUNT(DISTINCT a) * 1.0 / COUNT(DISTINCT q)) * 100 END,
-
+        (COUNT(DISTINCT a) * 1.0 / COUNT(DISTINCT qAll)) * 100,
         CASE WHEN COUNT(a) = 0 THEN 0.0
              ELSE (SUM(CASE WHEN a.dateAnswered <= FUNCTION('TIMESTAMPADD', DAY, 1, q.dateSend) THEN 1 ELSE 0 END) * 1.0 / COUNT(a)) * 100 END
     )
     FROM Consultant c
-    JOIN c.profile p
-    
-    LEFT JOIN Answer a ON a.consultant.consultantID = c.consultantID AND a.dateAnswered BETWEEN :startDate AND :endDate
-    
-    LEFT JOIN a.question q
-    LEFT JOIN q.field f
-    
+        JOIN c.profile p
+        LEFT JOIN Answer a ON a.consultant.consultantID = c.consultantID AND a.dateAnswered BETWEEN :startDate AND :endDate
+        LEFT JOIN a.question q
+        LEFT JOIN q.field f
+        CROSS JOIN Question qAll
+    WHERE qAll.status IN ('Approved', 'Answered') AND qAll.dateSend BETWEEN :startDate AND :endDate 
     GROUP BY c.consultantID, p.fullName, c.experienceYears
     ORDER BY COUNT(a) DESC
     """)

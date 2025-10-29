@@ -212,4 +212,6 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
     long countByStatus(Question.QuestionStatus status);
 
     List<Question> findByDepartment_DepartmentID(Integer departmentId);
+
+    long countByIsToxic(boolean isToxic);
 }
