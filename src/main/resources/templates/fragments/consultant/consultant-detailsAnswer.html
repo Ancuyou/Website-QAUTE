@@ -88,6 +88,12 @@
                         </div>
                     </div>
                     <p class="mb-0 text-dark" th:text="${answer.content}">Nội dung câu trả lời...</p>
+
+                    <p class="mb-0 mt-2 answer-content"
+                       th:if="${answer.isWithdrawn}"
+                       th:classappend="${answer.isWithdrawn ? 'fst-italic text-danger' : ''}">
+                        Câu trả lời đã được thu hồi từ bạn
+                    </p>
                 </div>
             </div>
         </div>
