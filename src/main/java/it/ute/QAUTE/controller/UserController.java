@@ -281,7 +281,7 @@ public class UserController {
             account.getProfile().setAvatar(null);
         }
         else if (avatarFile != null && !avatarFile.isEmpty()) {
-            String newAvatarUrl = String.valueOf(fileStorageService.storeFile(avatarFile, oldAvatar, id));
+            String newAvatarUrl = String.valueOf(fileStorageService.storeFile(avatarFile, oldAvatar,"avatars"));
             account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.save(account);

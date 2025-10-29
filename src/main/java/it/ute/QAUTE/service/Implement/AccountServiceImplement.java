@@ -142,7 +142,7 @@ public class AccountServiceImplement implements AccountService {
         Account acc = accountRepository.save(account);  // save lan 1
 
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile,acc.getProfile().getAvatar(), acc.getAccountID());
+            String avatarFileName = fileStorageService.storeFile(avatarFile,acc.getProfile().getAvatar(),"avatars");
             acc.getProfile().setAvatar(avatarFileName);
         }
         return accountRepository.save(acc);
@@ -165,7 +165,7 @@ public class AccountServiceImplement implements AccountService {
         }
         if (!pass.isBlank()) updatedAccount.setPassword(passwordEncoder.encode(pass));
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile,updatedAccount.getProfile().getAvatar(), updatedAccount.getAccountID());
+            String avatarFileName = fileStorageService.storeFile(avatarFile,updatedAccount.getProfile().getAvatar(), "avatars");
             System.out.println("FilePath: "+avatarFileName);
             updatedAccount.getProfile().setAvatar(avatarFileName);
         }

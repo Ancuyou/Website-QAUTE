@@ -75,7 +75,7 @@ public class EventServiceImplement implements EventService {
             String bannerUrl = fileStorageService.storeFile(
                     bannerFile,
                     null,
-                    event.getConsultant().getConsultantID());
+                    "events");
             event.setBanner(bannerUrl);
         }
 
@@ -120,7 +120,7 @@ public class EventServiceImplement implements EventService {
         if (bannerFile != null && !bannerFile.isEmpty()) {
             String oldBanner = existingEvent.getBanner();
             String newBannerUrl = fileStorageService.storeFile(bannerFile, oldBanner,
-                    existingEvent.getConsultant().getConsultantID());
+                    "events");
             existingEvent.setBanner(newBannerUrl);
         }
 
