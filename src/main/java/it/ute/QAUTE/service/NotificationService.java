@@ -4,6 +4,7 @@ import it.ute.QAUTE.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface NotificationService {
@@ -59,4 +60,5 @@ public interface NotificationService {
 
     long countAll();
     void notifyAdminSuspiciousActivityAlert(String ipAddress, String deviceName, String activity, String reason);
+    void notifyManagerViolation(String titleQuestion, String question, LocalDateTime senderDate);
 }

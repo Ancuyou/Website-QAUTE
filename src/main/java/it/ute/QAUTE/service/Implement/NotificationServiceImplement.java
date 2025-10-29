@@ -156,7 +156,32 @@ public class NotificationServiceImplement implements NotificationService {
     public Account getSystemSender() {
         return accountRepository.findFirstSystem();
     }
-
+    public void notifyManagerViolation(String titleQuestion, String question, LocalDateTime senderDate) {
+        String title = "⚠️ Cảnh báo: Phát hiện nội dung vi phạm tiêu chuẩn cộng đồng";
+        String content = String.format(
+                """
+                Hệ thống QAUTE đã phát hiện câu hỏi có dấu hiệu vi phạm tiêu chuẩn cộng đồng.
+                
+                📌 **Thông tin chi tiết:**
+                • Tiêu đề câu hỏi: %s
+                • Nội dung: "%s"
+                • Thời gian đăng: %s
+                
+                🔍 **Hành động cần thực hiện:**
+                - Xem xét nội dung câu hỏi
+                - Quyết định xóa hoặc giữ lại câu hỏi
+                - Cân nhắc cảnh báo hoặc xử phạt người dùng nếu cần
+                
+                ⚠️ Vui lòng kiểm tra và xử lý trong thời gian sớm nhất để đảm bảo môi trường cộng đồng lành mạnh.
+                
+                — QAUTE Moderation System
+                """,
+                titleQuestion,
+                question,
+                senderDate.format(DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy"))
+        );
+        createNotification(getSystemSender(), title, content, "Manager", "PUBLISHED", false);
+    }
     @Override
     public void notifyAdminSuspiciousActivityAlert(String ipAddress, String deviceName, String activity, String reason) {
         String title = "🚨 Cảnh báo bảo mật: Phát hiện hoạt động đáng ngờ";

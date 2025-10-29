@@ -102,6 +102,9 @@ public class QuestionServiceImplement implements QuestionService {
                                         saved.getContent(),
                                         saved.getDateSend()
                                 );
+                                notificationService.notifyManagerViolation(saved.getTitle(),
+                                        saved.getContent(),
+                                        saved.getDateSend());
                                 log.info("[AI] 🚨 Đã gửi thông báo vi phạm cho user ID {}", acc.getAccountID());
                             } else {
                                 log.warn("[AI] ⚠️ Không tìm thấy tài khoản cho Question {}", saved.getQuestionID());
