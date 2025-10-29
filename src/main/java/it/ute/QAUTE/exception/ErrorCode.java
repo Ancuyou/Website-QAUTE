@@ -41,7 +41,7 @@ public enum ErrorCode {
     EVENT_NOT_FOUND(444, "Event not found") ,
     FEEDBACK_ALREADY_SUBMITTED(445, "Feedback has already been submitted for this registration"),
     CONFLICTING_FEEDBACK(446, "Conflicting feedback submission"),
-    INVALID_QUESTION_EDIT(415, "Question has been answered and cannot be edited"),
+    INVALID_QUESTION_EDIT(415, "Question has been approved or answer and cannot be edited"),
     ANSWER_NOT_FOUND(416, "Answer not found"),
     CANNOT_WITHDRAW_ANSWER(417, "Cannot withdraw answer"),;
 

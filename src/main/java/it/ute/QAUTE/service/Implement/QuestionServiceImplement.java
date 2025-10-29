@@ -30,10 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -204,7 +201,8 @@ public class QuestionServiceImplement implements QuestionService {
 
     @Override
     public List<Question> getTop5RecentCommunityQuestions() {
-        List<Question> questions = questionRepository.findTop5ByOrderByDateSendDesc();
+        Pageable topFive = PageRequest.of(0, 5);
+        List<Question> questions = questionRepository.findTop5ByOrderByDateSendDesc(topFive);
         // Lọc bỏ câu trả lời đã thu hồi TRƯỚC KHI trả về
         questions.forEach(question -> {
             if (question.getAnswers() != null) {
@@ -244,6 +242,7 @@ public class QuestionServiceImplement implements QuestionService {
 
         Specification<Question> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(root.get("status").in(Arrays.asList(Question.QuestionStatus.Approved, Question.QuestionStatus.Answered)));
 
             if (departmentId != null) {
                 predicates.add(cb.equal(root.get("department").get("departmentID"), departmentId));
@@ -276,10 +275,10 @@ public class QuestionServiceImplement implements QuestionService {
         if (question.getUser() == null || question.getUser().getUserID() != userId) {
             throw new AppException(ErrorCode.UNAUTHORIZED); // Không có quyền chỉnh sửa
         }
-        boolean hasVisibleAnswer = question.getAnswers().stream().anyMatch(answer -> !answer.isWithdrawn());
-         if (hasVisibleAnswer || question.getLikes() > 0 || question.getStatus() != Question.QuestionStatus.Pending) {
-              throw new AppException(ErrorCode.INVALID_QUESTION_EDIT);
-         }
+//        boolean hasVisibleAnswer = question.getAnswers().stream().anyMatch(answer -> !answer.isWithdrawn());
+//         if (hasVisibleAnswer || question.getLikes() > 0 || question.getStatus() != Question.QuestionStatus.Pending) {
+//              throw new AppException(ErrorCode.INVALID_QUESTION_EDIT);
+//         }
         return question;
     }
 

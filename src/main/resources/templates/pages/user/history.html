@@ -118,9 +118,13 @@
                             <span th:if="${!#lists.isEmpty(question.answers)}" class="badge bg-success">
                                 <i class="fas fa-check me-1"></i>Đã trả lời
                             </span>
-                            <span th:if="${#lists.isEmpty(question.answers)}" class="badge bg-warning text-dark">
+                            <span th:if="${question.status.name == 'Approved'}" class="badge bg-warning text-dark">
                                 <i class="fas fa-clock me-1"></i>Chờ phản hồi
                             </span>
+                            <span th:if="${question.status.name == 'Pending'}" class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i>Chờ duyệt
+                            </span>
+
                         </div>
                     </div>
 
@@ -158,14 +162,14 @@
 
                             <!-- Cột phải: Button Edit -->
                             <div class="col-md-4 text-end mt-2 mt-md-0">
-                                <button th:if="${question.status.name() == 'Pending' and #lists.isEmpty(question.answers) and question.likes == 0}"
+                                <button th:if="${question.status.name() == 'Pending'}"
                                         class="btn btn-sm btn-warning btn-edit-question"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editQuestionModal"
                                         th:data-question-id="${question.questionID}">
                                     <i class="fas fa-edit me-1"></i>Chỉnh sửa
                                 </button>
-                                <span th:if="${!(question.status.name() == 'Pending' and #lists.isEmpty(question.answers))}"
+                                <span th:if="${!(question.status.name() == 'Pending')}"
                                     class="text-muted small fst-italic">
                                     <i class="fas fa-lock me-1"></i>Không thể chỉnh sửa
                                 </span>

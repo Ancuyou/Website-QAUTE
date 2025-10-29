@@ -101,7 +101,7 @@
             <div class="card border-0 shadow-sm consultant-card hover-lift">
                 <div class="card-body text-center p-4">
                     <div class="position-relative d-inline-block mb-3">
-                        <img th:src="${c.avatar != null ? c.avatar : '/images/default_avatar.png'}"
+                        <img th:src="@{${c.avatar != null ? c.avatar : '/images/default_avatar.png'}}"
                              class="rounded-circle consultant-avatar shadow-sm"
                              alt="Avatar">
                         <span class="online-indicator position-absolute bottom-0 end-0 me-2 mb-1"

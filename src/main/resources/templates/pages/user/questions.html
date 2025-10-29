@@ -151,7 +151,8 @@
                     <div class="col-lg-8">
                         <!-- QUESTIONS LIST -->
                         <div id="questionsWrapper">
-                            <div th:each="question, iterStat : ${questions}" class="card border-0 shadow-sm mb-4 question-card"
+                            <div th:each="question, iterStat : ${questions}"
+                                 class="card border-0 shadow-sm mb-4 question-card"
                                 th:data-question-id="${question.questionID}"
                                 th:classappend="${highlightQuestionId != null and highlightQuestionId == question.questionID} ? 'border-warning border-3' : ''">
 
@@ -626,6 +627,7 @@
                             history.pushState({ path: url }, '', url);
                         }
                         setupDynamicListeners(contentWrapper); // Gắn lại listener cho nội dung mới
+                        resetForms();
                     } else {
                         // Nếu server không trả về fragment (ví dụ: lỗi), tải lại toàn bộ trang
                         window.location.href = url;
@@ -900,6 +902,31 @@
                         });
                     })
                     .catch(e => console.error('Error loading initial fields:', e));
+            }
+            function resetForms() {
+                const contentWrapper = document.getElementById(mainContentWrapperId);
+                if (!contentWrapper) return;
+
+                const searchInput = contentWrapper.querySelector('#searchInput');
+                const sortSelect = contentWrapper.querySelector('#sortSelect');
+                const departmentFilter = contentWrapper.querySelector('#departmentFilter');
+                const fieldFilter = contentWrapper.querySelector('#fieldFilter');
+
+                if (searchInput) {
+                    searchInput.value = ''; // Clear keyword
+                }
+                if (sortSelect) {
+                    sortSelect.value = 'latest'; // Reset sort to 'Mới nhất'
+                }
+                if (departmentFilter) {
+                    departmentFilter.value = ''; // Reset department to 'Tất cả Khoa/Ban'
+                }
+                if (fieldFilter) {
+                    fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>'; // Clear fields
+                    fieldFilter.value = ''; // Reset field to 'Tất cả lĩnh vực'
+                    loadInitialFieldsForFilter();
+                }
+                console.log("Forms reset to default values.");
             }
 
         })();

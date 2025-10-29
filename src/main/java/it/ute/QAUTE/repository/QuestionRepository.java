@@ -23,7 +23,10 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
     // Lấy 3 câu hỏi gần nhất của một user
     List<Question> findTop3ByUserOrderByDateSendDesc(User user);
     // Lấy các câu hỏi mới nhất từ cộng đồng để hiển thị
-    List<Question> findTop5ByOrderByDateSendDesc();
+    @Query("SELECT q FROM Question q " +
+            "WHERE q.status IN (it.ute.QAUTE.entity.Question$QuestionStatus.Approved, it.ute.QAUTE.entity.Question$QuestionStatus.Answered) " +
+            "ORDER BY q.dateSend DESC")
+    List<Question> findTop5ByOrderByDateSendDesc(Pageable pageable);
     @Query("""
         SELECT q
         FROM Question q
@@ -191,11 +194,13 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>, Jp
 
     @Query("SELECT new it.ute.QAUTE.dto.HotTopicDTO(d.departmentID, d.departmentName, 'department', COUNT(q.questionID)) " +
             "FROM Question q JOIN q.department d " +
+            "WHERE q.status IN (it.ute.QAUTE.entity.Question$QuestionStatus.Approved, it.ute.QAUTE.entity.Question$QuestionStatus.Answered)" +
             "GROUP BY d.departmentID, d.departmentName ORDER BY COUNT(q.questionID) DESC")
     List<HotTopicDTO> findTopDepartments(Pageable pageable);
 
     @Query("SELECT new it.ute.QAUTE.dto.HotTopicDTO(f.fieldID, f.fieldName, 'field', COUNT(q.questionID)) " +
             "FROM Question q JOIN q.field f " +
+            "WHERE q.status IN (it.ute.QAUTE.entity.Question$QuestionStatus.Approved, it.ute.QAUTE.entity.Question$QuestionStatus.Answered)" +
             "GROUP BY f.fieldID, f.fieldName ORDER BY COUNT(q.questionID) DESC")
     List<HotTopicDTO> findTopFields(Pageable pageable);
 
