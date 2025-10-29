@@ -133,7 +133,15 @@
 
                     <div class="card-body">
                         <p class="mb-3" th:text="${question.content}">Nội dung</p>
-
+                        <div th:if="${question.fileAttachment != null and !#strings.isEmpty(question.fileAttachment)}"
+                             class="mt-3 border-top pt-3"
+                             th:attr="data-file-path=${question.fileAttachment}">
+                            <h6 class="fw-semibold small mb-2 text-muted">
+                                <i class="fas fa-paperclip me-1"></i>Tệp đính kèm:
+                            </h6>
+                            <div class="file-attachment-display">
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <span class="badge bg-primary" th:text="${question.department?.departmentName}">Khoa</span>
                             <span th:if="${question.field != null}"
@@ -253,6 +261,7 @@
             setupHistoryAjax();          // Gọi hàm setup AJAX
             setupHistoryFilterCascade(); // Gọi hàm setup cascade cho filter
             loadInitialHistoryFields();  // Load field ban đầu cho filter
+            renderFileAttachments();
         });
 
         function applyHighlightWithTimeout() {
@@ -332,6 +341,7 @@
                     const html = await response.text();
                     // Chỉ cập nhật nội dung bên trong wrapper
                     contentWrapper.innerHTML = html;
+                    renderFileAttachments();
 
                     if (pushState) {
                         history.pushState({ path: url, targetId: contentWrapperId }, '', url);
@@ -454,6 +464,154 @@
                     fieldFilter.innerHTML = '<option value="">-- Lỗi tải --</option>';
                     fieldFilter.disabled = false;
                 });
+        }
+        function renderFileAttachments() {
+            document.querySelectorAll('[data-file-path]').forEach(container => {
+                const filePath = container.getAttribute('data-file-path');
+                if (!filePath) return;
+
+                const displayDiv = container.querySelector('.file-attachment-display');
+                if (!displayDiv) return;
+
+                const ctx = /*[[@{/}]]*/ '/';
+                const fullPath = filePath.startsWith('/') ? filePath : '/' + filePath;
+                const fileName = filePath.split('/').pop();
+                const lowerFileName = fileName.toLowerCase();
+
+                let html = '';
+
+                // Hiển thị ảnh với card đẹp
+                if (lowerFileName.endsWith('.jpg') || lowerFileName.endsWith('.jpeg') ||
+                    lowerFileName.endsWith('.png') || lowerFileName.endsWith('.gif')) {
+                    html = `
+                <div class="card border-0 shadow-sm">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-auto">
+                            <a href="${ctx}${fullPath.substring(1)}" target="_blank" class="text-decoration-none">
+                                <img src="${ctx}${fullPath.substring(1)}"
+                                     alt="${fileName}"
+                                     class="rounded shadow-sm"
+                                     style="width: 100px; height: 100px; object-fit: cover; cursor: pointer; transition: transform 0.2s;"
+                                     onmouseover="this.style.transform='scale(1.05)'"
+                                     onmouseout="this.style.transform='scale(1)'">
+                            </a>
+                        </div>
+                        <div class="col ms-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-image text-primary me-2"></i>
+                                <h6 class="mb-0 text-truncate" style="max-width: 300px;" title="${fileName}">${fileName}</h6>
+                            </div>
+                            <p class="text-muted small mb-2">Hình ảnh</p>
+                            <a href="${ctx}${fullPath.substring(1)}" target="_blank"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>Xem đầy đủ
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                // File PDF
+                else if (lowerFileName.endsWith('.pdf')) {
+                    html = `
+                <div class="card border-0 shadow-sm">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-auto">
+                            <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded"
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="col ms-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-file-pdf text-danger me-2"></i>
+                                <h6 class="mb-0 text-truncate" style="max-width: 300px;" title="${fileName}">${fileName}</h6>
+                            </div>
+                            <p class="text-muted small mb-2">Tài liệu PDF</p>
+                            <a href="${ctx}${fullPath.substring(1)}" target="_blank"
+                               class="btn btn-sm btn-danger">
+                                <i class="fas fa-eye me-1"></i>Xem tài liệu
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                // File Word
+                else if (lowerFileName.endsWith('.doc') || lowerFileName.endsWith('.docx')) {
+                    html = `
+                <div class="card border-0 shadow-sm">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-auto">
+                            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded"
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-file-word fa-3x text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="col ms-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-file-word text-primary me-2"></i>
+                                <h6 class="mb-0 text-truncate" style="max-width: 300px;" title="${fileName}">${fileName}</h6>
+                            </div>
+                            <p class="text-muted small mb-2">Tài liệu Word</p>
+                            <a href="${ctx}${fullPath.substring(1)}" download="${fileName}"
+                               class="btn btn-sm btn-primary">
+                                <i class="fas fa-download me-1"></i>Tải xuống
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                // File PowerPoint
+                else if (lowerFileName.endsWith('.ppt') || lowerFileName.endsWith('.pptx')) {
+                    html = `
+                <div class="card border-0 shadow-sm">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-auto">
+                            <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded"
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-file-powerpoint fa-3x text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="col ms-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-file-powerpoint text-warning me-2"></i>
+                                <h6 class="mb-0 text-truncate" style="max-width: 300px;" title="${fileName}">${fileName}</h6>
+                            </div>
+                            <p class="text-muted small mb-2">Bài thuyết trình PowerPoint</p>
+                            <a href="${ctx}${fullPath.substring(1)}" download="${fileName}"
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-download me-1"></i>Tải xuống
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                // File khác
+                else {
+                    html = `
+                <div class="card border-0 shadow-sm">
+                    <div class="row g-0 align-items-center p-3">
+                        <div class="col-auto">
+                            <div class="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10 rounded"
+                                 style="width: 80px; height: 80px;">
+                                <i class="fas fa-file fa-3x text-secondary"></i>
+                            </div>
+                        </div>
+                        <div class="col ms-3">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-file text-secondary me-2"></i>
+                                <h6 class="mb-0 text-truncate" style="max-width: 300px;" title="${fileName}">${fileName}</h6>
+                            </div>
+                            <p class="text-muted small mb-2">Tệp đính kèm</p>
+                            <a href="${ctx}${fullPath.substring(1)}" target="_blank"
+                               class="btn btn-sm btn-secondary">
+                                <i class="fas fa-external-link-alt me-1"></i>Mở tệp
+                            </a>
+                        </div>
+                    </div>
+                </div>`;
+                }
+                displayDiv.innerHTML = html;
+            });
         }
     </script>
     </body>

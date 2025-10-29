@@ -221,7 +221,7 @@ public class ConsultantController {
             account.getProfile().setAvatar(null);
         }
         else if (avatarFile != null && !avatarFile.isEmpty()) {
-            String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,account.getAccountID());
+            String newAvatarUrl=fileStorageService.storeFile(avatarFile,oldAvatar,"avatars");
             account.getProfile().setAvatar(newAvatarUrl);
         }
         accountService.updateAccount(account);

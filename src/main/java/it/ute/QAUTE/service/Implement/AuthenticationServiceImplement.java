@@ -119,6 +119,10 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                 if (!authenticated) {
                     securityService.handleFailedLogin(account.getUsername());
                     securityService.loginFailed(account.getUsername(),deviceId,name_device);
+                }else {
+                    if(accountRep.getRole().equals(Account.Role.System)) {
+                        authenticated = false;
+                    }
                 }
             }
         } else{
