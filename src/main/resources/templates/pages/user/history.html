@@ -124,6 +124,9 @@
                             <span th:if="${question.status.name == 'Pending'}" class="badge bg-warning text-dark">
                                 <i class="fas fa-clock me-1"></i>Chờ duyệt
                             </span>
+                            <span th:if="${question.status.name == 'Rejected'}" class="badge bg-warning text-dark">
+                                <i class="fas fa-clock me-1"></i>Bị từ chối
+                            </span>
 
                         </div>
                     </div>

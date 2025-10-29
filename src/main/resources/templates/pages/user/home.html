@@ -574,6 +574,10 @@
                                               class="badge bg-warning-subtle text-warning border border-warning-subtle flex-shrink-0">
                                         <i class="fas fa-clock me-1"></i>Chờ duyệt
                                         </span>
+                                        <span th:if="${activity.status.name() == 'Rejected'}"
+                                              class="badge bg-warning-subtle text-warning border border-warning-subtle flex-shrink-0">
+                                        <i class="fas fa-clock me-1"></i>Bị từ chối
+                                        </span>
                                     </div>
 
                                     <!-- Nội dung rút gọn -->
@@ -765,7 +769,7 @@
                     <div class="card-body text-center p-4">
                         <!-- Avatar with status indicator -->
                         <div class="position-relative d-inline-block mb-3">
-                            <img th:src="@{${consultant.avatar != null and !#strings.isEmpty(consultant.avatar) ? consultant.avatar : '/images/default-avatar.png'}}"
+                            <img th:src="@{${consultant.avatar != null ? consultant.avatar : '/images/default_avatar.png'}}"
                                  class="rounded-circle shadow-sm"
                                  style="width: 100px; height: 100px; object-fit: cover; border: 4px solid #e0f2fe;"
                                  alt="Tư vấn viên">
