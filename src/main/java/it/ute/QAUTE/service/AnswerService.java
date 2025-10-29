@@ -3,6 +3,7 @@ package it.ute.QAUTE.service;
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
 
+import it.ute.QAUTE.entity.Question;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -26,4 +27,6 @@ public interface AnswerService {
     void withdrawAnswer(Integer answerId, Consultant currentConsultant);
 
     Answer findById(Integer answerId);
+
+    int countByQuestionAndNotWithdrawn(Question question);
 }

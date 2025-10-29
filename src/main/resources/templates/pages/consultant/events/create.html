@@ -4,72 +4,72 @@
 
     <th:block th:fragment="content">
 
-        <div class="container-fluid" style="margin-top: 20px;">
+        <div class="container-fluid" style="margin-top: 40px;">
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="mb-4">
-                         <div class="d-flex align-items-center">
-                             <a th:href="@{/consultant/events}" class="btn btn-outline-secondary me-3">
-                                 <i class="fas fa-arrow-left"></i>
-                             </a>
-                             <div>
-                                 <h2 class="fw-bold mb-1">
-                                     <i class="fas fa-plus-circle text-primary me-2"></i>Tạo sự kiện mới
-                                 </h2>
-                                 <p class="text-muted mb-0">Điền thông tin để tạo sự kiện hoặc workshop</p>
-                             </div>
-                         </div>
-                     </div>
+                        <div class="d-flex align-items-center">
+                            <a th:href="@{/consultant/events}" class="btn btn-outline-secondary me-3">
+                                <i class="fas fa-arrow-left"></i>
+                            </a>
+                            <div>
+                                <h2 class="fw-bold mb-1">
+                                    <i class="fas fa-plus-circle text-primary me-2"></i>Tạo sự kiện mới
+                                </h2>
+                                <p class="text-muted mb-0">Điền thông tin để tạo sự kiện hoặc workshop</p>
+                            </div>
+                        </div>
+                    </div>
 
-                     <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                         <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
-                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                     </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
 
-                     <div class="card border-0 shadow-sm mb-4">
-                         <div class="card-header bg-light">
-                             <h5 class="mb-0 fw-semibold">
-                                 <i class="fas fa-paste text-primary me-2"></i>Dán nội dung sự kiện vào đây (Tùy chọn)
-                             </h5>
-                         </div>
-                         <div class="card-body">
-                             <textarea id="eventDescriptionInput" class="form-control" rows="8" placeholder="Sao chép và dán toàn bộ mô tả sự kiện (từ Facebook, email,...) vào đây để AI gợi ý điền form..."></textarea>
-                             <button type="button" id="suggestEventButton" class="btn btn-outline-primary mt-3">
-                                 <i class="fas fa-lightbulb me-2"></i>Gợi ý điền form từ nội dung
-                             </button>
-                             <div id="aiSuggestionSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
-                                 <span class="visually-hidden">Đang xử lý...</span>
-                             </div>
-                             <small class="text-muted d-block mt-2">AI sẽ cố gắng trích xuất Tiêu đề, Mô tả, Thời gian, Địa điểm, Hình thức, Khoa và Lĩnh vực.</small>
-                         </div>
-                     </div>
-                     
-                     <form th:action="@{/consultant/events/create}" method="post" enctype="multipart/form-data" th:object="${event}" novalidate>
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="fas fa-paste text-primary me-2"></i>Dán nội dung sự kiện vào đây (Tùy chọn)
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea id="eventDescriptionInput" class="form-control" rows="8" placeholder="Sao chép và dán toàn bộ mô tả sự kiện (từ Facebook, email,...) vào đây để AI gợi ý điền form..."></textarea>
+                            <button type="button" id="suggestEventButton" class="btn btn-outline-primary mt-3">
+                                <i class="fas fa-lightbulb me-2"></i>Gợi ý điền form từ nội dung
+                            </button>
+                            <div id="aiSuggestionSpinner" class="spinner-border spinner-border-sm ms-2 d-none" role="status">
+                                <span class="visually-hidden">Đang xử lý...</span>
+                            </div>
+                            <small class="text-muted d-block mt-2">AI sẽ cố gắng trích xuất Tiêu đề, Mô tả, Thời gian, Địa điểm, Hình thức, Khoa và Lĩnh vực.</small>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/consultant/events/create}" method="post" enctype="multipart/form-data" th:object="${event}" novalidate>
                         <div class="row">
                             <div class="col-lg-8">
                                 <div class="card border-0 shadow-sm mb-4">
-                                     <div class="card-header bg-white">
-                                         <h5 class="mb-0 fw-semibold">
-                                             <i class="fas fa-info-circle text-primary me-2"></i>Thông tin cơ bản <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
-                                         </h5>
-                                     </div>
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0 fw-semibold">
+                                            <i class="fas fa-info-circle text-primary me-2"></i>Thông tin cơ bản <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
+                                        </h5>
+                                    </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                             <label for="eventTitle" class="form-label fw-semibold">Tiêu đề sự kiện <span class="text-danger">*</span></label>
-                                             <input type="text" th:field="*{title}" id="eventTitle"
-                                                    th:classappend="${#fields.hasErrors('title') ? 'is-invalid' : ''}"
-                                                    class="form-control" required
-                                                    placeholder="VD: Workshop Định hướng nghề nghiệp 2025">
-                                             <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Lỗi tiêu đề</div>
+                                            <label for="eventTitle" class="form-label fw-semibold">Tiêu đề sự kiện <span class="text-danger">*</span></label>
+                                            <input type="text" th:field="*{title}" id="eventTitle"
+                                                   th:classappend="${#fields.hasErrors('title') ? 'is-invalid' : ''}"
+                                                   class="form-control" required
+                                                   placeholder="VD: Workshop Định hướng nghề nghiệp 2025">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Lỗi tiêu đề</div>
                                         </div>
                                         <div class="mb-3">
-                                             <label for="eventDescription" class="form-label fw-semibold">Mô tả chi tiết <span class="text-danger">*</span></label>
-                                             <textarea th:field="*{description}" id="eventDescription"
-                                                       th:classappend="${#fields.hasErrors('description') ? 'is-invalid' : ''}"
-                                                       class="form-control" rows="5" required
-                                                       placeholder="Mô tả nội dung, lợi ích và những gì người tham gia sẽ học được..."></textarea>
-                                             <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Lỗi mô tả</div>
-                                             <small class="text-muted">Mô tả càng chi tiết càng thu hút người tham gia</small>
+                                            <label for="eventDescription" class="form-label fw-semibold">Mô tả chi tiết <span class="text-danger">*</span></label>
+                                            <textarea th:field="*{description}" id="eventDescription"
+                                                      th:classappend="${#fields.hasErrors('description') ? 'is-invalid' : ''}"
+                                                      class="form-control" rows="5" required
+                                                      placeholder="Mô tả nội dung, lợi ích và những gì người tham gia sẽ học được..."></textarea>
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('description')}" th:errors="*{description}">Lỗi mô tả</div>
+                                            <small class="text-muted">Mô tả càng chi tiết càng thu hút người tham gia</small>
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
@@ -94,13 +94,13 @@
                                             </div>
                                         </div>
                                         <div class="row">
-                                             <div class="col-md-6 mb-3">
+                                            <div class="col-md-6 mb-3">
                                                 <label class="form-label fw-semibold">Khoa/Phòng ban</label>
                                                 <select name="departmentId" id="eventDepartment" class="form-select">
                                                     <option value="">-- Tất cả khoa --</option> <option th:each="dept : ${departments}"
-                                                            th:value="${dept.departmentID}"
-                                                            th:text="${dept.departmentName}"
-                                                            th:selected="${event.department != null && event.department.departmentID == dept.departmentID}"></option>
+                                                                                                        th:value="${dept.departmentID}"
+                                                                                                        th:text="${dept.departmentName}"
+                                                                                                        th:selected="${event.department != null && event.department.departmentID == dept.departmentID}"></option>
                                                 </select>
                                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('department')}" th:errors="*{department}">Lỗi Khoa</div>
                                             </div>
@@ -108,9 +108,9 @@
                                                 <label class="form-label fw-semibold">Lĩnh vực</label>
                                                 <select name="fieldId" id="eventField" class="form-select">
                                                     <option value="">-- Chọn lĩnh vực --</option> <option th:each="fieldOpt : ${fields}"
-                                                            th:value="${fieldOpt.fieldID}"
-                                                            th:text="${fieldOpt.fieldName}"
-                                                            th:selected="${event.field != null && event.field.fieldID == fieldOpt.fieldID}"></option>
+                                                                                                          th:value="${fieldOpt.fieldID}"
+                                                                                                          th:text="${fieldOpt.fieldName}"
+                                                                                                          th:selected="${event.field != null && event.field.fieldID == fieldOpt.fieldID}"></option>
                                                 </select>
                                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('field')}" th:errors="*{field}">Lỗi Lĩnh vực</div>
                                             </div>
@@ -119,11 +119,11 @@
                                 </div>
 
                                 <div class="card border-0 shadow-sm mb-4">
-                                     <div class="card-header bg-white">
-                                         <h5 class="mb-0 fw-semibold">
-                                             <i class="fas fa-calendar-alt text-primary me-2"></i>Thời gian & Địa điểm <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
-                                         </h5>
-                                     </div>
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0 fw-semibold">
+                                            <i class="fas fa-calendar-alt text-primary me-2"></i>Thời gian & Địa điểm <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
+                                        </h5>
+                                    </div>
                                     <div class="card-body">
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
@@ -142,18 +142,18 @@
                                             </div>
                                         </div>
                                         <div class="mb-3" id="locationField">
-                                             <label for="eventLocation" class="form-label fw-semibold">Địa điểm</label>
-                                             <input type="text" th:field="*{location}" id="eventLocation"
-                                                    class="form-control" placeholder="VD: Phòng A.101, Tòa nhà A">
-                                             <div class="invalid-feedback" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Lỗi địa điểm</div>
-                                             <small class="text-muted">Địa chỉ cụ thể nếu là Offline hoặc Hybrid</small>
+                                            <label for="eventLocation" class="form-label fw-semibold">Địa điểm</label>
+                                            <input type="text" th:field="*{location}" id="eventLocation"
+                                                   class="form-control" placeholder="VD: Phòng A.101, Tòa nhà A">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Lỗi địa điểm</div>
+                                            <small class="text-muted">Địa chỉ cụ thể nếu là Offline hoặc Hybrid</small>
                                         </div>
                                         <div class="mb-3" id="meetingLinkField" style="display: none;">
-                                             <label for="eventMeetingLink" class="form-label fw-semibold">Link họp online</label>
-                                             <input type="url" th:field="*{meetingLink}" id="eventMeetingLink"
-                                                    class="form-control" placeholder="https://meet.google.com/xxx-xxxx-xxx">
-                                             <div class="invalid-feedback" th:if="${#fields.hasErrors('meetingLink')}" th:errors="*{meetingLink}">Lỗi link họp</div>
-                                             <small class="text-muted">Link Google Meet, Zoom,... nếu là Online hoặc Hybrid</small>
+                                            <label for="eventMeetingLink" class="form-label fw-semibold">Link họp online</label>
+                                            <input type="url" th:field="*{meetingLink}" id="eventMeetingLink"
+                                                   class="form-control" placeholder="https://meet.google.com/xxx-xxxx-xxx">
+                                            <div class="invalid-feedback" th:if="${#fields.hasErrors('meetingLink')}" th:errors="*{meetingLink}">Lỗi link họp</div>
+                                            <small class="text-muted">Link Google Meet, Zoom,... nếu là Online hoặc Hybrid</small>
                                         </div>
                                     </div>
                                 </div>
@@ -161,11 +161,11 @@
 
                             <div class="col-lg-4">
                                 <div class="card border-0 shadow-sm mb-4">
-                                     <div class="card-header bg-white">
-                                         <h5 class="mb-0 fw-semibold">
-                                             <i class="fas fa-image text-primary me-2"></i>Banner sự kiện
-                                         </h5>
-                                     </div>
+                                    <div class="card-header bg-white">
+                                        <h5 class="mb-0 fw-semibold">
+                                            <i class="fas fa-image text-primary me-2"></i>Banner sự kiện
+                                        </h5>
+                                    </div>
                                     <div class="card-body">
                                         <div class="text-center mb-3">
                                             <img id="bannerPreview" th:src="@{/images/default-event.jpg}"
@@ -179,10 +179,10 @@
                                 </div>
                                 <div class="card border-0 shadow-sm mb-4">
                                     <div class="card-header bg-white">
-                                         <h5 class="mb-0 fw-semibold">
-                                             <i class="fas fa-users text-primary me-2"></i>Số lượng tham gia
-                                         </h5>
-                                     </div>
+                                        <h5 class="mb-0 fw-semibold">
+                                            <i class="fas fa-users text-primary me-2"></i>Số lượng tham gia
+                                        </h5>
+                                    </div>
                                     <div class="card-body">
                                         <div class="mb-3">
                                             <label class="form-label fw-semibold">Số lượng tối đa</label>
@@ -217,7 +217,7 @@
         </div>
 
         <script>
-          
+
             function selectOptionByText(selectId, suggestedText) {
                 if (!suggestedText) return; // Bỏ qua nếu AI không gợi ý
 
@@ -230,7 +230,7 @@
 
                 // Lặp qua tất cả các <option>
                 for (let option of selectElement.options) {
-                     if (!option.value) continue; // Bỏ qua option rỗng "-- Chọn --"
+                    if (!option.value) continue; // Bỏ qua option rỗng "-- Chọn --"
 
                     const optionTextLower = option.text.toLowerCase().trim();
 
@@ -244,7 +244,7 @@
                     if (!exactMatchFound && (optionTextLower.includes(suggestionLower) || suggestionLower.includes(optionTextLower))) {
                         // Chỉ lấy kết quả khớp một phần ĐẦU TIÊN tìm thấy
                         if (!bestMatch) {
-                           bestMatch = option;
+                            bestMatch = option;
                         }
                     }
                 }
@@ -254,7 +254,7 @@
                     console.log(`Matched AI suggestion "${suggestedText}" to dropdown option "${bestMatch.text}" (Value: ${bestMatch.value}) for #${selectId}`);
                 } else {
                     console.warn(`Could not find a match for AI suggestion "${suggestedText}" in select#${selectId}`);
-                     selectElement.value = ''; // Reset về giá trị rỗng nếu không tìm thấy
+                    selectElement.value = ''; // Reset về giá trị rỗng nếu không tìm thấy
                 }
             }
 
@@ -275,7 +275,7 @@
                 if (match) {
                     // 3. Nếu khớp định dạng
                     const year = parseInt(match[1], 10);
-                    
+
                     // 4. Thêm kiểm tra năm hợp lý (ví dụ: từ 2020 đến 2050)
                     if (year >= 2020 && year < 2050) {
                         // console.log("Date string matched and year is valid:", standardizedString);
@@ -293,15 +293,15 @@
             }
 
             // --- Hàm helper xử lý toast ---
-             function showToast(type, title, message) {
-                 if (typeof window.showToast === 'function') {
+            function showToast(type, title, message) {
+                if (typeof window.showToast === 'function') {
                     window.showToast(type, title, message);
-                 } else {
-                     alert(`${title}: ${message}`);
-                 }
-             }
+                } else {
+                    alert(`${title}: ${message}`);
+                }
+            }
 
-             // --- Hàm helper xử lý ẩn/hiện trường ---
+            // --- Hàm helper xử lý ẩn/hiện trường ---
             function toggleModeFields(mode) {
                 const locationField = document.getElementById('locationField');
                 const meetingLinkField = document.getElementById('meetingLinkField');
@@ -315,8 +315,8 @@
                 const meetingLinkRequiredSpan = meetingLinkLabel?.querySelector('.text-danger');
 
                 // Ẩn hết dấu * trước
-                 if (locationRequiredSpan) locationRequiredSpan.style.display = 'none';
-                 if (meetingLinkRequiredSpan) meetingLinkRequiredSpan.style.display = 'none';
+                if (locationRequiredSpan) locationRequiredSpan.style.display = 'none';
+                if (meetingLinkRequiredSpan) meetingLinkRequiredSpan.style.display = 'none';
 
                 // Xóa required attribute trước
                 locationInput.removeAttribute('required');
@@ -331,18 +331,18 @@
                     locationField.style.display = 'block';
                     meetingLinkField.style.display = 'none';
                     locationInput.setAttribute('required', 'required');
-                     if (locationRequiredSpan) locationRequiredSpan.style.display = 'inline'; // Hiện dấu *
+                    if (locationRequiredSpan) locationRequiredSpan.style.display = 'inline'; // Hiện dấu *
                 } else if (mode === 'Hybrid') {
                     locationField.style.display = 'block';
                     meetingLinkField.style.display = 'block';
                     locationInput.setAttribute('required', 'required');
                     meetingLinkInput.setAttribute('required', 'required');
-                     if (locationRequiredSpan) locationRequiredSpan.style.display = 'inline'; // Hiện dấu *
-                     if (meetingLinkRequiredSpan) meetingLinkRequiredSpan.style.display = 'inline'; // Hiện dấu *
+                    if (locationRequiredSpan) locationRequiredSpan.style.display = 'inline'; // Hiện dấu *
+                    if (meetingLinkRequiredSpan) meetingLinkRequiredSpan.style.display = 'inline'; // Hiện dấu *
                 } else { // No mode selected or invalid
                     locationField.style.display = 'block'; // Default view
                     meetingLinkField.style.display = 'none';
-                     // Không có required
+                    // Không có required
                 }
             }
 
@@ -405,16 +405,16 @@
                     // Điền link
                     const meetingLinkInput = document.getElementById('eventMeetingLink');
                     const locationInput = document.getElementById('eventLocation'); // Lấy thêm location input
-                     meetingLinkInput.value = ''; // Reset link trước
+                    meetingLinkInput.value = ''; // Reset link trước
 
                     // Ưu tiên link gợi ý trực tiếp
                     if (suggestions.meetingLink) {
-                         meetingLinkInput.value = suggestions.meetingLink;
+                        meetingLinkInput.value = suggestions.meetingLink;
                     }
                     // Nếu mode cần link và AI gợi ý địa điểm là URL
                     else if ((modeSelect.value === 'Online' || modeSelect.value === 'Hybrid') && suggestions.location && (suggestions.location.startsWith('http') || suggestions.location.includes('meet.google.com') || suggestions.location.includes('zoom.us'))) {
-                         meetingLinkInput.value = suggestions.location;
-                         locationInput.value = ''; // Xóa địa điểm nếu nó là link
+                        meetingLinkInput.value = suggestions.location;
+                        locationInput.value = ''; // Xóa địa điểm nếu nó là link
                     }
                     // Nếu mode cần link và không có gợi ý link/location hợp lệ, thử tìm trong mô tả
                     else if (modeSelect.value === 'Online' || modeSelect.value === 'Hybrid') {
@@ -452,6 +452,6 @@
                 }
             });
         </script>
-        </th:block>
+    </th:block>
 </th:block>
 </html>

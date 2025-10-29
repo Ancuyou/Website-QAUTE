@@ -154,6 +154,13 @@ public class AnswerController {
 
             answerService.withdrawAnswer(answerId, consultant);
 
+            Question question = questionService.findById(questionId);
+            int countAnswersNotWithdrawn = answerService.countByQuestionAndNotWithdrawn(question);
+            if (countAnswersNotWithdrawn == 0) {
+                question.setStatus(QuestionStatus.Approved);
+                questionService.saveQuestion(question);
+            }
+
             redirectAttributes.addFlashAttribute("success", "true");
             redirectAttributes.addFlashAttribute("successMessage", "Đã thu hồi câu trả lời thành công.");
             redirectAttributes.addAttribute("highlightQuestionId", questionId);
