@@ -100,7 +100,7 @@ public class ManagerController {
         model.addAttribute("selectedFieldId", fieldId);
         model.addAttribute("userName", userName);
         model.addAttribute("selectedStatus", status);
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/questions";
     }
 
@@ -118,7 +118,7 @@ public class ManagerController {
         model.addAttribute("question", question);
         model.addAttribute("departments", departments);
         model.addAttribute("fields", fields);
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/editQuestion";
     }
 
@@ -190,7 +190,7 @@ public class ManagerController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("active", "fields");
 
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/fields";
     }
 
@@ -199,6 +199,7 @@ public class ManagerController {
         model.addAttribute("field", new Field());
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("active", "fields");
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/addField";
     }
 
@@ -249,7 +250,7 @@ public class ManagerController {
         model.addAttribute("field", field);
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("active", "fields");
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/editField";
     }
 
@@ -308,7 +309,7 @@ public class ManagerController {
         model.addAttribute("avgResponseTime", answerReportService.getAverageResponseTime(startDate, endDate));
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/reports/answers";
     }
 
@@ -369,7 +370,7 @@ public class ManagerController {
 
         double answeredRate = total > 0 ? (answeredCount * 100.0 / total) : 0.0;
         model.addAttribute("answeredRate", Math.round(answeredRate));
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/reports/questions";
     }
 
@@ -395,7 +396,7 @@ public class ManagerController {
         model.addAttribute("activeUsers", userReportService.getActiveUsers());
         model.addAttribute("usersByRole", userReportService.getUsersByRole(startDate, endDate));
         model.addAttribute("topUsers", userReportService.getTop10Users(startDate, endDate));
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/reports/users";
     }
 
@@ -417,7 +418,7 @@ public class ManagerController {
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("totalAnswers", totalAnswer);
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/reports/consultants";
     }
 
@@ -434,6 +435,7 @@ public class ManagerController {
         model.addAttribute("totalElements", toxicQuestions.getTotalElements());
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/badContents";
     }
     @GetMapping("/profile")
@@ -528,16 +530,19 @@ public class ManagerController {
         model.addAttribute("totalPages", notifications.getTotalPages());
         model.addAttribute("q", q);
         model.addAttribute("status", status);
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/notifications";
     }
     @GetMapping("/notifications/new")
     public String addNotification(Model model){
         model.addAttribute("notification", new Notification());
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/addNotification";
     }
     @GetMapping("/notifications/edit/{id}")
     public String editNotification(@PathVariable("id") Integer id, Model model){
         model.addAttribute("notification", notificationService.findNotificationById(id));
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/addNotification";
     }
     @PostMapping("/notifications/add")
@@ -616,7 +621,7 @@ public class ManagerController {
         model.addAttribute("totalFields", fieldService.countAll());
         model.addAttribute("totalEvents", eventService.countAll());
         model.addAttribute("totalNotifications", notificationService.countAll());
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/dashboard";
     }
 }

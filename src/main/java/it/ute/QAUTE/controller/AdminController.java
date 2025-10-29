@@ -67,7 +67,6 @@ public class AdminController {
         model.addAttribute("totalItems", data.getTotalElements());
         model.addAttribute("pageSizeOptions", new int[]{5, 10, 15, 20});
         model.addAttribute("active", "consultants");
-
         return "pages/admin/consultants";
     }
 

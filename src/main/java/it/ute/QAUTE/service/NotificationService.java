@@ -58,4 +58,5 @@ public interface NotificationService {
     void notifyUserRegistrationConfirmed(User user, Event event);
 
     long countAll();
+    void notifyAdminSuspiciousActivityAlert(String ipAddress, String deviceName, String activity, String reason);
 }

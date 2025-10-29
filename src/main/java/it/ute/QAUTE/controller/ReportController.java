@@ -21,7 +21,8 @@ public class ReportController {
 
     @Autowired
     private ReportService reportService;
-
+    @Autowired
+    private AuthenticationService authenticationService;
     @Autowired
     private AccountService accountService;
 
@@ -94,7 +95,7 @@ public class ReportController {
         model.addAttribute("status", status);
 
         model.addAttribute("active", "reports-user");
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/userReports";
     }
 

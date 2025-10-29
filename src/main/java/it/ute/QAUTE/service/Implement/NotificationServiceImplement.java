@@ -140,7 +140,7 @@ public class NotificationServiceImplement implements NotificationService {
                         "/queue/notifications",
                         savedNotification.getTitle() + ": " + savedNotification.getContent());
                 Boolean isOnline = onlineCache.getIfPresent(receiver.getAccountID());
-                if(savedNotification.is_priority() && isOnline==null) emailService.sendNotification(receiver.getEmail(), savedNotification.getTitle(), savedNotification.getContent());
+                if(!savedNotification.getSender().getRole().equals(Account.Role.System) && savedNotification.is_priority() && isOnline==null) emailService.sendNotification(receiver.getEmail(), savedNotification.getTitle(), savedNotification.getContent());
             }
             System.out.println("✅ Gửi thông báo tới " + receivers.size() + " người dùng.");
         } else {
@@ -157,6 +157,38 @@ public class NotificationServiceImplement implements NotificationService {
         return accountRepository.findFirstSystem();
     }
 
+    @Override
+    public void notifyAdminSuspiciousActivityAlert(String ipAddress, String deviceName, String activity, String reason) {
+        String title = "🚨 Cảnh báo bảo mật: Phát hiện hoạt động đáng ngờ";
+
+        String content = String.format(
+                """
+                Hệ thống QAUTE đã phát hiện hoạt động đáng ngờ có thể là tấn công bảo mật!
+                
+                📌 **Thông tin chi tiết:**
+                • Địa chỉ IP: %s
+                • Thiết bị: %s
+                • Hoạt động: %s
+                • Lý do cảnh báo: %s
+                • Thời gian phát hiện: %s
+                
+                ⚠️ **Hành động khuyến nghị:**
+                - Kiểm tra logs hệ thống ngay lập tức
+                - Xem xét chặn IP này nếu cần thiết
+                - Giám sát các hoạt động tiếp theo từ thiết bị này
+                
+                🔒 Hệ thống đã tự động áp dụng các biện pháp bảo vệ tạm thời.
+                
+                — QAUTE Security System
+                """,
+                ipAddress,
+                deviceName,
+                activity,
+                reason,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss dd-MM-yyyy"))
+        );
+        createNotification(getSystemSender(), title, content, "Admin", "PUBLISHED", true);
+    }
     @Override
     public void createNotificationForSpecificUser(Account sender, Account receiver,
                                                   String title, String content,
