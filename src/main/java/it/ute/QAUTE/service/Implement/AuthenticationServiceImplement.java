@@ -96,6 +96,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         Account accountRep;
         boolean authenticated;
         if(!isGoogle){
+
             accountRep = accountRepository.findByUsername(account.getUsername());
             if (accountRep == null) {
                 return AuthenticationResponse.builder()
@@ -137,7 +138,8 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                         .message(message)
                         .build();
             }else {
-                authenticated = true;
+                if(accountRep.getRole().equals(Account.Role.System)) authenticated = false;
+                else authenticated = true;
             }
         }
         if (authenticated){

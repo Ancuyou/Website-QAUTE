@@ -76,8 +76,9 @@ public class QuestionServiceImplement implements QuestionService {
     public void saveQuestion(Question question) {
         question.setToxic(false);
         Question saved = questionRepository.save(question);
+        String textToxic = question.getTitle() + "&&" + question.getContent();
 
-        aIService.predictAsync(saved.getContent())
+        aIService.predictAsync(textToxic)
                 .thenAccept(result -> {
                     try {
                         boolean isToxic = (result == 1);
