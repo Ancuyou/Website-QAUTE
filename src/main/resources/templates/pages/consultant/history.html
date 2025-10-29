@@ -4,9 +4,12 @@
             <div class="container py-5">
                 <div class="row">
                     <div class="col-12">
-                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom"> <h1 class="fw-bold mb-0 text-dark" style="font-size: 2rem;"> <i class="fas fa-history me-2 text-primary"></i>Lịch sử tư vấn
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <h1 class="fw-bold mb-0 text-dark" style="font-size: 2rem;"> <i
+                                    class="fas fa-history me-2 text-primary"></i>Lịch sử tư vấn
                             </h1>
-                            <a th:href="@{/consultant/questions}" class="btn btn-primary shadow-sm"> <i class="fas fa-plus me-2"></i>Trả lời câu hỏi mới
+                            <a th:href="@{/consultant/questions}" class="btn btn-primary shadow-sm"> <i
+                                    class="fas fa-plus me-2"></i>Trả lời câu hỏi mới
                             </a>
                         </div>
 
@@ -16,27 +19,35 @@
                                     <div class="row g-3 align-items-end">
 
                                         <div class="col-md-3">
-                                            <label for="departmentFilter" class="form-label fw-semibold text-dark small">Khoa/Ban</label> <select id="departmentFilter" name="departmentId" class="form-select" th:value="${selectedDepartmentId}"> <option value="">Tất cả Khoa/Ban</option>
-                                                <option th:each="dept : ${departments}"
-                                                        th:value="${dept.departmentID}"
-                                                        th:text="${dept.departmentName}"
-                                                        th:selected="${dept.departmentID == selectedDepartmentId}">
-                                                </option>
-                                            </select>
+                                            <label for="departmentFilter"
+                                                   class="form-label fw-semibold text-dark small">Khoa/Ban</label> <select
+                                                id="departmentFilter" name="departmentId" class="form-select"
+                                                th:value="${selectedDepartmentId}">
+                                            <option value="">Tất cả Khoa/Ban</option>
+                                            <option th:each="dept : ${departments}" th:value="${dept.departmentID}"
+                                                    th:text="${dept.departmentName}"
+                                                    th:selected="${dept.departmentID == selectedDepartmentId}">
+                                            </option>
+                                        </select>
                                         </div>
 
                                         <div class="col-md-3">
-                                            <label for="fieldFilter" class="form-label fw-semibold text-dark small">Lĩnh vực</label> <select id="fieldFilter" name="fieldId" class="form-select" th:disabled="${selectedDepartmentId == null}" th:value="${selectedFieldId}"> <option value="">Tất cả lĩnh vực</option>
-                                                <option th:each="field : ${fields}"
-                                                        th:value="${field.fieldID}"
-                                                        th:text="${field.fieldName}"
-                                                        th:selected="${field.fieldID == selectedFieldId}">
-                                                </option>
-                                            </select>
+                                            <label for="fieldFilter" class="form-label fw-semibold text-dark small">Lĩnh
+                                                vực</label> <select id="fieldFilter" name="fieldId" class="form-select"
+                                                                    th:disabled="${selectedDepartmentId == null}"
+                                                                    th:value="${selectedFieldId}">
+                                            <option value="">Tất cả lĩnh vực</option>
+                                            <option th:each="field : ${fields}" th:value="${field.fieldID}"
+                                                    th:text="${field.fieldName}"
+                                                    th:selected="${field.fieldID == selectedFieldId}">
+                                            </option>
+                                        </select>
                                         </div>
 
                                         <div class="col-md-2">
-                                            <label class="form-label fw-semibold text-dark small">Thời gian</label> <select class="form-select" name="timeRange" th:value="${timeRange}"> <option value="" th:selected="${timeRange == null}">Tất cả</option>
+                                            <label class="form-label fw-semibold text-dark small">Thời gian</label>
+                                            <select class="form-select" name="timeRange" th:value="${timeRange}">
+                                                <option value="" th:selected="${timeRange == null}">Tất cả</option>
                                                 <option value="7" th:selected="${timeRange == 7}">7 ngày qua</option>
                                                 <option value="30" th:selected="${timeRange == 30}">30 ngày qua</option>
                                                 <option value="90" th:selected="${timeRange == 90}">3 tháng qua</option>
@@ -44,12 +55,14 @@
                                         </div>
 
                                         <div class="col-md-3">
-                                            <label class="form-label fw-semibold text-dark small">Từ khóa</label> <input type="text" class="form-control" name="keyword" th:value="${keyword}"
+                                            <label class="form-label fw-semibold text-dark small">Từ khóa</label> <input
+                                                type="text" class="form-control" name="keyword" th:value="${keyword}"
                                                 placeholder="Tìm theo tiêu đề...">
                                         </div>
 
                                         <div class="col-md-1">
-                                            <button type="submit" class="btn btn-primary w-100"> <i class="fas fa-filter"></i>
+                                            <button type="submit" class="btn btn-primary w-100"> <i
+                                                    class="fas fa-filter"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -62,24 +75,33 @@
                                 <div class="card border-0 shadow-sm h-100 bg-white">
                                     <div class="card-body text-center p-4">
                                         <i class="fas fa-comments fa-2x text-primary mb-3"></i>
-                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;" th:text="${totalAnswers}">0</h2>
-                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Tổng câu trả lời</p> </div>
+                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;"
+                                            th:text="${totalAnswers}">0</h2>
+                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Tổng câu trả lời
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="card border-0 shadow-sm h-100 bg-white">
                                     <div class="card-body text-center p-4">
                                         <i class="fas fa-question-circle fa-2x text-success mb-3"></i>
-                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;" th:text="${uniqueQuestions}">0</h2>
-                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Số câu hỏi đã tư vấn</p> </div>
+                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;"
+                                            th:text="${uniqueQuestions}">0</h2>
+                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Số câu hỏi đã tư
+                                            vấn</p>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="card border-0 shadow-sm h-100 bg-white">
                                     <div class="card-body text-center p-4">
                                         <i class="fas fa-users fa-2x text-info mb-3"></i>
-                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;" th:text="${uniqueUsers}">0</h2>
-                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Số người được tư vấn</p> </div>
+                                        <h2 class="fw-bold text-dark mb-2" style="font-size: 2.5rem;"
+                                            th:text="${uniqueUsers}">0</h2>
+                                        <p class="mb-0 text-muted fw-semibold" style="font-size: 1rem;">Số người được tư
+                                            vấn</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -87,55 +109,73 @@
                         <div th:if="${#lists.isEmpty(answersHistory)}" class="card shadow-sm border-0 bg-white">
                             <div class="card-body p-5 text-center">
                                 <i class="fas fa-inbox fa-4x mb-4 text-muted"></i>
-                                <h4 class="fw-bold mb-3 text-dark">Không tìm thấy hoạt động</h4> <p class="text-muted mb-0" style="font-size: 1rem;">Chưa có lịch sử tư vấn nào khớp với bộ lọc của bạn.</p> </div>
+                                <h4 class="fw-bold mb-3 text-dark">Không tìm thấy hoạt động</h4>
+                                <p class="text-muted mb-0" style="font-size: 1rem;">Chưa có lịch sử tư vấn nào khớp với
+                                    bộ lọc của bạn.</p>
+                            </div>
                         </div>
 
                         <div th:unless="${#lists.isEmpty(answersHistory)}">
-                            <div th:each="answer : ${answersHistory}" class="card border-0 shadow-sm mb-4 bg-white">
+                            <div th:each="answer, iterStat : ${answersHistory}"
+                                 class="card border-0 shadow-sm mb-4 bg-white">
                                 <div class="card-body p-4">
                                     <div class="row g-3">
-                                        <div class="col-auto d-none d-md-block">
-                                             <div class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10"
-                                                style="width: 50px; height: 50px;"> <i class="fas fa-check-double text-success"></i> </div>
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10"
+                                             style="width: 50px; height: 50px;">
+
+                                            <span class="h4 fw-bold text-success"
+                                                  th:text="${(currentPage * pageSize) + iterStat.count}">
+                                            </span>
+
                                         </div>
 
                                         <div class="col-md">
                                             <div class="d-flex justify-content-between align-items-start mb-3">
                                                 <div>
-                                                    <h5 class="fw-bold mb-2">
+                                                    <h4 class="fw-bold mb-2">
                                                         <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}"
-                                                            class="text-decoration-none text-primary">
+                                                           class="text-decoration-none text-primary">
                                                             <span th:text="${answer.title}">Tiêu đề câu hỏi</span>
                                                         </a>
-                                                    </h5>
+                                                    </h4>
                                                     <div class="text-muted small mb-2">
-                                                        <span>Hỏi bởi: <strong class="text-dark" th:text="${answer.userName}">Tên người hỏi</strong></span>
+                                                        <span>Hỏi bởi: <strong class="text-dark"
+                                                                               th:text="${answer.userName}">Tên người
+                                                                hỏi</strong></span>
                                                         <span class="mx-2">|</span>
                                                         <i class="fas fa-calendar-alt me-1"></i>
-                                                        <span th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy')}">Thời gian</span>
+                                                        <span
+                                                                th:text="${#temporals.format(answer.createdAt, 'dd/MM/yyyy')}">Thời
+                                                            gian</span>
                                                     </div>
                                                 </div>
                                                 <div class="ms-3 flex-shrink-0 d-print-none">
                                                     <a th:href="@{/consultant/question-details/{id}(id=${answer.questionID})}"
-                                                        class="btn btn-outline-primary btn-sm">
+                                                       class="btn btn-outline-primary btn-sm">
                                                         <i class="fas fa-eye me-1"></i>Xem
                                                     </a>
                                                 </div>
                                             </div>
-                                            <blockquote class="border-start border-3 border-light ps-3 py-2 mb-3 bg-light rounded">
-                                                <p class="mb-0 text-muted fst-italic small" th:text="${#strings.abbreviate(answer.contentQuestion, 150)}">
+                                            <blockquote
+                                                    class="border-start border-3 border-light ps-3 py-2 mb-3 bg-light rounded">
+                                                <p class="mb-0 text-muted fst-italic"
+                                                   th:text="${#strings.abbreviate(answer.contentQuestion, 150)}">
                                                     Nội dung câu hỏi...
                                                 </p>
                                             </blockquote>
-                                            <blockquote class="border-start border-3 border-success ps-3 py-2 bg-success bg-opacity-10 rounded">
-                                                <p class="mb-1 text-dark small" th:text="${#strings.abbreviate(answer.contentAnswer, 150)}">
+                                            <blockquote
+                                                    class="border-start border-3 border-success ps-3 py-2 bg-success bg-opacity-10 rounded">
+                                                <p class="mb-1 text-dark"
+                                                   th:text="${#strings.abbreviate(answer.contentAnswer, 150)}">
                                                     Nội dung câu trả lời...
                                                 </p>
-                                                <footer class="text-muted small mt-1 mb-0"> <i class="fas fa-clock me-1"></i>
+                                                <footer class="text-muted mt-1 mb-0"> <i class="fas fa-clock me-1"></i>
                                                     Bạn đã trả lời lúc <cite class="fw-semibold"
-                                                        th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời gian trả lời</cite>
+                                                                             th:text="${#temporals.format(answer.answerAt, 'HH:mm dd/MM/yyyy')}">Thời
+                                                        gian trả lời</cite>
                                                 </footer>
-                                                <span th:if="${answer.isWithdrawn}" class="text-danger fst-italic small d-block mt-1">
+                                                <span th:if="${answer.isWithdrawn}"
+                                                      class="text-danger fst-italic small d-block mt-1">
                                                     (Đã thu hồi)
                                                 </span>
                                             </blockquote>
@@ -149,19 +189,19 @@
                             <ul class="pagination justify-content-center">
                                 <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                     <a class="page-link"
-                                        th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}">
+                                       th:href="@{/consultant/history(page=${currentPage - 1}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 </li>
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                     th:classappend="${i == currentPage} ? 'active'">
-                                     <a class="page-link"
-                                        th:href="@{/consultant/history(page=${i}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}"
-                                        th:text="${i + 1}">1</a>
+                                    <a class="page-link"
+                                       th:href="@{/consultant/history(page=${i}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}"
+                                       th:text="${i + 1}">1</a>
                                 </li>
                                 <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
                                     <a class="page-link"
-                                        th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}">
+                                       th:href="@{/consultant/history(page=${currentPage + 1}, size=${pageSize}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, timeRange=${timeRange}, keyword=${keyword})}">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -174,50 +214,74 @@
 
         <style>
             .card {
-                transition: box-shadow 0.3s ease; /* Chỉ giữ lại hiệu ứng shadow */
+                transition: box-shadow 0.3s ease;
+                /* Chỉ giữ lại hiệu ứng shadow */
             }
+
             .card:hover {
-                box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; /* Shadow nhẹ hơn */
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+                /* Shadow nhẹ hơn */
             }
+
             .btn {
-                transition: all 0.2s ease; /* Hiệu ứng nhanh hơn */
+                transition: all 0.2s ease;
+                /* Hiệu ứng nhanh hơn */
             }
-            .form-select, .form-control {
-                border: 1px solid #ced4da; /* Border mặc định của Bootstrap */
+
+            .form-select,
+            .form-control {
+                border: 1px solid #ced4da;
+                /* Border mặc định của Bootstrap */
                 transition: border-color 0.2s ease, box-shadow 0.2s ease;
             }
-            .form-select:focus, .form-control:focus {
-                border-color: #86b7fe; /* Màu focus mặc định */
-                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Shadow focus mặc định */
+
+            .form-select:focus,
+            .form-control:focus {
+                border-color: #86b7fe;
+                /* Màu focus mặc định */
+                box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                /* Shadow focus mặc định */
             }
+
             .pagination .page-link {
-                color: #0d6efd; /* Màu primary mặc định */
-                border: 1px solid #dee2e6; /* Border mặc định */
-                margin: 0 3px; /* Giảm khoảng cách */
-                border-radius: .25rem; /* Bo góc mặc định */
+                color: #0d6efd;
+                /* Màu primary mặc định */
+                border: 1px solid #dee2e6;
+                /* Border mặc định */
+                margin: 0 3px;
+                /* Giảm khoảng cách */
+                border-radius: .25rem;
+                /* Bo góc mặc định */
             }
+
             .pagination .page-item.active .page-link {
-                background-color: #0d6efd; /* Màu primary mặc định */
+                background-color: #0d6efd;
+                /* Màu primary mặc định */
                 border-color: #0d6efd;
                 color: white;
             }
+
             .pagination .page-item.disabled .page-link {
                 color: #6c757d;
                 background-color: #fff;
                 border-color: #dee2e6;
             }
+
             .pagination .page-link:hover {
-                 background-color: #e9ecef; /* Màu hover nhạt */
-                 border-color: #dee2e6;
+                background-color: #e9ecef;
+                /* Màu hover nhạt */
+                border-color: #dee2e6;
             }
-             .pagination .page-item.active .page-link:hover {
-                 background-color: #0b5ed7; /* Hover đậm hơn chút cho active */
-                 border-color: #0a58ca;
+
+            .pagination .page-item.active .page-link:hover {
+                background-color: #0b5ed7;
+                /* Hover đậm hơn chút cho active */
+                border-color: #0a58ca;
             }
         </style>
 
         <script th:inline="javascript">
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const departmentFilter = document.getElementById('departmentFilter');
                 const fieldFilter = document.getElementById('fieldFilter');
                 const ctx = /*[[@{/}]]*/ '/qaute/'; // Lấy context path
@@ -269,9 +333,9 @@
 
                 const selectedDeptId = departmentFilter.value;
                 if (!selectedDeptId) { // Nếu không chọn khoa nào thì không cần load
-                     fieldFilter.disabled = false;
-                     fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>'; // Đảm bảo có option default
-                     return;
+                    fieldFilter.disabled = false;
+                    fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>'; // Đảm bảo có option default
+                    return;
                 }
 
                 const url = `${ctx}api/questions/fields/${selectedDeptId}`;

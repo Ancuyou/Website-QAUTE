@@ -433,6 +433,7 @@ public class ManagerController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", toxicQuestions.getTotalPages());
         model.addAttribute("totalElements", toxicQuestions.getTotalElements());
+        model.addAttribute("pendingCount", questionService.countByIsToxic());
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("account", authenticationService.getCurrentAccount());

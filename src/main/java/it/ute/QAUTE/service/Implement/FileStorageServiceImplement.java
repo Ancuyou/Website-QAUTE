@@ -10,9 +10,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -24,7 +22,7 @@ public class FileStorageServiceImplement implements FileStorageService {
     private Cloudinary cloudinary;
 
     @Override
-    public String storeFile(MultipartFile file, String oldAvatar, int accountID) {
+    public String storeFile(MultipartFile file, String oldAvatar, String folderType) {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("File upload trống.");
         }
@@ -40,12 +38,14 @@ public class FileStorageServiceImplement implements FileStorageService {
         if (ext == null || !ALLOWED_EXT.contains(ext.toLowerCase(Locale.ROOT))) {
             throw new RuntimeException("Định dạng ảnh không hợp lệ. Chỉ chấp nhận: " + ALLOWED_EXT);
         }
-
+        if (!List.of("avatars", "events", "questions").contains(folderType)) {
+            throw new RuntimeException("Thư mục không hợp lệ. Chỉ được 'avatars', 'events' hoặc 'questions'.");
+        }
         try {
             Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
-                            "public_id", "avatars/" + accountID,
-                            "folder", "avatars",
+                            "public_id", UUID.randomUUID().toString(),
+                            "folder", folderType,
                             "overwrite", true,
                             "resource_type", "image"
                     ));

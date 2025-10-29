@@ -69,4 +69,6 @@ public interface QuestionService {
     long countByStatus(Question.QuestionStatus status);
 
     long countAnwer_Questions(LocalDateTime start, LocalDateTime end);
+
+    long countByIsToxic();
 }

@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -434,5 +433,9 @@ public class QuestionServiceImplement implements QuestionService {
                 question.setAnswers(visibleAnswers);
             }
         });
+    }
+    @Override
+    public long countByIsToxic(){
+        return questionRepository.countByIsToxic(true);
     }
 }
