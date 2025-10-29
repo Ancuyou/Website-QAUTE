@@ -101,7 +101,7 @@
         </ul>
     </li>
 </ul>
-<ul th:fragment="managerDropdown(userName, avatarUrl)"
+<ul th:fragment="managerDropdown"
     class="navbar-nav ms-auto">
 
     <!-- Notification Bell Icon -->
@@ -145,9 +145,14 @@
     <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center"
            href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            <img th:src="@{${avatarUrl != null ? avatarUrl : '/images/default_avatar.png'}}"
+            <img th:src="${account?.profile?.avatar} ?: @{/images/default_avatar.png}"
                  class="rounded-circle me-2" alt="Avatar" width="32" height="32">
-            <span class="fw-semibold" th:text="${userName} ?: 'Manager'">Manager</span>
+
+            <!-- tên hiển thị: fullName → username → 'Manager' -->
+            <span class="fw-semibold"
+                  th:text="${#strings.defaultString(account?.profile?.fullName, account?.username) ?: 'Manager'}">
+        Manager
+      </span>
         </a>
 
         <ul class="dropdown-menu dropdown-menu-end">

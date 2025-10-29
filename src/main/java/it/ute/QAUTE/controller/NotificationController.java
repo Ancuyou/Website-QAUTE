@@ -37,7 +37,6 @@ public class NotificationController {
                 .count();
         System.out.println("Avatar " + account.getProfile().getAvatar());
         System.out.println("account.getRole(): " + account.getRole());
-        model.addAttribute("account", account);
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("accountId", accountId);

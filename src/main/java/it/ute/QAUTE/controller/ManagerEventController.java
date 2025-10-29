@@ -96,7 +96,7 @@ public class ManagerEventController {
         model.addAttribute("eventTypes", Arrays.asList(Event.EventType.values()));
         model.addAttribute("departments", departmentService.findAll());
         model.addAttribute("consultants", consultantService.getAllConsultants(false));
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/events/list";
     }
 
@@ -112,7 +112,7 @@ public class ManagerEventController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", events.getTotalPages());
         model.addAttribute("totalPending", events.getTotalElements());
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/events/pending";
     }
 
@@ -128,7 +128,7 @@ public class ManagerEventController {
         }
         model.addAttribute("event", event);
         model.addAttribute("participants", participants);
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/events/participants";
     }
 
@@ -157,7 +157,7 @@ public class ManagerEventController {
 
         model.addAttribute("totalAllTime", eventService.countApprovedEvents());
         model.addAttribute("pendingAllTime", eventService.countPendingEvents());
-
+        model.addAttribute("account", authenticationService.getCurrentAccount());
         return "pages/manager/events/reports";
     }
 

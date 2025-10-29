@@ -6,6 +6,7 @@ import it.ute.QAUTE.entity.BlackList;
 import it.ute.QAUTE.repository.AccountRepository;
 import it.ute.QAUTE.repository.BlackListRepository;
 import it.ute.QAUTE.service.EmailService;
+import it.ute.QAUTE.service.NotificationService;
 import it.ute.QAUTE.service.SecurityService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,8 @@ public class SecurityServiceImplement implements SecurityService {
     private BlackListRepository blackListRepository;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
     private static final int ramThreshold = 4;
     private static final int dbLockThreshold=2;
     private static final int downgradeCircle=7;
@@ -195,6 +198,7 @@ public class SecurityServiceImplement implements SecurityService {
             for (Account admin:adminList){
                 emailService.sendSuspiciousActivityAlert(admin.getEmail(),deviceId,deviceName,"Đang thực hiện đăng nhập nhiều đăng nhập",reason.toString());
             }
+            notificationService.notifyAdminSuspiciousActivityAlert(deviceId,deviceName,"Đang thực hiện đăng nhập nhiều đăng nhập",reason.toString());
         }
     }
     @Override
