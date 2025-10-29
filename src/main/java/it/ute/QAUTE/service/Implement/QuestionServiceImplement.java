@@ -1,6 +1,6 @@
 package it.ute.QAUTE.service.Implement;
 
-import it.ute.QAUTE.api.FastApiClient;
+import it.ute.QAUTE.api.FastAPIClient;
 import it.ute.QAUTE.dto.HotTopicDTO;
 import it.ute.QAUTE.dto.QuestionDTO;
 import it.ute.QAUTE.entity.*;
@@ -33,6 +33,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,7 +48,7 @@ public class QuestionServiceImplement implements QuestionService {
     @Autowired
     private FieldRepository fieldRepository;
     @Autowired
-    private FastApiClient fastApiClient;
+    private FastAPIClient fastApiClient;
     @Autowired
     private AIServiceImplement aIService;
     @Autowired
@@ -188,12 +189,32 @@ public class QuestionServiceImplement implements QuestionService {
 
     @Override
     public List<Question> getTop3RecentQuestionsByUser(it.ute.QAUTE.entity.User user) {
-        return questionRepository.findTop3ByUserOrderByDateSendDesc(user);
+        List<Question> questions = questionRepository.findTop3ByUserOrderByDateSendDesc(user);
+        // Lọc bỏ câu trả lời đã thu hồi TRƯỚC KHI trả về
+        questions.forEach(question -> {
+            if (question.getAnswers() != null) {
+                Set<Answer> visibleAnswers = question.getAnswers().stream()
+                        .filter(answer -> !answer.isWithdrawn())
+                        .collect(Collectors.toSet());
+                question.setAnswers(visibleAnswers);
+            }
+        });
+        return questions;
     }
 
     @Override
     public List<Question> getTop5RecentCommunityQuestions() {
-        return questionRepository.findTop5ByOrderByDateSendDesc();
+        List<Question> questions = questionRepository.findTop5ByOrderByDateSendDesc();
+        // Lọc bỏ câu trả lời đã thu hồi TRƯỚC KHI trả về
+        questions.forEach(question -> {
+            if (question.getAnswers() != null) {
+                Set<Answer> visibleAnswers = question.getAnswers().stream()
+                        .filter(answer -> !answer.isWithdrawn())
+                        .collect(Collectors.toSet());
+                question.setAnswers(visibleAnswers);
+            }
+        });
+        return questions;
     }
 
     @Override
@@ -241,7 +262,10 @@ public class QuestionServiceImplement implements QuestionService {
             // predicates.add(cb.equal(root.get("status"), Question.QuestionStatus.Approved));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        return questionRepository.findAll(spec, pageable);
+        Page<Question> questionPage = questionRepository.findAll(spec, pageable);
+        // Lọc câu trả lời bị thu hồi trước khi trả về
+        filterWithdrawnAnswers(questionPage);
+        return questionPage;
     }
 
     @Override
@@ -252,8 +276,9 @@ public class QuestionServiceImplement implements QuestionService {
         if (question.getUser() == null || question.getUser().getUserID() != userId) {
             throw new AppException(ErrorCode.UNAUTHORIZED); // Không có quyền chỉnh sửa
         }
-         if (!question.getAnswers().isEmpty() || question.getLikes() > 0 || question.getStatus() != Question.QuestionStatus.Pending) {
-              throw new AppException(ErrorCode.INVALID_REQUEST);
+        boolean hasVisibleAnswer = question.getAnswers().stream().anyMatch(answer -> !answer.isWithdrawn());
+         if (hasVisibleAnswer || question.getLikes() > 0 || question.getStatus() != Question.QuestionStatus.Pending) {
+              throw new AppException(ErrorCode.INVALID_QUESTION_EDIT);
          }
         return question;
     }
@@ -263,8 +288,10 @@ public class QuestionServiceImplement implements QuestionService {
     @Override
     public void updateQuestion(Integer questionId, int userId, QuestionDTO questionDTO) {
         Question question = findQuestionByIdForEditing(questionId, userId);
+        // Điều kiện mới: Chỉ chặn chỉnh sửa nếu có ít nhất MỘT câu trả lời CHƯA bị thu hồi
+        boolean hasVisibleAnswer = question.getAnswers().stream().anyMatch(answer -> !answer.isWithdrawn());
         // Kiểm tra lại lần nữa trước khi cập nhật (phòng trường hợp có tương tác trong lúc modal mở)
-        if (!question.getAnswers().isEmpty() || question.getStatus() != Question.QuestionStatus.Pending) {
+        if (hasVisibleAnswer || question.getLikes() > 0 || question.getStatus() != Question.QuestionStatus.Pending) {
             throw new AppException(ErrorCode.INVALID_QUESTION_EDIT);
         }
         // Cập nhật thông tin
@@ -375,7 +402,10 @@ public class QuestionServiceImplement implements QuestionService {
             // Không cần lọc theo status Approved ở trang history
             return cb.and(predicates.toArray(new Predicate[0]));
         };
-        return questionRepository.findAll(spec, pageable);
+        Page<Question> questionPage = questionRepository.findAll(spec, pageable);
+        // Lọc câu trả lời bị thu hồi trước khi trả về
+        filterWithdrawnAnswers(questionPage);
+        return questionPage;
     }
     @Override
     public long countAll() {
@@ -390,5 +420,17 @@ public class QuestionServiceImplement implements QuestionService {
     @Override
     public long countAnwer_Questions(LocalDateTime start, LocalDateTime end){
         return questionRepository.countAnsweredQuestionsByQuestionDate(start, end);
+    }
+
+    // Hàm helper để lọc bỏ các câu trả lời đã bị thu hồi
+    private void filterWithdrawnAnswers(Page<Question> questionPage) {
+        questionPage.getContent().forEach(question -> {
+            if (question.getAnswers() != null && !question.getAnswers().isEmpty()) {
+                Set<Answer> visibleAnswers = question.getAnswers().stream()
+                        .filter(answer -> !answer.isWithdrawn())
+                        .collect(Collectors.toSet());
+                question.setAnswers(visibleAnswers);
+            }
+        });
     }
 }

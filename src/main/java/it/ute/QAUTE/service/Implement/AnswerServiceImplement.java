@@ -53,7 +53,7 @@ public class AnswerServiceImplement implements AnswerService {
     }
     @Override
     public long countAnswersForUser(it.ute.QAUTE.entity.User user) {
-        return answerRepository.countByQuestionUser(user);
+        return answerRepository.countVisibleAnswersByQuestionUser(user);
     }
     @Override
     public long countAll() {

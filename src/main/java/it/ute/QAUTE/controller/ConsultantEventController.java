@@ -2,7 +2,7 @@ package it.ute.QAUTE.controller;
 
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
-import it.ute.QAUTE.api.FastApiClient;
+import it.ute.QAUTE.api.FastAPIClient;
 import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.service.*;
 import jakarta.validation.Valid;
@@ -52,7 +52,7 @@ public class ConsultantEventController {
     private FieldService fieldService;
 
     @Autowired
-    private FastApiClient fastApiClient;
+    private FastAPIClient fastApiClient;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

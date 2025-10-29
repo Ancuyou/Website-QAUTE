@@ -22,6 +22,8 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
         List<Answer> findByConsultant_ConsultantID(Integer consultantId);
 
         long countByQuestionUser(User user);
+        @Query("SELECT COUNT(a) FROM Answer a WHERE a.question.user = :user AND a.isWithdrawn = false")
+        long countVisibleAnswersByQuestionUser(@Param("user") User user);
 
         @Query("""
                             SELECT a FROM Answer a
@@ -94,6 +96,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
                         FROM Answer a
                         WHERE a.consultant.consultantID = :consultantId
                           AND a.dateAnswered BETWEEN :startDate AND :endDate
+                          AND a.isWithdrawn = false
                         """)
         long countConsultantAllAnswers(
                         @Param("consultantId") Integer consultantId,
@@ -107,6 +110,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
                         JOIN Question q ON a.QuestionID = q.QuestionID
                         WHERE a.ConsultantID = :consultantId
                           AND a.DateAnswered BETWEEN :startDate AND :endDate
+                          AND a.isWithdrawn = false
                         """, nativeQuery = true)
         Double averageConsultantResponseTime(
                         @Param("consultantId") Integer consultantId,
@@ -119,6 +123,7 @@ public interface AnswerRepository extends JpaRepository<Answer, Integer> {
                         FROM Answer a
                         WHERE a.consultant.consultantID = :consultantId
                           AND a.dateAnswered BETWEEN :startDate AND :endDate
+                          AND a.isWithdrawn = false
                         """)
         long countDistinctUsersAnsweredByConsultant(
                         @Param("consultantId") Integer consultantId,

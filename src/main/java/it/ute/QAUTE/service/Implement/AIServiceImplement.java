@@ -1,7 +1,7 @@
 package it.ute.QAUTE.service.Implement;
 
 import com.github.benmanes.caffeine.cache.Cache;
-import it.ute.QAUTE.api.FastApiClient;
+import it.ute.QAUTE.api.FastAPIClient;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Conversation;
 import it.ute.QAUTE.entity.Messages;
@@ -32,7 +32,7 @@ public class AIServiceImplement implements AIService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private FastApiClient fastApiClient;
+    private FastAPIClient fastApiClient;
     @Async("aiExecutor")
     @Override
     public void replyMessage(Messages userMsg){

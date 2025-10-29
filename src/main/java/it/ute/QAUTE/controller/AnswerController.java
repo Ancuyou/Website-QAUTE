@@ -1,6 +1,6 @@
 package it.ute.QAUTE.controller;
 
-import it.ute.QAUTE.api.FastApiClient;
+import it.ute.QAUTE.api.FastAPIClient;
 import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
@@ -40,7 +40,7 @@ public class AnswerController {
     private QuestionService questionService;
 
     @Autowired
-    private FastApiClient fastApiClient;
+    private FastAPIClient fastApiClient;
 
     @PostMapping("/questions/answer")
     public String handlePostAnswer(

@@ -175,7 +175,7 @@
 
                         <div th:if="${!#lists.isEmpty(question.answers)}" class="mt-4">
                             <h6 class="fw-bold mb-3">Câu trả lời:</h6>
-                            <div th:each="answer : ${question.answers}" class="bg-light p-3 rounded-3 mb-2">
+                            <div th:each="answer : ${question.answers}" th:if="${!answer.isWithdrawn}" class="bg-light p-3 rounded-3 mb-2">
                                 <div class="d-flex align-items-start">
                                     <img th:src="@{${answer.consultant.profile.avatar != null ? answer.consultant.profile.avatar : '/images/default_avatar.png'}}"
                                         class="rounded-circle me-3"

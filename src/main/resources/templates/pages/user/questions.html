@@ -239,7 +239,7 @@
                                     <h6 class="mb-3 small text-uppercase fw-bold">
                                         <span th:text="${#lists.size(question.answers)}">0</span> câu trả lời
                                     </h6>
-                                    <div th:each="answer : ${question.answers}" class="d-flex mb-3">
+                                    <div th:each="answer : ${question.answers}" th:if="${!answer.isWithdrawn}" class="d-flex mb-3">
                                         <img th:src="${answer.consultant.profile.avatar ?: 'https://via.placeholder.com/35'}"
                                             class="rounded-circle me-3" alt="Consultant Avatar"
                                             style="width: 35px; height: 35px;">

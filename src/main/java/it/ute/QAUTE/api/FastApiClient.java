@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class FastApiClient {
+public class FastAPIClient {
 
     @Qualifier("fastApiWebClient")
     private final WebClient webClient;
