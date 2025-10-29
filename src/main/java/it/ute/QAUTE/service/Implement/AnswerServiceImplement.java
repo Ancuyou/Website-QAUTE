@@ -2,6 +2,7 @@ package it.ute.QAUTE.service.Implement;
 
 import it.ute.QAUTE.entity.Answer;
 import it.ute.QAUTE.entity.Consultant;
+import it.ute.QAUTE.entity.Question;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.repository.AnswerRepository;
@@ -81,5 +82,18 @@ public class AnswerServiceImplement implements AnswerService {
             throw new AppException(ErrorCode.ANSWER_NOT_FOUND);
         }
         return answerOptional.get();
+    }
+
+    @Override
+    public int countByQuestionAndNotWithdrawn(Question question) {
+        List<Answer> answers = answerRepository.findByQuestion_QuestionID(question.getQuestionID());
+        int count = 0;
+        for (Answer answer : answers) {
+            if (!answer.isWithdrawn()) {
+                count++;
+            }
+        }
+        System.out.println("Count of answers not withdrawn for question ID " + question.getQuestionID() + ": " + count);
+        return count;
     }
 }
