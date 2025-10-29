@@ -387,7 +387,7 @@
                     document.getElementById('eventStartTime').value = formatDateTimeLocal(suggestions.startTime);
                     document.getElementById('eventEndTime').value = formatDateTimeLocal(suggestions.endTime);
                     document.getElementById('eventLocation').value = suggestions.location || '';
-
+                    document.getElementById('eventMaxParticipants').value = suggestions.maxParticipants || '';
                     // BỔ SUNG: ĐIỀN KHOA VÀ LĨNH VỰC
                     selectOptionByText('eventDepartment', suggestions.departmentName);
                     selectOptionByText('eventField', suggestions.fieldName);
