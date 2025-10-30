@@ -5,6 +5,9 @@ import it.ute.QAUTE.entity.Account;
 import it.ute.QAUTE.exception.ErrorCode;
 import it.ute.QAUTE.service.Implement.AuthenticationServiceImplement;
 import it.ute.QAUTE.service.Implement.SecurityServiceImplement;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserServ
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
@@ -32,8 +36,11 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
 
 @Configuration
 @EnableWebSecurity
@@ -41,18 +48,11 @@ import java.time.Duration;
 @Slf4j
 public class SecurityConfig {
 
-    // === PUBLIC ENDPOINTS ===
-    private static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/**", "/oauth2/**", "/ws/**", "/app/**", "/topic/**",
-            "/queue/**", "/api/**", "/app-error/**", "/notifications/**",
-            "/css/**", "/js/**", "/images/**", "/pages/block"
+    private final String[] PUBLIC_ENDPOINT = {
+            "/auth/**", "/oauth2/**", "/api/**",
+            "/ws/**", "/app/**", "/topic/**", "/queue/**",
+            "/css/**", "/js/**", "/images/**", "/pages/block", "/app-error"
     };
-
-    // === ROLE-BASED ENDPOINTS ===
-    private static final String[] USER_ENDPOINTS = {"/user/questions/**", "/user/**"};
-    private static final String[] CONSULTANT_ENDPOINTS = {"/consultant/**"};
-    private static final String[] ADMIN_ENDPOINTS = {"/admin/**"};
-    private static final String[] MANAGER_ENDPOINTS = {"/manager/**"};
 
     @Autowired private CustomJwtDecoder customJwtDecoder;
     @Autowired private AuthenticationServiceImplement authenticationService;
@@ -60,29 +60,21 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers("/images/**").permitAll()
-
-                        // Shared between User & Consultant
-                        .requestMatchers("/user/questions/**").hasAnyAuthority("ROLE_User", "ROLE_Consultant")
-
-                        // Role-specific
-                        .requestMatchers(USER_ENDPOINTS).hasAuthority("ROLE_User")
-                        .requestMatchers(CONSULTANT_ENDPOINTS).hasAuthority("ROLE_Consultant")
-                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ROLE_Admin")
-                        .requestMatchers(MANAGER_ENDPOINTS).hasAuthority("ROLE_Manager")
-
+        http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(req -> req
+                        .requestMatchers(PUBLIC_ENDPOINT).permitAll()
+                        .requestMatchers("/user/**").hasAuthority("ROLE_User")
+                        .requestMatchers("/consultant/**").hasAuthority("ROLE_Consultant")
+                        .requestMatchers("/admin/**").hasAuthority("ROLE_Admin")
+                        .requestMatchers("/manager/**").hasAuthority("ROLE_Manager")
                         .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth2 -> oauth2
+                .oauth2Login(oauth -> oauth
                         .loginPage("/auth/login")
                         .redirectionEndpoint(r -> r.baseUri("/auth/google/callback"))
-                        .userInfoEndpoint(u -> u.userService(oAuth2UserService()))
-                        .successHandler(oAuth2SuccessHandler())
-                        .failureHandler(oAuth2FailureHandler())
+                        .userInfoEndpoint(u -> u.userService(oauth2UserService()))
+                        .successHandler(oauth2SuccessHandler())
+                        .failureHandler(oauth2FailureHandler())
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt
@@ -96,38 +88,52 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                         .accessDeniedHandler(new CustomAccessDeniedHandler())
                 );
-
         return http.build();
     }
 
-    // === BEARER TOKEN RESOLVER (Session + Cookie) ===
     @Bean
     public BearerTokenResolver bearerTokenResolver() {
         return request -> {
             String uri = request.getRequestURI();
-            String contextPath = request.getContextPath();
-
-            // Bỏ qua các endpoint không cần token
-            if (isPublicAuthEndpoint(uri, contextPath)) {
+            if (uri.startsWith(request.getContextPath() + "/auth") ||
+                    uri.startsWith(request.getContextPath() + "/oauth2") ||
+                    uri.startsWith(request.getContextPath() + "/app-error")) {
                 return null;
             }
 
-            // 1. Kiểm tra session
             HttpSession session = request.getSession(false);
+            String accessToken = null;
+
             if (session != null) {
-                String token = (String) session.getAttribute("ACCESS_TOKEN");
-                if (token != null && !token.isBlank()) {
-                    return token;
+                Object token = session.getAttribute("ACCESS_TOKEN");
+                if (token instanceof String s && !s.isBlank()) {
+                    try {
+                        Jwt jwt = customJwtDecoder.decode(s);
+                        Date expiry = Date.from(jwt.getExpiresAt());
+                        if (expiry == null || expiry.after(new Date())) {
+                            return s;
+                        }
+                        log.warn("Access token in session expired at {}", expiry);
+                    } catch (Exception e) {
+                        log.warn("Access token invalid: {}", e.getMessage());
+                    }
                 }
             }
 
-            // 2. Kiểm tra cookie REFRESH_TOKEN
-            var cookies = request.getCookies();
-            if (cookies != null) {
-                for (var cookie : cookies) {
-                    if ("REFRESH_TOKEN".equals(cookie.getName()) && cookie.getValue() != null && !cookie.getValue().isBlank()) {
-                        return cookie.getValue();
+            String refreshToken = extractRefreshToken(request);
+            if (refreshToken != null && !refreshToken.isBlank()) {
+                log.info("Access token expired, attempting refresh with cookie token...");
+                try {
+                    String newAccess = authenticationService.refreshAccessTokenOnly(refreshToken, request);
+                    if (newAccess != null) {
+                        HttpSession newSession = request.getSession(true);
+                        newSession.setAttribute("ACCESS_TOKEN", newAccess);
+
+                        log.info("Issued new access token successfully -> new session id: {}", newSession.getId());
+                        return newAccess;
                     }
+                } catch (Exception e) {
+                    log.warn("Failed to refresh token from cookie: {}", e.getMessage());
                 }
             }
 
@@ -135,118 +141,89 @@ public class SecurityConfig {
         };
     }
 
-    private boolean isPublicAuthEndpoint(String uri, String contextPath) {
-        return uri.startsWith(contextPath + "/auth") ||
-                uri.startsWith(contextPath + "/oauth2") ||
-                uri.startsWith(contextPath + "/app-error") ||
-                uri.startsWith(contextPath + "/auth/google/callback");
+
+    private String extractRefreshToken(HttpServletRequest request) {
+        return Optional.ofNullable(request.getCookies())
+                .flatMap(cookies -> Arrays.stream(cookies)
+                        .filter(c -> "REFRESH_TOKEN".equals(c.getName()))
+                        .map(Cookie::getValue)
+                        .findFirst())
+                .orElse(null);
     }
 
-    // === JWT AUTHENTICATION CONVERTER ===
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        authoritiesConverter.setAuthoritiesClaimName("scope");
-        authoritiesConverter.setAuthorityPrefix("");
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
+        var gac = new JwtGrantedAuthoritiesConverter();
+        gac.setAuthoritiesClaimName("scope");
+        gac.setAuthorityPrefix("");
 
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
-        return converter;
+        var jac = new JwtAuthenticationConverter();
+        jac.setJwtGrantedAuthoritiesConverter(gac);
+        return jac;
     }
 
-    // === PASSWORD ENCODER ===
     @Bean
     public static PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 
-    // === OAUTH2 USER SERVICE ===
     @Bean
-    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService() {
-        DefaultOAuth2UserService delegate = new DefaultOAuth2UserService();
+    public OAuth2UserService<OAuth2UserRequest, OAuth2User> oauth2UserService() {
+        var delegate = new DefaultOAuth2UserService();
         return delegate::loadUser;
     }
 
-    // === OAUTH2 SUCCESS HANDLER ===
     @Bean
-    public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+    public AuthenticationSuccessHandler oauth2SuccessHandler() {
         return (request, response, authentication) -> {
+            OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
+            OAuth2User oauthUser = oauthToken.getPrincipal();
+            String email = (String) oauthUser.getAttributes().get("email");
+            String deviceId = securityService.getClientIP(request);
+            String deviceName = securityService.getDeviceFingerprint(request);
+
+            log.info("OAuth2 login: {}", email);
+            AuthenticationResponse auth = null;
             try {
-                OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-                OAuth2User oauthUser = oauthToken.getPrincipal();
-                String email = (String) oauthUser.getAttributes().get("email");
+                auth = authenticationService.authentication(Account.builder().email(email).build(), deviceId, deviceName, true);
+            } catch (ParseException e) {
+                redirectToError(response, request, ErrorCode.ACCOUNT_EXISTED, e.getMessage());
+                return;
+            }
 
-                String deviceId = securityService.getClientIP(request);
-                String deviceName = securityService.getDeviceFingerprint(request);
-
-                AuthenticationResponse auth = authenticationService.authentication(
-                        Account.builder().email(email).build(),
-                        deviceId, deviceName, true
-                );
-
-                if (auth == null || auth.getToken() == null) {
-                    log.error("OAuth2 login failed: authentication response is invalid");
-                    redirectToError(request, response, ErrorCode.ACCOUNT_EXISTED);
-                    return;
-                }
-
-                // Lưu token vào session
+            if (auth != null) {
                 HttpSession session = request.getSession(true);
                 session.setAttribute("ACCESS_TOKEN", auth.getToken());
-
-                // Xác định role từ JWT hoặc fallback
-                String role = extractRoleFromToken(auth.getToken(), auth.getRole().toString());
+                String role = (String) customJwtDecoder.decode(auth.getToken()).getClaims().get("scope");
                 session.setAttribute("SCOPE", role);
 
-                // Thiết lập cookie refresh token
                 ResponseCookie cookie = ResponseCookie.from("REFRESH_TOKEN", auth.getRefreshtoken())
                         .httpOnly(true)
-                        .secure(true) // Nên bật nếu dùng HTTPS
+                        .secure(false)
                         .sameSite("Lax")
                         .path("/")
                         .maxAge(Duration.ofDays(7))
                         .build();
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-                // Chuyển hướng theo role
-                String redirectPath = resolveRedirectPath(role);
-                response.sendRedirect(request.getContextPath() + redirectPath);
-
-            } catch (Exception e) {
-                log.error("OAuth2 success handler failed", e);
-                redirectToError(request, response, ErrorCode.ACCOUNT_EXISTED);
+                response.sendRedirect(request.getContextPath() + resolveRedirectByRole("ROLE_" + auth.getRole().toString()));
+            } else {
+                redirectToError(response, request, ErrorCode.ACCOUNT_EXISTED, "Auth null");
             }
         };
     }
 
-    // === OAUTH2 FAILURE HANDLER ===
-    @Bean
-    public AuthenticationFailureHandler oAuth2FailureHandler() {
-        return (request, response, ex) -> redirectToError(request, response, ErrorCode.ACCOUNT_EXISTED);
-    }
-
-    // === HELPER: Redirect to error page ===
-    private void redirectToError(jakarta.servlet.http.HttpServletRequest request,
-                                 jakarta.servlet.http.HttpServletResponse response,
-                                 ErrorCode errorCode) throws java.io.IOException {
+    private void redirectToError(HttpServletResponse response, HttpServletRequest request, ErrorCode code, String msg) throws java.io.IOException {
         String base = request.getContextPath();
-        String encodedMessage = URLEncoder.encode(errorCode.getMessage(), StandardCharsets.UTF_8);
-        response.sendRedirect(base + "/app-error?errorCode=" + errorCode.getCode() + "&message=" + encodedMessage);
+        response.sendRedirect(base + "auth/app-error?errorCode=" + code.getCode() +
+                "&message=" + URLEncoder.encode(code.getMessage() + " " + msg, java.nio.charset.StandardCharsets.UTF_8));
     }
 
-    // === HELPER: Extract role from JWT or fallback ===
-    private String extractRoleFromToken(String token, String fallbackRole) {
-        try {
-            var decoded = customJwtDecoder.decode(token);
-            return (String) decoded.getClaims().get("scope");
-        } catch (Exception e) {
-            log.warn("Failed to decode JWT for role, using fallback: {}", fallbackRole);
-            return "ROLE_" + fallbackRole;
-        }
+    @Bean
+    public AuthenticationFailureHandler oauth2FailureHandler() {
+        return (request, response, ex) -> response.sendRedirect("/auth/login");
     }
 
-    // === HELPER: Resolve redirect path by role ===
-    private String resolveRedirectPath(String role) {
+    private String resolveRedirectByRole(String role) {
         return switch (role) {
             case "ROLE_User" -> "/user/home";
             case "ROLE_Consultant" -> "/consultant/home";

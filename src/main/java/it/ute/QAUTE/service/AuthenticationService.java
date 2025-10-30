@@ -47,6 +47,8 @@ public interface AuthenticationService {
 
     Account getCurrentAccount();
 
+    String refreshAccessTokenOnly(String refreshToken, HttpServletRequest request);
+
     String createMFACache(MFAResponse mfaResponse);
 
     MFAResponse get(String cid);

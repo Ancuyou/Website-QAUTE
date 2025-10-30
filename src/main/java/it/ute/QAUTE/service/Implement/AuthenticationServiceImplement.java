@@ -466,6 +466,25 @@ public class AuthenticationServiceImplement implements AuthenticationService {
     }
 
     @Override
+    public String refreshAccessTokenOnly(String refreshToken, HttpServletRequest request) {
+        try {
+            SignedJWT rjwt = verifyToken(refreshToken);
+            String username = rjwt.getJWTClaimsSet().getSubject();
+            Account account = accountRepository.findByUsername(username);
+
+            if (account == null) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            return generateToken(account, null, false);
+
+        } catch (Exception e) {
+            log.warn("Refresh token invalid or expired: {}", e.getMessage());
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+    }
+
+    @Override
     public String createMFACache(MFAResponse mfaResponse) {
         String cid=java.util.UUID.randomUUID().toString();
         temporaryMFACache.put(cid, mfaResponse);
