@@ -554,8 +554,7 @@ public class ManagerController {
                                    @RequestParam("status") String status,
                                    RedirectAttributes redirectAttributes) throws ParseException, JOSEException {
         try {
-            int id = Math.toIntExact(authenticationService.getCurrentAccount().getAccountID());
-            Account account = accountService.findById(id);
+            Account account = authenticationService.getCurrentAccount();
             notificationService.createNotification(account, title, content, targetType, status,priority);
             redirectAttributes.addFlashAttribute("success", true);
             redirectAttributes.addFlashAttribute("successMessage", "Notification has been created!");

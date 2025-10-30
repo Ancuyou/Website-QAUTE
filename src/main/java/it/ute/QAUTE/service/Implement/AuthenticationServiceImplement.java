@@ -96,6 +96,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         Account accountRep;
         boolean authenticated;
         if(!isGoogle){
+
             accountRep = accountRepository.findByUsername(account.getUsername());
             if (accountRep == null) {
                 return AuthenticationResponse.builder()
@@ -118,6 +119,10 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                 if (!authenticated) {
                     securityService.handleFailedLogin(account.getUsername());
                     securityService.loginFailed(account.getUsername(),deviceId,name_device);
+                }else {
+                    if(accountRep.getRole().equals(Account.Role.System)) {
+                        authenticated = false;
+                    }
                 }
             }
         } else{
@@ -137,7 +142,8 @@ public class AuthenticationServiceImplement implements AuthenticationService {
                         .message(message)
                         .build();
             }else {
-                authenticated = true;
+                if(accountRep.getRole().equals(Account.Role.System)) authenticated = false;
+                else authenticated = true;
             }
         }
         if (authenticated){
@@ -400,6 +406,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
 
             }
         }
+        System.out.println("heetss hạn access");
         String refresh = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -421,6 +428,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             String newAccess = generateToken(acc, null, false);
             HttpSession session = request.getSession(true);
             session.setAttribute("ACCESS_TOKEN", newAccess);
+            System.out.println("tạo mới access");
             return acc.getAccountID();
         } catch (Exception e) {
             ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
@@ -456,6 +464,25 @@ public class AuthenticationServiceImplement implements AuthenticationService {
         } catch (Exception e) {
             log.warn("Invalid REFRESH_TOKEN: {}", e.getMessage());
             return null;
+        }
+    }
+
+    @Override
+    public String refreshAccessTokenOnly(String refreshToken, HttpServletRequest request) {
+        try {
+            SignedJWT rjwt = verifyToken(refreshToken);
+            String username = rjwt.getJWTClaimsSet().getSubject();
+            Account account = accountRepository.findByUsername(username);
+
+            if (account == null) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            return generateToken(account, null, false);
+
+        } catch (Exception e) {
+            log.warn("Refresh token invalid or expired: {}", e.getMessage());
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 
