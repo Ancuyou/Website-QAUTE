@@ -263,6 +263,121 @@
         background: #dee2e6;
         border-radius: 4px;
     }
+    /* Navbar Enhanced Styles */
+    .navbar {
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .navbar.scrolled {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .navbar-brand {
+        transition: transform 0.3s ease;
+    }
+
+    .navbar-brand:hover {
+        transform: scale(1.05);
+    }
+
+    .nav-link {
+        position: relative;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem !important;
+        border-radius: 8px;
+    }
+
+    .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+    }
+
+    .nav-link:hover {
+        background-color: rgba(13, 110, 253, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .nav-link:hover::before {
+        width: 80%;
+    }
+
+    .nav-link.active {
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd !important;
+    }
+
+    /* Button Enhancements */
+    .btn-primary, .btn-outline-primary {
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before, .btn-outline-primary::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-primary:hover::before, .btn-outline-primary:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.2);
+    }
+
+    /* Dropdown Enhancements */
+    .dropdown-menu {
+        border: none;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        border-radius: 12px;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .dropdown-item {
+        transition: all 0.2s ease;
+        border-radius: 8px;
+        margin: 2px 8px;
+    }
+
+    .dropdown-item:hover {
+        background-color: rgba(13, 110, 253, 0.08);
+        transform: translateX(5px);
+    }
     /* Responsive */
     @media (max-width: 991px) {
         .hero-animation-wrapper {
@@ -567,16 +682,16 @@
                                             <i class="fas fa-check-circle me-1"></i>Đã trả lời
                                         </span>
                                         <span th:if="${activity.status.name() == 'Approved'}"
-                                              class="badge bg-warning-subtle text-warning border border-warning-subtle flex-shrink-0">
-                                        <i class="fas fa-clock me-1"></i>Chờ phản hồi
+                                              class="badge bg-info-subtle text-info border border-info-subtle flex-shrink-0">
+                                            <i class="fas fa-hourglass-half me-1"></i>Chờ phản hồi
                                         </span>
                                         <span th:if="${activity.status.name() == 'Pending'}"
                                               class="badge bg-warning-subtle text-warning border border-warning-subtle flex-shrink-0">
-                                        <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                            <i class="fas fa-clock me-1"></i>Chờ duyệt
                                         </span>
                                         <span th:if="${activity.status.name() == 'Rejected'}"
-                                              class="badge bg-warning-subtle text-warning border border-warning-subtle flex-shrink-0">
-                                        <i class="fas fa-clock me-1"></i>Bị từ chối
+                                              class="badge bg-danger-subtle text-danger border border-danger-subtle flex-shrink-0">
+                                            <i class="fas fa-times-circle me-1"></i>Bị từ chối
                                         </span>
                                     </div>
 
@@ -1200,5 +1315,25 @@
 <th:block th:replace="~{fragments/editQuestionModal :: editModal}"></th:block>
 <!-- **2. Thêm Footer (quan trọng để load JS)** -->
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    });
+
+    // Active link highlighting
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.nav-link').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+            link.classList.add('active');
+        }
+    });
+</script>
+
 </body>
 </html>

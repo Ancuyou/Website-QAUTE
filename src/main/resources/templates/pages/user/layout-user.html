@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" th:fragment="layout(content, title)">
+<head th:replace="~{fragments/head :: head(${title} ?: 'QAUTE')}">
+</head>
+
+<body style="background-color: #f8f9fa;">
+<th:block th:replace="~{fragments/user/user-navbar :: user-navbar}"></th:block>
+
+<th:block th:replace="${content}"></th:block>
+
+<th:block th:replace="~{fragments/report :: reportModal}"></th:block>
+
+<th:block th:replace="~{fragments/editQuestionModal :: editModal}"></th:block>
+
+<div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
+
+<div th:replace="~{fragments/toast :: toast}"></div>
+
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
+
+</body>
+</html>
