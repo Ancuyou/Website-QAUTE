@@ -174,14 +174,16 @@ public class SecurityServiceImplement implements SecurityService {
     public void handleBlockDevice(String deviceId, String deviceName){
         Map<String, Integer> usernameAttempts = deviceAttemptCache.getIfPresent(deviceId);
         List<String> targetUsernames = new ArrayList<>(usernameAttempts.keySet());
-        Long failCount=usernameAttempts.values().stream().filter(count -> count >= 0).count();
+        int failCount=usernameAttempts.values().stream()
+                .mapToInt(Integer::intValue)
+                .sum();
         boolean isBLock=false;
         StringBuilder reason= new StringBuilder("Danh sách các tên đăng nhập của các tài khoản bị tấn công là: ");
         for (String targetUsername : targetUsernames){
             reason.append(targetUsername).append(", ");
         }
         reason.append("\nVui lòng thực hiện việc khóa tài khoản hoặc đưa ra các giải pháp phù hợp");
-        if(targetUsernames.size()==1 && failCount>=20) isBLock=true;
+        if(targetUsernames.size()==1 && failCount>=3) isBLock=true;
         else if(targetUsernames.size()==2 && failCount>=15) isBLock=true;
         else if(targetUsernames.size()>=3 && failCount>=15) isBLock=true;
         if(isBLock){
