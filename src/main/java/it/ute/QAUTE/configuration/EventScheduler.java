@@ -125,16 +125,14 @@ public class EventScheduler {
             }
         }
     }
-    
-    /**
-     * Tự động chuyển status sang Completed khi sự kiện kết thúc (chạy mỗi 10 phút)
-     */
-    @Scheduled(fixedRate = 600000) // 10 minutes
+
+
+    @Scheduled(fixedRate = 600000) // 1 minute
     public void markEventsAsCompleted() {
         LocalDateTime now = LocalDateTime.now();
         
         List<Event> endingEvents = eventRepository.findEventsBetween(
-            now.minusHours(12),
+            now.minusHours(100),
             now
         );
         
@@ -147,10 +145,8 @@ public class EventScheduler {
             }
         }
     }
-    
-    /**
-     * Cảnh báo về sự kiện sắp đầy (90% capacity)
-     */
+
+
     @Scheduled(fixedRate = 600000) // 10 minutes
     public void notifyNearlyFullEvents() {
         List<Event> approvedEvents = eventRepository.findByStatus(

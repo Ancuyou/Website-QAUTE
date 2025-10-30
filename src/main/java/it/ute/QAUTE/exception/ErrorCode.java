@@ -43,7 +43,10 @@ public enum ErrorCode {
     CONFLICTING_FEEDBACK(446, "Conflicting feedback submission"),
     INVALID_QUESTION_EDIT(415, "Question has been approved or answer and cannot be edited"),
     ANSWER_NOT_FOUND(416, "Answer not found"),
-    CANNOT_WITHDRAW_ANSWER(417, "Cannot withdraw answer"),;
+    CANNOT_WITHDRAW_ANSWER(417, "Cannot withdraw answer"),
+    INVALID_EVENT_TIME_END_BEFORE_START(450, "Invalid event time: End time is before start time"),
+    INVALID_EVENT_TIME_START_IN_PAST(451, "Invalid event time: Start time is in the past")
+    ;
 
     ErrorCode(int code, String message) {
         this.code = code;

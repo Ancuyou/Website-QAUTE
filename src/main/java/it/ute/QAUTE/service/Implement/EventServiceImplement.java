@@ -371,12 +371,12 @@ public class EventServiceImplement implements EventService {
     @Override
     public void validateEventTime(Event event) {
         if (event.getEndTime().isBefore(event.getStartTime())) {
-            ErrorCode errorCode = ErrorCode.INVALID_EVENT_TIME;
+            ErrorCode errorCode = ErrorCode.INVALID_EVENT_TIME_END_BEFORE_START;
             throw new AppException(errorCode);
         }
 
         if (event.getStartTime().isBefore(LocalDateTime.now())) {
-            ErrorCode errorCode = ErrorCode.INVALID_EVENT_TIME;
+            ErrorCode errorCode = ErrorCode.INVALID_EVENT_TIME_START_IN_PAST;
             throw new AppException(errorCode);
         }
 

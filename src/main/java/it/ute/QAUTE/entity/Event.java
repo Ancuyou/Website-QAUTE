@@ -52,12 +52,10 @@ public class Event {
     private String meetingLink;
 
     @NotNull(message = "Thời gian bắt đầu không được để trống.")
-    @Future(message = "Thời gian bắt đầu phải ở trong tương lai.")
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
 
     @NotNull(message = "Thời gian kết thúc không được để trống.")
-    @Future(message = "Thời gian kết thúc phải sau thời gian hiện tại.")
     @Column(name = "EndTime", nullable = false)
     private LocalDateTime endTime;
 

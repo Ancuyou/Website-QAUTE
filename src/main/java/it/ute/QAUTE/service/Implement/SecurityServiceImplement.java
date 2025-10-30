@@ -183,7 +183,7 @@ public class SecurityServiceImplement implements SecurityService {
             reason.append(targetUsername).append(", ");
         }
         reason.append("\nVui lòng thực hiện việc khóa tài khoản hoặc đưa ra các giải pháp phù hợp");
-        if(targetUsernames.size()==1 && failCount>=10) isBLock=true;
+        if(targetUsernames.size()==1 && failCount>=3) isBLock=true;
         else if(targetUsernames.size()==2 && failCount>=15) isBLock=true;
         else if(targetUsernames.size()>=3 && failCount>=15) isBLock=true;
         if(isBLock){
