@@ -80,4 +80,5 @@ public class FastAPIClient {
                 .block();
         return result != null ? result : 0;
     }
+
 }

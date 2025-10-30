@@ -267,9 +267,7 @@ public class UserController {
                          @RequestParam(value = "resetAvatar", required = false) String resetAvatar,
                          HttpSession session, HttpServletRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int id = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
-        System.out.println(id);
-        Account account = accountService.findById(id);
+        Account account = authenticationService.getCurrentAccount();
         if(newPassword !=null &&!newPassword.isBlank()) account.setPassword(authenticationService.hashed(newPassword));
         account.getProfile().setFullName(fullName);
         account.getProfile().setPhone(phone);
