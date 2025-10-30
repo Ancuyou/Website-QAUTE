@@ -191,9 +191,10 @@ public class SecurityConfig {
                 return;
             }
 
-            if (auth != null) {
+            if (auth.isAuthenticated()) {
                 HttpSession session = request.getSession(true);
                 session.setAttribute("ACCESS_TOKEN", auth.getToken());
+                log.info("ACCESS_TOKEN gg" + auth.getToken());
                 String role = (String) customJwtDecoder.decode(auth.getToken()).getClaims().get("scope");
                 session.setAttribute("SCOPE", role);
 
@@ -214,7 +215,7 @@ public class SecurityConfig {
 
     private void redirectToError(HttpServletResponse response, HttpServletRequest request, ErrorCode code, String msg) throws java.io.IOException {
         String base = request.getContextPath();
-        response.sendRedirect(base + "auth/app-error?errorCode=" + code.getCode() +
+        response.sendRedirect(base + "/app-error?errorCode=" + code.getCode() +
                 "&message=" + URLEncoder.encode(code.getMessage() + " " + msg, java.nio.charset.StandardCharsets.UTF_8));
     }
 

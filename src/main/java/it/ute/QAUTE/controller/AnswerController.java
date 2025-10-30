@@ -66,7 +66,7 @@ public class AnswerController {
         if (!confirmed) { 
             int toxicResult = 0;
             try {
-                toxicResult = fastApiClient.predictToxic(content);
+                toxicResult = fastApiClient.predictToxic(content + "&&" + content);
                 System.out.println("Result: toxic" + toxicResult);
             } catch (Exception e) {
                 System.err.println("Lỗi khi gọi API kiểm tra toxic: " + e.getMessage());
