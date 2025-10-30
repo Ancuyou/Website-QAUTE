@@ -249,11 +249,6 @@ public class AdminController {
 
         try {
             accountService.editManagerOrConsultant(form, newPassword, avatarFile);
-        } catch (AppException e) {
-            redirectAttributes.addFlashAttribute("error", true);
-            redirectAttributes.addFlashAttribute("errorMessage",
-                    "Sửa thất bại: " + e.getMessage());
-            return "redirect:/admin/user/edit/" + form.getAccountID();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", true);
             redirectAttributes.addFlashAttribute("errorMessage",

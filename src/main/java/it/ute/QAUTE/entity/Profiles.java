@@ -30,18 +30,18 @@ public class Profiles {
     private String avatar;
     @Column(name="OnlineAt")
     private Date onlineAt;
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile")
     private Account account;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile")
     private Consultant consultant;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile")
     private User user;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile")
     private Admin admin;
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile", fetch = FetchType.LAZY)
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "profile")
     private Manager manager;
 }

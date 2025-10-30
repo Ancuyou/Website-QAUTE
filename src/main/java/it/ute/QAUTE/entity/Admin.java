@@ -16,7 +16,7 @@ public class Admin {
     private int adminId;
     @Column(name="SecretPin", nullable = false)
     private String secretPin;
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ProfileID", referencedColumnName = "ProfileID")
     private Profiles profile;
 }

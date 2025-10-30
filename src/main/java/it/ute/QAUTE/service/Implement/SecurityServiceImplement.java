@@ -189,7 +189,7 @@ public class SecurityServiceImplement implements SecurityService {
         if(isBLock){
             System.out.println("khoá thiết bị");
             BlackList newBlock=new BlackList();
-            LocalDateTime unblockAt=LocalDateTime.now().plusMinutes(1);
+            LocalDateTime unblockAt=LocalDateTime.now().plusHours(8);
             newBlock.setUnblockAt(Date.from(unblockAt.atZone(ZoneId.systemDefault()).toInstant()));
             newBlock.setBlock(true);
             newBlock.setDeviceId(deviceId);

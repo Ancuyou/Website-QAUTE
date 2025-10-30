@@ -1,13 +1,10 @@
 package it.ute.QAUTE.service.Implement;
 
+import it.ute.QAUTE.entity.*;
 import it.ute.QAUTE.exception.AppException;
 import it.ute.QAUTE.exception.ErrorCode;
 import com.github.benmanes.caffeine.cache.Cache;
-import it.ute.QAUTE.entity.Account;
-import it.ute.QAUTE.entity.Profiles;
-import it.ute.QAUTE.entity.User;
-import it.ute.QAUTE.repository.AccountRepository;
-import it.ute.QAUTE.repository.ProfilesRepository;
+import it.ute.QAUTE.repository.*;
 import it.ute.QAUTE.service.AccountService;
 import it.ute.QAUTE.service.FileStorageService;
 import lombok.extern.slf4j.Slf4j;
@@ -19,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -39,7 +33,14 @@ public class AccountServiceImplement implements AccountService {
     private FileStorageService fileStorageService;
     @Autowired
     private ProfilesRepository profilesRepository;
-
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
+    private ManagerRepository managerRepository;
+    @Autowired
+    private ConsultantRepository consultantRepository;
+    @Autowired
+    private UserRepository userRepository;
     @Override
     public void changePassword(String email, String password){
         Account account=accountRepository.findByEmail(email);
@@ -151,24 +152,145 @@ public class AccountServiceImplement implements AccountService {
     @Transactional
     @Override
     public Account editManagerOrConsultant(Account account, String pass, MultipartFile avatarFile) {
+        // 1️⃣ Kiểm tra trùng username / email
         if (accountRepository.existsByUsernameAndAccountIDNot(account.getUsername(), account.getAccountID())) {
             throw new AppException(ErrorCode.USERNAME_EXISTED);
         }
         if (accountRepository.existsByEmailIgnoreCaseAndAccountIDNot(account.getEmail(), account.getAccountID())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
+
+        // 2️⃣ Lấy account cũ từ DB với profile
         Account updatedAccount = accountRepository.findByAccountID(account.getAccountID());
-        String oldAvatar = updatedAccount.getProfile().getAvatar();
-        if(oldAvatar != null && oldAvatar.contains("cloudinary.com")){
-            fileStorageService.deleteFile(oldAvatar);
-            updatedAccount.getProfile().setAvatar(null);
-        }
-        if (!pass.isBlank()) updatedAccount.setPassword(passwordEncoder.encode(pass));
+
+        Profiles existingProfile = updatedAccount.getProfile();
+
+        // 3️⃣ Cập nhật avatar (nếu có)
+        String oldAvatar = existingProfile.getAvatar();
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            String avatarFileName = fileStorageService.storeFile(avatarFile,updatedAccount.getProfile().getAvatar(), "avatars");
-            System.out.println("FilePath: "+avatarFileName);
-            updatedAccount.getProfile().setAvatar(avatarFileName);
+            // Xóa ảnh cũ nếu có trên cloud
+            if (oldAvatar != null && oldAvatar.contains("cloudinary.com")) {
+                fileStorageService.deleteFile(oldAvatar);
+            }
+            // Lưu ảnh mới
+            String newAvatar = fileStorageService.storeFile(avatarFile, oldAvatar, "avatars");
+            existingProfile.setAvatar(newAvatar);
         }
+
+        // 4️⃣ Cập nhật các trường của profile
+        Profiles newProfile = account.getProfile();
+        if (newProfile != null) {
+            existingProfile.setFullName(newProfile.getFullName());
+            existingProfile.setPhone(newProfile.getPhone());
+        }
+
+        // 5️⃣ Cập nhật mật khẩu
+        if (pass != null && !pass.isBlank()) {
+            updatedAccount.setPassword(passwordEncoder.encode(pass));
+        }
+
+        // 6️⃣ Cập nhật thông tin cơ bản
+        updatedAccount.setUsername(account.getUsername());
+        updatedAccount.setEmail(account.getEmail());
+
+        // Kiểm tra xem có thay đổi role không
+        Account.Role oldRole = updatedAccount.getRole();
+        Account.Role newRole = account.getRole();
+        boolean roleChanged = oldRole != newRole;
+
+        updatedAccount.setRole(newRole);
+
+        // 7️⃣ Xử lý role đặc biệt - chỉ xử lý 4 role
+        switch (newRole) {
+            case Admin:
+                if (existingProfile.getAdmin() == null) {
+                    Admin admin = adminRepository.findByProfile_ProfileID(existingProfile.getProfileID());
+                    if (admin == null) {
+                        // Tạo mới nếu chưa có
+                        admin = new Admin();
+                        admin.setProfile(existingProfile);
+                        admin.setSecretPin(""); // Đặt giá trị mặc định hoặc từ input
+                        admin = adminRepository.save(admin);
+                    }
+                    existingProfile.setAdmin(admin);
+                }
+                // Xóa các entity con khác nếu chuyển role
+                if (roleChanged) {
+                    existingProfile.setManager(null);
+                    existingProfile.setConsultant(null);
+                    existingProfile.setUser(null);
+                }
+                break;
+
+            case Manager:
+                if (existingProfile.getManager() == null) {
+                    Manager manager = managerRepository.findByProfile_ProfileID(existingProfile.getProfileID());
+                    if (manager == null) {
+                        manager = new Manager();
+                        manager.setProfile(existingProfile);
+                        manager.setSecretPin("");
+                        manager = managerRepository.save(manager);
+                    }
+                    existingProfile.setManager(manager);
+                }
+                if (roleChanged) {
+                    existingProfile.setAdmin(null);
+                    existingProfile.setConsultant(null);
+                    existingProfile.setUser(null);
+                }
+                break;
+
+            case Consultant:
+                if (existingProfile.getConsultant() == null) {
+                    Consultant consultant = consultantRepository.findByProfile_ProfileID(existingProfile.getProfileID());
+                    if (consultant == null) {
+                        consultant = new Consultant();
+                        consultant.setProfile(existingProfile);
+                        consultant.setExperienceYears(0);
+                        consultant = consultantRepository.save(consultant);
+                    }
+                    existingProfile.setConsultant(consultant);
+                }
+                if (roleChanged) {
+                    existingProfile.setAdmin(null);
+                    existingProfile.setManager(null);
+                    existingProfile.setUser(null);
+                }
+                break;
+
+            case User:
+                User user = existingProfile.getUser();
+                if (user == null) {
+                    user = userRepository.findByProfile_ProfileID(existingProfile.getProfileID())
+                            .orElseGet(() -> {
+                                User newUser = new User();
+                                newUser.setProfile(existingProfile);
+                                newUser.setRoleName(User.Role.Khac); // Mặc định
+                                return userRepository.save(newUser);
+                            });
+                    existingProfile.setUser(user);
+                }
+
+                // Cập nhật studentCode và roleName
+                User inputUser = account.getProfile() != null ? account.getProfile().getUser() : null;
+                if (inputUser != null) {
+                    if (inputUser.getStudentCode() != null) {
+                        user.setStudentCode(inputUser.getStudentCode());
+                    }
+                    if (inputUser.getRoleName() != null) {
+                        user.setRoleName(inputUser.getRoleName());
+                    }
+                    userRepository.save(user);
+                }
+
+                if (roleChanged) {
+                    existingProfile.setAdmin(null);
+                    existingProfile.setManager(null);
+                    existingProfile.setConsultant(null);
+                }
+                break;
+        }
+        profilesRepository.save(existingProfile);
         return accountRepository.save(updatedAccount);
     }
     @Override
