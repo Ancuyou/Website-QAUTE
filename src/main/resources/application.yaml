@@ -2,6 +2,8 @@ server:
   port: 8080
   servlet:
     context-path: /qaute
+  forward-headers-strategy: native
+
 spring:
   servlet:
     multipart:

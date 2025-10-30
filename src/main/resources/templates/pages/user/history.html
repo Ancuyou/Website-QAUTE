@@ -1,17 +1,8 @@
-    <!DOCTYPE html>
-    <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-    <head>
-        <th:block th:replace="~{fragments/head :: head('QAUTE - Lịch sử câu hỏi')}"></th:block>
-        <style>
-            /* ... CSS highlight giữ nguyên ... */
-            .question-card { /* ... giữ nguyên ... */ }
-            .question-card:hover { /* ... giữ nguyên ... */ }
-        </style>
-    </head>
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pages/user/layout-user :: layout(~{::history_content}, 'QAUTE - Lịch sử câu hỏi')}">
 
-    <body>
-    <th:block th:replace="~{fragments/user/user-navbar :: user-navbar}"></th:block>
-
+<th:block th:fragment="history_content">
     <main style="padding-top: 80px; background-color: #f8f9fa; min-height: 100vh;">
         <div class="container py-5">
             <div class="card border-0 shadow-sm mb-4 text-center p-4 rounded-3"
@@ -116,18 +107,17 @@
                                 </div>
                             </div>
                             <span th:if="${!#lists.isEmpty(question.answers)}" class="badge bg-success">
-                                <i class="fas fa-check me-1"></i>Đã trả lời
+                                <i class="fas fa-check-circle me-1"></i>Đã trả lời
                             </span>
-                            <span th:if="${question.status.name == 'Approved'}" class="badge bg-warning text-dark">
-                                <i class="fas fa-clock me-1"></i>Chờ phản hồi
+                            <span th:if="${question.status.name == 'Approved' and #lists.isEmpty(question.answers)}" class="badge bg-info">
+                                <i class="fas fa-hourglass-half me-1"></i>Chờ phản hồi
                             </span>
                             <span th:if="${question.status.name == 'Pending'}" class="badge bg-warning text-dark">
-                                <i class="fas fa-clock me-1"></i>Chờ duyệt
+                                <i class="fas fa-spinner me-1"></i>Chờ duyệt
                             </span>
-                            <span th:if="${question.status.name == 'Rejected'}" class="badge bg-warning text-dark">
-                                <i class="fas fa-clock me-1"></i>Bị từ chối
+                            <span th:if="${question.status.name == 'Rejected'}" class="badge bg-danger">
+                                <i class="fas fa-times-circle me-1"></i>Bị từ chối
                             </span>
-
                         </div>
                     </div>
 
@@ -248,11 +238,9 @@
                         </li>
                     </ul>
                 </nav>
-
-
-            </div> </div> </main>
-
-    <th:block th:replace="~{fragments/editQuestionModal :: editModal}"></th:block> <th:block th:replace="~{fragments/footer :: footer}"></th:block>
+            </div>
+        </div>
+    </main>
 
     <script th:inline="javascript">
         // Scroll to highlighted question with timeout
@@ -614,5 +602,5 @@
             });
         }
     </script>
-    </body>
-    </html>
+</th:block>
+</html>

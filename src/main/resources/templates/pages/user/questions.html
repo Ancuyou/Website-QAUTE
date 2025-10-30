@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{pages/user/layout-user :: layout(~{::questions_content}, 'QAUTE - Cộng đồng Hỏi & Đáp')}">
 
-<head>
-    <th:block th:replace="~{fragments/head :: head('QAUTE - Cộng đồng Hỏi & Đáp')}"></th:block>
+<th:block th:fragment="questions_content">
     <style>
         .answer-form {
             display: none;
@@ -47,306 +47,304 @@
             }
         }
     </style>
-</head>
 
-<body>
-<th:block th:replace="~{fragments/user/user-navbar :: user-navbar}"></th:block>
 
-<main style="padding-top: 80px; background-color: #f8f9fa; min-height: 100vh;">
-    <div class="container py-5">
-        <div class="card border-0 shadow-sm mb-4 text-center p-4 rounded-3"
-             style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
-            <h1 class="fw-bold display-5">Cộng đồng Hỏi & Đáp</h1>
-            <p class="lead mb-4">Bạn có thắc mắc? Hãy đặt câu hỏi để nhận được sự giúp đỡ từ cộng đồng và các chuyên
-                gia.</p>
-            <button class="btn btn-warning btn-lg fw-bold" data-bs-toggle="modal"
-                    data-bs-target="#askQuestionModal">
-                <i class="fas fa-pen-to-square me-2"></i>Đặt câu hỏi ngay
-            </button>
-        </div>
-
-        <div id="content-wrapper" th:fragment="contentFragment">
-            <!-- Form Tìm kiếm & Sắp xếp -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <form id="searchForm" th:action="@{/user/questions}" method="get" class="row g-3 align-items-end">
-                        <div class="col-lg-6">
-                            <label for="searchInput" class="form-label">Tìm kiếm từ khóa</label>
-                            <input type="text" name="keyword" id="searchInput" class="form-control"
-                                   placeholder="Nhập tiêu đề hoặc nội dung..." th:value="${keyword}">
-                        </div>
-                        <div class="col-lg-3">
-                            <label for="sortSelect" class="form-label">Sắp xếp theo</label>
-                            <select id="sortSelect" name="sortBy" class="form-select">
-                                <option value="latest" th:selected="${sortBy == 'latest'}">Mới nhất</option>
-                                <option value="views" th:selected="${sortBy == 'views'}">Phổ biến nhất</option>
-                                <option value="answers" th:selected="${sortBy == 'answers'}">Nhiều trả lời nhất</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-3">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-search me-2"></i>Tìm & Sắp xếp
-                            </button>
-                        </div>
-                    </form>
-                </div>
+    <main style="padding-top: 80px; background-color: #f8f9fa; min-height: 100vh;">
+        <div class="container py-5">
+            <div class="card border-0 shadow-sm mb-4 text-center p-4 rounded-3"
+                 style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">
+                <h1 class="fw-bold display-5">Cộng đồng Hỏi & Đáp</h1>
+                <p class="lead mb-4">Bạn có thắc mắc? Hãy đặt câu hỏi để nhận được sự giúp đỡ từ cộng đồng và các chuyên
+                    gia.</p>
+                <button class="btn btn-warning btn-lg fw-bold" data-bs-toggle="modal"
+                        data-bs-target="#askQuestionModal">
+                    <i class="fas fa-pen-to-square me-2"></i>Đặt câu hỏi ngay
+                </button>
             </div>
 
-            <!-- Form Lọc -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h6 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-primary"></i>Lọc theo chủ đề</h6>
+            <div id="content-wrapper" th:fragment="contentFragment">
+                <!-- Form Tìm kiếm & Sắp xếp -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="searchForm" th:action="@{/user/questions}" method="get" class="row g-3 align-items-end">
+                            <div class="col-lg-6">
+                                <label for="searchInput" class="form-label">Tìm kiếm từ khóa</label>
+                                <input type="text" name="keyword" id="searchInput" class="form-control"
+                                       placeholder="Nhập tiêu đề hoặc nội dung..." th:value="${keyword}">
+                            </div>
+                            <div class="col-lg-3">
+                                <label for="sortSelect" class="form-label">Sắp xếp theo</label>
+                                <select id="sortSelect" name="sortBy" class="form-select">
+                                    <option value="latest" th:selected="${sortBy == 'latest'}">Mới nhất</option>
+                                    <option value="views" th:selected="${sortBy == 'views'}">Phổ biến nhất</option>
+                                    <option value="answers" th:selected="${sortBy == 'answers'}">Nhiều trả lời nhất</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-2"></i>Tìm & Sắp xếp
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <form th:action="@{/user/questions}" method="get" id="filterForm">
-                        <input type="hidden" name="keyword" th:value="${keyword}">
-                        <input type="hidden" name="sortBy" th:value="${sortBy}">
-                        <input type="hidden" name="page" value="0">
 
-                        <div class="mb-3">
-                            <label for="departmentFilter" class="form-label">Khoa/Ban</label>
-                            <select id="departmentFilter" name="departmentId" class="form-select">
-                                <option value="">Tất cả Khoa/Ban</option>
-                                <option th:each="dept : ${departments}"
-                                        th:value="${dept.departmentID}"
-                                        th:text="${dept.departmentName}"
-                                        th:selected="${dept.departmentID == selectedDepartmentId}">
-                                </option>
-                            </select>
-                        </div>
+                <!-- Form Lọc -->
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h6 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-primary"></i>Lọc theo chủ đề</h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/user/questions}" method="get" id="filterForm">
+                            <input type="hidden" name="keyword" th:value="${keyword}">
+                            <input type="hidden" name="sortBy" th:value="${sortBy}">
+                            <input type="hidden" name="page" value="0">
 
-                        <div class="mb-3">
-                            <label for="fieldFilter" class="form-label">Lĩnh vực</label>
-                            <select id="fieldFilter" name="fieldId" class="form-select">
-                                <option value="">Tất cả lĩnh vực</option>
-                                <option th:each="field : ${fields}"
-                                        th:value="${field.fieldID}"
-                                        th:text="${field.fieldName}"
-                                        th:selected="${field.fieldID == selectedFieldId}">
-                                </option>
-                            </select>
-
-                        </div>
-
-                        <button type="submit" class="btn btn-outline-primary w-100">
-                            <i class="fas fa-check me-2"></i>Áp dụng bộ lọc
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- ALERTS -->
-            <div id="alertsContainer">
-                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fas fa-check-circle me-2"></i> <span th:text="${successMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-lg-8">
-                    <!-- QUESTIONS LIST -->
-                    <div id="questionsWrapper">
-                        <div th:each="question, iterStat : ${questions}"
-                             class="card border-0 shadow-sm mb-4 question-card"
-                             th:data-question-id="${question.questionID}"
-                             th:classappend="${highlightQuestionId != null and highlightQuestionId == question.questionID} ? 'border-warning border-3' : ''">
-
-                            <div class="card-header bg-white py-3">
-                                <div class="d-flex align-items-center">
-                                    <img th:src="@{${question.user.profile.avatar != null ? question.user.profile.avatar : '/images/default_avatar.png'}}"
-                                         style="width: 40px; height: 40px;" class="rounded-circle me-3" alt="User Avatar">
-                                    <div>
-                                        <h6 class="mb-0" th:text="${question.user.profile.fullName}">Tên người dùng</h6>
-                                        <small class="text-muted"
-                                               th:text="${#temporals.format(question.dateSend, 'dd/MM/yyyy HH:mm')}"></small>
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <label for="departmentFilter" class="form-label">Khoa/Ban</label>
+                                <select id="departmentFilter" name="departmentId" class="form-select">
+                                    <option value="">Tất cả Khoa/Ban</option>
+                                    <option th:each="dept : ${departments}"
+                                            th:value="${dept.departmentID}"
+                                            th:text="${dept.departmentName}"
+                                            th:selected="${dept.departmentID == selectedDepartmentId}">
+                                    </option>
+                                </select>
                             </div>
 
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h5 class="fw-bold mb-0" th:text="${question.title}">Tiêu đề câu hỏi</h5>
-                                    <!-- REPORT BUTTON với data attributes -->
-                                    <button type="button" class="btn btn-outline-danger btn-sm btn-report"
-                                            th:attr="data-type='question', data-id=${question.questionID}">
-                                        <i class="bi bi-flag"></i> Báo cáo
-                                    </button>
+                            <div class="mb-3">
+                                <label for="fieldFilter" class="form-label">Lĩnh vực</label>
+                                <select id="fieldFilter" name="fieldId" class="form-select">
+                                    <option value="">Tất cả lĩnh vực</option>
+                                    <option th:each="field : ${fields}"
+                                            th:value="${field.fieldID}"
+                                            th:text="${field.fieldName}"
+                                            th:selected="${field.fieldID == selectedFieldId}">
+                                    </option>
+                                </select>
+
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-check me-2"></i>Áp dụng bộ lọc
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- ALERTS -->
+                <div id="alertsContainer">
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> <span th:text="${successMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i> <span th:text="${errorMessage}"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- QUESTIONS LIST -->
+                        <div id="questionsWrapper">
+                            <div th:each="question, iterStat : ${questions}"
+                                 class="card border-0 shadow-sm mb-4 question-card"
+                                 th:data-question-id="${question.questionID}"
+                                 th:classappend="${highlightQuestionId != null and highlightQuestionId == question.questionID} ? 'border-warning border-3' : ''">
+
+                                <div class="card-header bg-white py-3">
+                                    <div class="d-flex align-items-center">
+                                        <img th:src="@{${question.user.profile.avatar != null ? question.user.profile.avatar : '/images/default_avatar.png'}}"
+                                             style="width: 40px; height: 40px;" class="rounded-circle me-3" alt="User Avatar">
+                                        <div>
+                                            <h6 class="mb-0" th:text="${question.user.profile.fullName}">Tên người dùng</h6>
+                                            <small class="text-muted"
+                                                   th:text="${#temporals.format(question.dateSend, 'dd/MM/yyyy HH:mm')}"></small>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <p class="card-text" th:text="${question.content}">Nội dung câu hỏi.</p>
-
-                                <div th:if="${question.fileAttachment != null and question.fileAttachment != ''}"
-                                     class="mt-3">
-                                    <div th:if="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
-                                                or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
-                                        <img th:src="@{${question.fileAttachment}}" alt="Ảnh đính kèm"
-                                             style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h5 class="fw-bold mb-0" th:text="${question.title}">Tiêu đề câu hỏi</h5>
+                                        <!-- REPORT BUTTON với data attributes -->
+                                        <button type="button" class="btn btn-outline-danger btn-sm btn-report"
+                                                th:attr="data-type='question', data-id=${question.questionID}">
+                                            <i class="bi bi-flag"></i> Báo cáo
+                                        </button>
                                     </div>
-                                    <div th:unless="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
+
+                                    <p class="card-text" th:text="${question.content}">Nội dung câu hỏi.</p>
+
+                                    <div th:if="${question.fileAttachment != null and question.fileAttachment != ''}"
+                                         class="mt-3">
+                                        <div th:if="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
                                                     or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
-                                        <a th:href="@{${question.fileAttachment}}" target="_blank"
-                                           class="btn btn-outline-secondary btn-sm mt-2">
-                                            <i class="fas fa-paperclip me-1"></i> Tải tệp đính kèm
-                                        </a>
+                                            <img th:src="@{${question.fileAttachment}}" alt="Ảnh đính kèm"
+                                                 style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 10px;">
+                                        </div>
+                                        <div th:unless="${#strings.toLowerCase(question.fileAttachment).endsWith('.jpg')
+                                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.jpeg')
+                                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.png')
+                                                        or #strings.toLowerCase(question.fileAttachment).endsWith('.gif')}">
+                                            <a th:href="@{${question.fileAttachment}}" target="_blank"
+                                               class="btn btn-outline-secondary btn-sm mt-2">
+                                                <i class="fas fa-paperclip me-1"></i> Tải tệp đính kèm
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div class="mb-3 mt-2">
-                                        <span class="badge bg-primary"
-                                              th:text="${question.department.departmentName}">Khoa</span>
-                                    <span th:if="${question.field != null}" class="badge bg-secondary"
-                                          th:text="${question.field.fieldName}">Ngành</span>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <button
-                                                class="btn btn-sm btn-outline-primary me-2 btn-like-question"
-                                                th:attr="data-question-id=${question.questionID}"
-                                                th:classappend="${likedQuestions != null && likedQuestions[question.questionID]} ? 'active' : ''">
-                                            <i class="fas fa-thumbs-up me-1"></i>
-                                            <span class="like-count" th:text="${question.likes}">0</span>
-                                        </button>
-
-                                        <button class="btn btn-sm btn-outline-secondary me-2 btn-toggle-comments"
-                                                th:attr="data-target=|comments${iterStat.count}|, data-question-view-id=${question.questionID}">
-                                            <i class="fas fa-comment me-1"></i>
-                                            <span th:text="${#lists.size(question.answers)}">0</span>
-                                        </button>
-
-                                        <button th:if="${account != null and account.role.name() == 'Consultant'}"
-                                                class="btn btn-sm btn-success btn-toggle-answer"
-                                                th:attr="data-target=|answerForm${iterStat.count}|">
-                                            <i class="fas fa-reply me-1"></i>Trả lời
-                                        </button>
+                                    <div class="mb-3 mt-2">
+                                            <span class="badge bg-primary"
+                                                  th:text="${question.department.departmentName}">Khoa</span>
+                                        <span th:if="${question.field != null}" class="badge bg-secondary"
+                                              th:text="${question.field.fieldName}">Ngành</span>
                                     </div>
-                                    <div class="text-muted small">
-                                        <i class="fas fa-eye me-1"></i> <span th:text="${question.views}">0</span> lượt xem
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- ANSWERS SECTION -->
-                            <div class="card-footer bg-light" th:id="|comments${iterStat.count}|" style="display: none;">
-                                <h6 class="mb-3 small text-uppercase fw-bold">
-                                    <span th:text="${#lists.size(question.answers)}">0</span> câu trả lời
-                                </h6>
-                                <div th:each="answer : ${question.answers}" th:if="${!answer.isWithdrawn}" class="d-flex mb-3">
-                                    <img th:src="${answer.consultant.profile.avatar ?: 'https://via.placeholder.com/35'}"
-                                         class="rounded-circle me-3" alt="Consultant Avatar"
-                                         style="width: 35px; height: 35px;">
-                                    <div class="flex-grow-1">
-                                        <div class="bg-white p-3 rounded border">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <strong class="me-2" th:text="${answer.consultant.profile.fullName}">Tên
-                                                        Consultant</strong>
-                                                    <span class="badge bg-success">Tư vấn viên</span>
-                                                </div>
-                                                <small class="text-muted"
-                                                       th:text="${#temporals.format(answer.dateAnswered, 'dd/MM/yyyy HH:mm')}"></small>
-                                                <button type="button" class="btn btn-outline-danger btn-sm btn-report"
-                                                        th:attr="data-type='answer', data-id=${answer.answerID}">
-                                                    <i class="bi bi-flag"></i> Báo cáo
-                                                </button>
-                                            </div>
-                                            <p class="mb-0 mt-2" th:text="${answer.content}">Nội dung câu trả lời.</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <button
+                                                    class="btn btn-sm btn-outline-primary me-2 btn-like-question"
+                                                    th:attr="data-question-id=${question.questionID}"
+                                                    th:classappend="${likedQuestions != null && likedQuestions[question.questionID]} ? 'active' : ''">
+                                                <i class="fas fa-thumbs-up me-1"></i>
+                                                <span class="like-count" th:text="${question.likes}">0</span>
+                                            </button>
+
+                                            <button class="btn btn-sm btn-outline-secondary me-2 btn-toggle-comments"
+                                                    th:attr="data-target=|comments${iterStat.count}|, data-question-view-id=${question.questionID}">
+                                                <i class="fas fa-comment me-1"></i>
+                                                <span th:text="${#lists.size(question.answers)}">0</span>
+                                            </button>
+
+                                            <button th:if="${account != null and account.role.name() == 'Consultant'}"
+                                                    class="btn btn-sm btn-success btn-toggle-answer"
+                                                    th:attr="data-target=|answerForm${iterStat.count}|">
+                                                <i class="fas fa-reply me-1"></i>Trả lời
+                                            </button>
+                                        </div>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-eye me-1"></i> <span th:text="${question.views}">0</span> lượt xem
                                         </div>
                                     </div>
                                 </div>
-                                <div th:if="${#lists.isEmpty(question.answers)}" class="text-center text-muted p-3">
-                                    Chưa có câu trả lời nào cho câu hỏi này.
-                                </div>
-                            </div>
 
-                            <!-- ANSWER FORM -->
-                            <div class="card-footer answer-form" th:id="|answerForm${iterStat.count}|">
-                                <form th:action="@{/user/questions/answer}" method="post">
-                                    <input type="hidden" name="questionId" th:value="${question.questionID}" />
-                                    <div class="d-flex align-items-start">
-                                        <img th:src="${account?.profile?.avatar ?: 'https://via.placeholder.com/40'}"
-                                             class="rounded-circle me-3" width="40" height="40" alt="My Avatar">
+                                <!-- ANSWERS SECTION -->
+                                <div class="card-footer bg-light" th:id="|comments${iterStat.count}|" style="display: none;">
+                                    <h6 class="mb-3 small text-uppercase fw-bold">
+                                        <span th:text="${#lists.size(question.answers)}">0</span> câu trả lời
+                                    </h6>
+                                    <div th:each="answer : ${question.answers}" th:if="${!answer.isWithdrawn}" class="d-flex mb-3">
+                                        <img th:src="${answer.consultant.profile.avatar ?: 'https://via.placeholder.com/35'}"
+                                             class="rounded-circle me-3" alt="Consultant Avatar"
+                                             style="width: 35px; height: 35px;">
                                         <div class="flex-grow-1">
-                                                <textarea name="content" class="form-control" rows="3"
-                                                          placeholder="Viết câu trả lời của bạn..." required></textarea>
-                                            <div class="text-end mt-2">
-                                                <button type="submit" class="btn btn-primary btn-sm">Gửi trả lời</button>
+                                            <div class="bg-white p-3 rounded border">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <strong class="me-2" th:text="${answer.consultant.profile.fullName}">Tên
+                                                            Consultant</strong>
+                                                        <span class="badge bg-success">Tư vấn viên</span>
+                                                    </div>
+                                                    <small class="text-muted"
+                                                           th:text="${#temporals.format(answer.dateAnswered, 'dd/MM/yyyy HH:mm')}"></small>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm btn-report"
+                                                            th:attr="data-type='answer', data-id=${answer.answerID}">
+                                                        <i class="bi bi-flag"></i> Báo cáo
+                                                    </button>
+                                                </div>
+                                                <p class="mb-0 mt-2" th:text="${answer.content}">Nội dung câu trả lời.</p>
                                             </div>
                                         </div>
                                     </div>
-                                </form>
-                            </div>
-                        </div>
+                                    <div th:if="${#lists.isEmpty(question.answers)}" class="text-center text-muted p-3">
+                                        Chưa có câu trả lời nào cho câu hỏi này.
+                                    </div>
+                                </div>
 
-                        <!-- EMPTY STATE -->
-                        <div th:if="${questions == null or #lists.isEmpty(questions)}" class="card border-0 shadow-sm">
-                            <div class="card-body p-5 text-center">
-                                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">Chưa có câu hỏi nào trong cộng đồng. Hãy là người đầu tiên!</p>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- ====== THÊM PHÂN TRANG TỪ ĐÂY ====== -->
-                    <nav id="paginationContainer" th:if="${totalPages > 1}" aria-label="Question pagination">
-                        <ul class="pagination justify-content-center">
-                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/user/questions(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}">
-                                    Trước
-                                </a>
-                            </li>
-
-                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                                class="page-item"
-                                th:classappend="${i == currentPage} ? 'active'">
-                                <a class="page-link"
-                                   th:href="@{/user/questions(page=${i}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}"
-                                   th:text="${i + 1}">
-                                </a>
-                            </li>
-
-                            <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                                <a class="page-link"
-                                   th:href="@{/user/questions(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}">
-                                    Sau
-                                </a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
-
-                <!-- SIDEBAR -->
-                <div class="col-lg-4">
-                    <div class="sticky-sidebar">
-                        <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
-                            <div class="card-header text-white py-3 border-0"
-                                 style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                                <h6 class="mb-0 fw-semibold">
-                                    <i class="fas fa-fire me-2"></i>Chủ đề HOT
-                                </h6>
-                            </div>
-                            <div class="card-body p-0">
-                                <div id="hotTopicsContainer" class="list-group list-group-flush">
-                                    <a th:each="topic : ${hotTopics}"
-                                       th:href="@{/user/questions(departmentId=${topic.type == 'department' ? topic.id : null}, fieldId=${topic.type == 'field' ? topic.id : null})}"
-                                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
-                                        <div class="d-flex align-items-center">
-                                            <span class="badge bg-danger rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
-                                            <span class="fw-medium" th:text="'#' + ${topic.name}">#Chủ đề</span>
+                                <!-- ANSWER FORM -->
+                                <div class="card-footer answer-form" th:id="|answerForm${iterStat.count}|">
+                                    <form th:action="@{/user/questions/answer}" method="post">
+                                        <input type="hidden" name="questionId" th:value="${question.questionID}" />
+                                        <div class="d-flex align-items-start">
+                                            <img th:src="${account?.profile?.avatar ?: 'https://via.placeholder.com/40'}"
+                                                 class="rounded-circle me-3" width="40" height="40" alt="My Avatar">
+                                            <div class="flex-grow-1">
+                                                    <textarea name="content" class="form-control" rows="3"
+                                                              placeholder="Viết câu trả lời của bạn..." required></textarea>
+                                                <div class="text-end mt-2">
+                                                    <button type="submit" class="btn btn-primary btn-sm">Gửi trả lời</button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <span class="badge bg-danger rounded-pill px-3 py-2" th:text="${topic.count}">0</span>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- EMPTY STATE -->
+                            <div th:if="${questions == null or #lists.isEmpty(questions)}" class="card border-0 shadow-sm">
+                                <div class="card-body p-5 text-center">
+                                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                                    <p class="text-muted">Chưa có câu hỏi nào trong cộng đồng. Hãy là người đầu tiên!</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ====== THÊM PHÂN TRANG TỪ ĐÂY ====== -->
+                        <nav id="paginationContainer" th:if="${totalPages > 1}" aria-label="Question pagination">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/user/questions(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}">
+                                        Trước
                                     </a>
-                                    <div th:if="${hotTopics == null or #lists.isEmpty(hotTopics)}" class="list-group-item text-center text-muted p-4">
-                                        Chưa có chủ đề nào nổi bật.
+                                </li>
+
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                    class="page-item"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link"
+                                       th:href="@{/user/questions(page=${i}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}"
+                                       th:text="${i + 1}">
+                                    </a>
+                                </li>
+
+                                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                                    <a class="page-link"
+                                       th:href="@{/user/questions(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, fieldId=${selectedFieldId}, keyword=${keyword}, sortBy=${sortBy})}">
+                                        Sau
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+
+                    <!-- SIDEBAR -->
+                    <div class="col-lg-4">
+                        <div class="sticky-sidebar">
+                            <div class="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp" style="animation-delay: 0.2s;">
+                                <div class="card-header text-white py-3 border-0"
+                                     style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                                    <h6 class="mb-0 fw-semibold">
+                                        <i class="fas fa-fire me-2"></i>Chủ đề HOT
+                                    </h6>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div id="hotTopicsContainer" class="list-group list-group-flush">
+                                        <a th:each="topic : ${hotTopics}"
+                                           th:href="@{/user/questions(departmentId=${topic.type == 'department' ? topic.id : null}, fieldId=${topic.type == 'field' ? topic.id : null})}"
+                                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-0 py-3 px-4 hover-bg-light">
+                                            <div class="d-flex align-items-center">
+                                                <span class="badge bg-danger rounded-circle me-3" style="width: 8px; height: 8px; padding: 0;"></span>
+                                                <span class="fw-medium" th:text="'#' + ${topic.name}">#Chủ đề</span>
+                                            </div>
+                                            <span class="badge bg-danger rounded-pill px-3 py-2" th:text="${topic.count}">0</span>
+                                        </a>
+                                        <div th:if="${hotTopics == null or #lists.isEmpty(hotTopics)}" class="list-group-item text-center text-muted p-4">
+                                            Chưa có chủ đề nào nổi bật.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -355,582 +353,578 @@
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<!-- ASK QUESTION MODAL -->
-<div class="modal fade" id="askQuestionModal" tabindex="-1" aria-labelledby="askQuestionModalLabel"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <!-- header -->
-            <div class="modal-header">
-                <h5 class="model-title" id="askQuestionModalLabel">
-                    <i class="fas fa-pen-to-square me-2"></i> Đặt câu hỏi mới
-                </h5>
-            </div>
-            <form id="askQuestionForm"
-                  th:action="@{/user/questions/ask}"
-                  th:object="${questionDTO}"
-                  method="post"
-                  enctype="multipart/form-data">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="title" class="form-label">
-                            Tiêu đề câu hỏi <span class="text-danger">*</span></label>
-                        <input type="text"
-                               class="form-control"
-                               id="title"
-                               th:field="*{title}"
-                               placeholder="Nhập tiêu đề câu hỏi" required>
-                        <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback d-block">
-                            <i class="fas fa-exclamation-circle me-1"></i>
-                            <span th:errors="*{title}"></span>
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="content" class="form-label">
-                            Nội dung <span class="text-danger">*</span></label>
-                        <textarea class="form-control"
-                                  id="content"
-                                  th:field="*{content}"
-                                  rows="4"
-                                  placeholder="Mô tả chi tiết câu hỏi của bạn" required></textarea>
-                        <div th:if="${#fields.hasErrors('content')}" class="invalid-feedback d-block">
-                            <i class="fas fa-exclamation-circle me-1"></i>
-                            <span th:errors="*{content}"></span>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="department" class="form-label">
-                                Khoa/Ban <span class="text-danger">*</span></label>
-                            <select class="form-select"
-                                    id="department"
-                                    th:field="*{departmentId}" required>
-                                <option value="">-- Chọn Khoa/Ban --</option>
-                                <option th:each="dept : ${departments}"
-                                        th:value="${dept.departmentID}"
-                                        th:text="${dept.departmentName}"></option>
-                            </select>
-                            <div th:if="${#fields.hasErrors('departmentId')}" class="invalid-feedback d-block">
+    <!-- ASK QUESTION MODAL -->
+    <div class="modal fade" id="askQuestionModal" tabindex="-1" aria-labelledby="askQuestionModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <!-- header -->
+                <div class="modal-header">
+                    <h5 class="model-title" id="askQuestionModalLabel">
+                        <i class="fas fa-pen-to-square me-2"></i> Đặt câu hỏi mới
+                    </h5>
+                </div>
+                <form id="askQuestionForm"
+                      th:action="@{/user/questions/ask}"
+                      th:object="${questionDTO}"
+                      method="post"
+                      enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">
+                                Tiêu đề câu hỏi <span class="text-danger">*</span></label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="title"
+                                   th:field="*{title}"
+                                   placeholder="Nhập tiêu đề câu hỏi" required>
+                            <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback d-block">
                                 <i class="fas fa-exclamation-circle me-1"></i>
-                                <span th:errors="*{departmentId}"></span>
+                                <span th:errors="*{title}"></span>
                             </div>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="field" class="form-label">Lĩnh vực cụ thể</label>
-                            <select class="form-select"
-                                    id="field"
-                                    th:field="*{fieldId}"
-                                    disabled>
-                                <option value="">-- Vui lòng chọn Khoa/Ban trước --</option>
-                            </select>
+                        <div class="mb-3">
+                            <label for="content" class="form-label">
+                                Nội dung <span class="text-danger">*</span></label>
+                            <textarea class="form-control"
+                                      id="content"
+                                      th:field="*{content}"
+                                      rows="4"
+                                      placeholder="Mô tả chi tiết câu hỏi của bạn" required></textarea>
+                            <div th:if="${#fields.hasErrors('content')}" class="invalid-feedback d-block">
+                                <i class="fas fa-exclamation-circle me-1"></i>
+                                <span th:errors="*{content}"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="department" class="form-label">
+                                    Khoa/Ban <span class="text-danger">*</span></label>
+                                <select class="form-select"
+                                        id="department"
+                                        th:field="*{departmentId}" required>
+                                    <option value="">-- Chọn Khoa/Ban --</option>
+                                    <option th:each="dept : ${departments}"
+                                            th:value="${dept.departmentID}"
+                                            th:text="${dept.departmentName}"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('departmentId')}" class="invalid-feedback d-block">
+                                    <i class="fas fa-exclamation-circle me-1"></i>
+                                    <span th:errors="*{departmentId}"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="field" class="form-label">Lĩnh vực cụ thể</label>
+                                <select class="form-select"
+                                        id="field"
+                                        th:field="*{fieldId}"
+                                        disabled>
+                                    <option value="">-- Vui lòng chọn Khoa/Ban trước --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="fileAttachment" class="form-label">Đính kèm tệp (nếu có)</label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="fileAttachment"
+                                   name="file"
+                                   accept="image/*,.pdf,.doc,.docx,.ppt,.pptx">
+                            <small class="text-muted">Hỗ trợ: Ảnh, PDF, Word, PowerPoint</small>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="fileAttachment" class="form-label">Đính kèm tệp (nếu có)</label>
-                        <input type="file"
-                               class="form-control"
-                               id="fileAttachment"
-                               name="file"
-                               accept="image/*,.pdf,.doc,.docx,.ppt,.pptx">
-                        <small class="text-muted">Hỗ trợ: Ảnh, PDF, Word, PowerPoint</small>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Gửi câu hỏi
+                        </button>
                     </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Hủy
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-paper-plane me-2"></i>Gửi câu hỏi
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<div th:replace="~{fragments/report :: reportModal}"></div>
-<div th:replace="~{fragments/chat-bubble :: chat-bubble}"></div>
-<div th:replace="~{fragments/toast :: toast}"></div>
-<th:block th:replace="~{fragments/footer :: footer}"></th:block>
+    <!-- JAVASCRIPT -->
+    <script th:inline="javascript">
+        (function () {
+            'use strict';
 
-<!-- JAVASCRIPT -->
-<script th:inline="javascript">
-    (function () {
-        'use strict';
+            // --- BIẾN TOÀN CỤC TRONG PHẠM VI SCRIPT ---
+            const ctx = /*[[@{/}]]*/ '/';
+            const mainContentWrapperId = 'content-wrapper'; // ID cho vùng nội dung chính cần cập nhật
 
-        // --- BIẾN TOÀN CỤC TRONG PHẠM VI SCRIPT ---
-        const ctx = /*[[@{/}]]*/ '/';
-        const mainContentWrapperId = 'content-wrapper'; // ID cho vùng nội dung chính cần cập nhật
-
-        // --- KHỞI TẠO KHI DOM ĐÃ SẴN SÀNG ---
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', init);
-        } else {
-            init();
-        }
-
-        /**
-         * Hàm khởi tạo chính, chạy một lần khi tải trang.
-         */
-        function init() {
-            // Gắn các listener cho các thành phần tĩnh (không bị thay thế bởi AJAX)
-            const askQuestionForm = document.getElementById('askQuestionForm');
-            if (askQuestionForm) {
-                askQuestionForm.addEventListener('submit', handleAskQuestionSubmit);
+            // --- KHỞI TẠO KHI DOM ĐÃ SẴN SÀNG ---
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
             }
 
-            const reportModal = document.getElementById('reportModal');
-            if (reportModal) {
-                reportModal.addEventListener('hidden.bs.modal', () => document.getElementById('reportForm').reset());
-            }
-
-            // Khởi tạo các dropdown phụ thuộc
-            initDepartmentFieldCascade();
-            initFilterDepartmentFieldCascade();
-            loadInitialFieldsForFilter();
-
-            // Gắn listener cho các thành phần sẽ được tải lại bằng AJAX
-            setupDynamicListeners(document.getElementById(mainContentWrapperId));
-
-            // Xử lý history back/forward của trình duyệt
-            window.addEventListener('popstate', function(event) {
-                if (event.state && event.state.path) {
-                    loadContentFragment(event.state.path, false);
+            /**
+             * Hàm khởi tạo chính, chạy một lần khi tải trang.
+             */
+            function init() {
+                // Gắn các listener cho các thành phần tĩnh (không bị thay thế bởi AJAX)
+                const askQuestionForm = document.getElementById('askQuestionForm');
+                if (askQuestionForm) {
+                    askQuestionForm.addEventListener('submit', handleAskQuestionSubmit);
                 }
-            });
-            // Lưu trạng thái ban đầu
-            history.replaceState({ path: window.location.href }, '');
-        }
 
-        /**
-         * Gắn lại các event listener cho nội dung được tải động qua AJAX.
-         * Phải được gọi mỗi khi #content-wrapper được cập nhật.
-         */
-        function setupDynamicListeners(container) {
-            if (!container) return;
-            console.log("Setting up dynamic listeners inside:", container.id);
-
-            // Nút Toggle Comments
-            container.querySelectorAll('.btn-toggle-comments').forEach(btn => {
-                // *** Quan trọng: Chỉ gắn listener nếu chưa có ***
-                if (!btn.hasAttribute('data-listener-attached')) {
-                    console.log("Attaching listener to toggle button for question:", btn.dataset.questionViewId);
-                    btn.addEventListener('click', handleToggleCommentsClick);
-                    btn.setAttribute('data-listener-attached', 'true'); // Đánh dấu đã gắn
+                const reportModal = document.getElementById('reportModal');
+                if (reportModal) {
+                    reportModal.addEventListener('hidden.bs.modal', () => document.getElementById('reportForm').reset());
                 }
-            });
 
-            // Nút Toggle Answer Form (cho Consultant)
-            container.querySelectorAll('.btn-toggle-answer').forEach(btn => {
-                if (!btn.hasAttribute('data-listener-attached')) {
-                    btn.addEventListener('click', function() {
-                        const target = document.getElementById(this.dataset.target);
-                        if (target) target.style.display = target.style.display === 'none' ? 'block' : 'none';
-                    });
-                    btn.setAttribute('data-listener-attached', 'true');
-                }
-            });
+                // Khởi tạo các dropdown phụ thuộc
+                initDepartmentFieldCascade();
+                initFilterDepartmentFieldCascade();
+                loadInitialFieldsForFilter();
 
+                // Gắn listener cho các thành phần sẽ được tải lại bằng AJAX
+                setupDynamicListeners(document.getElementById(mainContentWrapperId));
 
-            // Nút Report
-            container.querySelectorAll('.btn-report').forEach(btn => {
-                if (!btn.hasAttribute('data-listener-attached')) {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        openReportModal(this.dataset.type, this.dataset.id);
-                    });
-                    btn.setAttribute('data-listener-attached', 'true');
-                }
-            });
-
-            // Nút Like
-            container.querySelectorAll('.btn-like-question').forEach(btn => {
-                if (!btn.hasAttribute('data-listener-attached')) {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        handleQuestionLike(this.dataset.questionId, this);
-                    });
-                    btn.setAttribute('data-listener-attached', 'true');
-                }
-            });
-
-            // Highlight câu hỏi (chạy 1 lần sau khi load)
-            const highlightId = /*[[${highlightQuestionId}]]*/ null;
-            if (highlightId && !container.dataset.highlighted) { // Chỉ scroll lần đầu
-                const card = container.querySelector(`[data-question-id="${highlightId}"]`);
-                if (card) { setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); }
-                container.dataset.highlighted = 'true'; // Đánh dấu đã scroll
-            }
-
-            // Gắn listener cho forms và pagination (nếu dùng AJAX)
-            const searchForm = container.querySelector('#searchForm');
-            if (searchForm && !searchForm.hasAttribute('data-listener-attached')) {
-                searchForm.addEventListener('submit', handleAjaxNavigation);
-                searchForm.setAttribute('data-listener-attached', 'true');
-            }
-            const filterForm = container.querySelector('#filterForm');
-            if (filterForm && !filterForm.hasAttribute('data-listener-attached')) {
-                filterForm.addEventListener('submit', handleAjaxNavigation);
-                filterForm.setAttribute('data-listener-attached', 'true');
-            }
-            const paginationLinks = container.querySelectorAll('#paginationContainer a');
-            paginationLinks.forEach(link => {
-                if (!link.hasAttribute('data-listener-attached')) {
-                    link.addEventListener('click', handleAjaxNavigation);
-                    link.setAttribute('data-listener-attached', 'true');
-                }
-            });
-        }
-
-        /**
-         * Xử lý các sự kiện điều hướng (phân trang, tìm kiếm) bằng AJAX.
-         */
-        async function handleAjaxNavigation(event) {
-            event.preventDefault();
-            const target = event.currentTarget;
-            const url = target.tagName === 'A' ? target.href : (new URL(target.action, window.location.origin) + '?' + new URLSearchParams(new FormData(target)).toString());
-
-            await loadContentFragment(url);
-        }
-
-        /**
-         * Tải nội dung fragment từ server và cập nhật DOM.
-         */
-        async function loadContentFragment(url, pushState = true) {
-            const contentWrapper = document.getElementById(mainContentWrapperId);
-            if (!contentWrapper) return;
-
-            contentWrapper.style.opacity = '0.5'; // Hiệu ứng loading
-
-            try {
-                const response = await fetch(url, {
-                    headers: { 'X-Requested-With': 'fetch' }
-                });
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-                const html = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const newContent = doc.getElementById(mainContentWrapperId);
-
-                if (newContent) {
-                    contentWrapper.innerHTML = newContent.innerHTML;
-                    if (pushState) {
-                        history.pushState({ path: url }, '', url);
+                // Xử lý history back/forward của trình duyệt
+                window.addEventListener('popstate', function(event) {
+                    if (event.state && event.state.path) {
+                        loadContentFragment(event.state.path, false);
                     }
-                    setupDynamicListeners(contentWrapper); // Gắn lại listener cho nội dung mới
-                    resetForms();
-                } else {
-                    // Nếu server không trả về fragment (ví dụ: lỗi), tải lại toàn bộ trang
-                    window.location.href = url;
-                }
-            } catch (error) {
-                console.error('Failed to load content:', error);
-                window.location.href = url; // Tải lại trang nếu có lỗi
-            } finally {
-                contentWrapper.style.opacity = '1';
+                });
+                // Lưu trạng thái ban đầu
+                history.replaceState({ path: window.location.href }, '');
             }
-        }
 
-        /**
-         * Xử lý submit form đặt câu hỏi.
-         */
-        async function handleAskQuestionSubmit(event) {
-            event.preventDefault();
-            const form = event.currentTarget;
-            const formData = new FormData(form);
-            const submitButton = form.querySelector('button[type="submit"]');
-            const url = '/qaute/user/questions/ask';
+            /**
+             * Gắn lại các event listener cho nội dung được tải động qua AJAX.
+             * Phải được gọi mỗi khi #content-wrapper được cập nhật.
+             */
+            function setupDynamicListeners(container) {
+                if (!container) return;
+                console.log("Setting up dynamic listeners inside:", container.id);
 
-            submitButton.disabled = true;
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...';
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    body: formData,
+                // Nút Toggle Comments
+                container.querySelectorAll('.btn-toggle-comments').forEach(btn => {
+                    // *** Quan trọng: Chỉ gắn listener nếu chưa có ***
+                    if (!btn.hasAttribute('data-listener-attached')) {
+                        console.log("Attaching listener to toggle button for question:", btn.dataset.questionViewId);
+                        btn.addEventListener('click', handleToggleCommentsClick);
+                        btn.setAttribute('data-listener-attached', 'true'); // Đánh dấu đã gắn
+                    }
                 });
 
-                if (response.redirected) {
-                    // Thay vì reload toàn bộ trang, load fragment và hiển thị toast
-                    await loadContentFragment(response.url, true);
-
-                    // Đóng modal
-                    const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
-                    if (modal) modal.hide();
-                    form.reset();
-
-                    // Hiển thị toast (nếu có window.showToast từ toast fragment)
-                    if (typeof window.showToast === 'function') {
-                        window.showToast('success', 'Thành công!', 'Câu hỏi của bạn đã được gửi thành công!');
+                // Nút Toggle Answer Form (cho Consultant)
+                container.querySelectorAll('.btn-toggle-answer').forEach(btn => {
+                    if (!btn.hasAttribute('data-listener-attached')) {
+                        btn.addEventListener('click', function() {
+                            const target = document.getElementById(this.dataset.target);
+                            if (target) target.style.display = target.style.display === 'none' ? 'block' : 'none';
+                        });
+                        btn.setAttribute('data-listener-attached', 'true');
                     }
-                } else {
-                    // Xử lý lỗi validation
+                });
+
+
+                // Nút Report
+                container.querySelectorAll('.btn-report').forEach(btn => {
+                    if (!btn.hasAttribute('data-listener-attached')) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            openReportModal(this.dataset.type, this.dataset.id);
+                        });
+                        btn.setAttribute('data-listener-attached', 'true');
+                    }
+                });
+
+                // Nút Like
+                container.querySelectorAll('.btn-like-question').forEach(btn => {
+                    if (!btn.hasAttribute('data-listener-attached')) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            handleQuestionLike(this.dataset.questionId, this);
+                        });
+                        btn.setAttribute('data-listener-attached', 'true');
+                    }
+                });
+
+                // Highlight câu hỏi (chạy 1 lần sau khi load)
+                const highlightId = /*[[${highlightQuestionId}]]*/ null;
+                if (highlightId && !container.dataset.highlighted) { // Chỉ scroll lần đầu
+                    const card = container.querySelector(`[data-question-id="${highlightId}"]`);
+                    if (card) { setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100); }
+                    container.dataset.highlighted = 'true'; // Đánh dấu đã scroll
+                }
+
+                // Gắn listener cho forms và pagination (nếu dùng AJAX)
+                const searchForm = container.querySelector('#searchForm');
+                if (searchForm && !searchForm.hasAttribute('data-listener-attached')) {
+                    searchForm.addEventListener('submit', handleAjaxNavigation);
+                    searchForm.setAttribute('data-listener-attached', 'true');
+                }
+                const filterForm = container.querySelector('#filterForm');
+                if (filterForm && !filterForm.hasAttribute('data-listener-attached')) {
+                    filterForm.addEventListener('submit', handleAjaxNavigation);
+                    filterForm.setAttribute('data-listener-attached', 'true');
+                }
+                const paginationLinks = container.querySelectorAll('#paginationContainer a');
+                paginationLinks.forEach(link => {
+                    if (!link.hasAttribute('data-listener-attached')) {
+                        link.addEventListener('click', handleAjaxNavigation);
+                        link.setAttribute('data-listener-attached', 'true');
+                    }
+                });
+            }
+
+            /**
+             * Xử lý các sự kiện điều hướng (phân trang, tìm kiếm) bằng AJAX.
+             */
+            async function handleAjaxNavigation(event) {
+                event.preventDefault();
+                const target = event.currentTarget;
+                const url = target.tagName === 'A' ? target.href : (new URL(target.action, window.location.origin) + '?' + new URLSearchParams(new FormData(target)).toString());
+
+                await loadContentFragment(url);
+            }
+
+            /**
+             * Tải nội dung fragment từ server và cập nhật DOM.
+             */
+            async function loadContentFragment(url, pushState = true) {
+                const contentWrapper = document.getElementById(mainContentWrapperId);
+                if (!contentWrapper) return;
+
+                contentWrapper.style.opacity = '0.5'; // Hiệu ứng loading
+
+                try {
+                    const response = await fetch(url, {
+                        headers: { 'X-Requested-With': 'fetch' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
                     const html = await response.text();
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
-                    const newModalBody = doc.querySelector('.modal-body');
-                    if (newModalBody) {
-                        form.closest('.modal-body').innerHTML = newModalBody.innerHTML;
-                        initDepartmentFieldCascade(); // Khởi tạo lại cascade cho form mới
+                    const newContent = doc.getElementById(mainContentWrapperId);
+
+                    if (newContent) {
+                        contentWrapper.innerHTML = newContent.innerHTML;
+                        if (pushState) {
+                            history.pushState({ path: url }, '', url);
+                        }
+                        setupDynamicListeners(contentWrapper); // Gắn lại listener cho nội dung mới
+                        resetForms();
+                    } else {
+                        // Nếu server không trả về fragment (ví dụ: lỗi), tải lại toàn bộ trang
+                        window.location.href = url;
+                    }
+                } catch (error) {
+                    console.error('Failed to load content:', error);
+                    window.location.href = url; // Tải lại trang nếu có lỗi
+                } finally {
+                    contentWrapper.style.opacity = '1';
+                }
+            }
+
+            /**
+             * Xử lý submit form đặt câu hỏi.
+             */
+            async function handleAskQuestionSubmit(event) {
+                event.preventDefault();
+                const form = event.currentTarget;
+                const formData = new FormData(form);
+                const submitButton = form.querySelector('button[type="submit"]');
+                const ctx = /*[[@{/}]]*/ '/';
+                const submitUrl = ctx + 'user/questions/ask';
+
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang gửi...';
+
+                try {
+                    const response = await fetch(submitUrl, {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (response.redirected) {
+                        // Thay vì reload toàn bộ trang, load fragment và hiển thị toast
+                        const redirectUrl = new URL(response.url);
+                        const relativeRedirect = redirectUrl.pathname + redirectUrl.search;
+                        await loadContentFragment(relativeRedirect, true);
+
+                        // Đóng modal
+                        const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
+                        if (modal) modal.hide();
+                        form.reset();
+
+                        // Hiển thị toast (nếu có window.showToast từ toast fragment)
+                        if (typeof window.showToast === 'function') {
+                            window.showToast('success', 'Thành công!', 'Câu hỏi của bạn đã được gửi thành công!');
+                        }
+                    } else {
+                        // Xử lý lỗi validation
+                        const html = await response.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const newModalBody = doc.querySelector('.modal-body');
+                        if (newModalBody) {
+                            form.closest('.modal-body').innerHTML = newModalBody.innerHTML;
+                            initDepartmentFieldCascade(); // Khởi tạo lại cascade cho form mới
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error submitting question:', error);
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('error', 'Lỗi!', 'Đã xảy ra lỗi khi gửi câu hỏi. Vui lòng thử lại.');
+                    }
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Gửi câu hỏi';
+                }
+            }
+
+            // --- CÁC HÀM HELPER (Giữ nguyên từ script cũ) ---
+
+            function openReportModal(contentType, contentId) {
+                const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+                document.getElementById('reportContentType').value = contentType;
+                document.getElementById('reportContentId').value = contentId;
+                modal.show();
+            }
+
+            async function handleQuestionLike(questionId, button) {
+                try {
+                    const response = await fetch(`${ctx}api/questions/${questionId}/like`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    if (response.status === 401) {
+                        if (typeof window.showToast === 'function') {
+                            window.showToast('warning', 'Chưa đăng nhập', 'Vui lòng đăng nhập để thích câu hỏi.');
+                        }
+                        return;
+                    }
+
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        const icon = button.querySelector('i');
+                        const countSpan = button.querySelector('.like-count');
+
+                        if (data.liked) {
+                            icon.classList.remove('far');
+                            icon.classList.add('fas', 'text-danger');
+                            button.classList.add('active');
+                        } else {
+                            icon.classList.remove('fas', 'text-danger');
+                            icon.classList.add('far');
+                            button.classList.remove('active');
+                        }
+
+                        // Cập nhật số lượng like (nếu có endpoint trả về)
+                        countSpan.textContent = data.likeCount || '0';
+                    }
+                } catch (error) {
+                    console.error('Error handling like:', error);
+                    if (typeof window.showToast === 'function') {
+                        window.showToast('error', 'Lỗi!', 'Không thể thực hiện thao tác. Vui lòng thử lại.');
                     }
                 }
-            } catch (error) {
-                console.error('Error submitting question:', error);
-                if (typeof window.showToast === 'function') {
-                    window.showToast('error', 'Lỗi!', 'Đã xảy ra lỗi khi gửi câu hỏi. Vui lòng thử lại.');
-                }
-            } finally {
-                submitButton.disabled = false;
-                submitButton.textContent = 'Gửi câu hỏi';
             }
-        }
 
-        // --- CÁC HÀM HELPER (Giữ nguyên từ script cũ) ---
+            function handleToggleCommentsClick() {
+                const targetId = this.dataset.target;
+                const target = document.getElementById(targetId);
+                const questionId = this.dataset.questionViewId;
+                // Lấy trạng thái đã tăng view chưa từ chính nút bấm
+                const viewIncremented = this.hasAttribute('data-view-incremented');
 
-        function openReportModal(contentType, contentId) {
-            const modal = new bootstrap.Modal(document.getElementById('reportModal'));
-            document.getElementById('reportContentType').value = contentType;
-            document.getElementById('reportContentId').value = contentId;
-            modal.show();
-        }
+                console.log(`Toggle clicked for ${questionId}. Target: ${targetId}. View Incremented: ${viewIncremented}`);
 
-        async function handleQuestionLike(questionId, button) {
-            try {
-                const response = await fetch(`${ctx}api/questions/${questionId}/like`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
+                if (target) {
+                    const isCurrentlyHidden = target.style.display === 'none' || !target.style.display;
+                    target.style.display = isCurrentlyHidden ? 'block' : 'none';
+
+                    // Chỉ gọi API và cập nhật UI nếu MỞ comment VÀ chưa từng tăng view cho lần mở này
+                    if (isCurrentlyHidden && questionId && !viewIncremented) {
+                        console.log(`Action: Opening comments for ${questionId}. Triggering view increment.`);
+                        handleQuestionView(questionId, this); // Truyền cả nút bấm vào hàm
+                    } else if (isCurrentlyHidden) {
+                        console.log(`Action: Opening comments for ${questionId}, but view already incremented for this session.`);
+                    } else {
+                        console.log(`Action: Closing comments for ${questionId}. No view increment needed.`);
+                    }
+                } else {
+                    console.warn(`Target element ${targetId} not found.`);
+                }
+            }
+
+            // Sửa hàm handleQuestionView để nhận thêm nút bấm và set cờ
+            async function handleQuestionView(questionId, buttonElement) {
+                console.log(`Executing handleQuestionView for ${questionId}`);
+                // Đánh dấu ngay là đang xử lý để tránh gọi lại nếu user click nhanh
+                if (buttonElement.hasAttribute('data-view-processing')) {
+                    console.log(`View increment already processing for ${questionId}. Skipping.`);
+                    return;
+                }
+                buttonElement.setAttribute('data-view-processing', 'true');
+
+                try {
+                    const response = await fetch(`${ctx}api/questions/${questionId}/view`, { method: 'POST' });
+                    console.log(`Fetch completed for view increment ${questionId}. Status: ${response.status}`);
+
+                    if (response.ok) {
+                        // Đánh dấu là đã tăng view thành công trên nút bấm
+                        buttonElement.setAttribute('data-view-incremented', 'true');
+                        console.log(`Successfully incremented view for ${questionId}. Marked button.`);
+
+                        // Cập nhật giao diện
+                        const questionCard = document.querySelector(`.question-card[data-question-id="${questionId}"]`);
+                        if (questionCard) {
+                            const viewCountContainer = questionCard.querySelector('.d-flex.justify-content-between.align-items-center .text-muted.small');
+                            if (viewCountContainer) {
+                                const viewCountSpan = viewCountContainer.querySelector('i.fa-eye + span');
+                                if (viewCountSpan) {
+                                    let currentViews = parseInt(viewCountSpan.textContent.trim(), 10);
+                                    if (!isNaN(currentViews)) {
+                                        viewCountSpan.textContent = currentViews + 1;
+                                        console.log(`UI Updated: View count for ${questionId} is now ${currentViews + 1}`);
+                                    } else { console.warn(`Could not parse current view count: "${viewCountSpan.textContent}"`); }
+                                } else { console.warn(`View count span not found in card ${questionId}`); }
+                            } else { console.warn(`View count container not found in card ${questionId}`); }
+                        } else { console.warn(`Question card not found for UI update: ${questionId}`); }
+                    } else {
+                        console.error(`Failed API call to record view for ${questionId}. Status: ${response.status}`);
+                        // Không đặt cờ data-view-incremented nếu API lỗi, cho phép thử lại lần sau
+                    }
+                } catch (error) {
+                    console.error(`Error recording view for question ${questionId}:`, error);
+                    // Không đặt cờ data-view-incremented nếu có lỗi mạng, cho phép thử lại lần sau
+                } finally {
+                    // Xóa cờ đang xử lý sau khi hoàn tất (dù thành công hay lỗi)
+                    buttonElement.removeAttribute('data-view-processing');
+                    console.log(`Finished processing view increment for ${questionId}.`);
+                }
+            }
+
+            async function fetchJsonArray(url) {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status} @ ${url}`);
+                const data = await res.json();
+                if (!Array.isArray(data)) throw new TypeError('Expected JSON array');
+                return data;
+            }
+
+            function initDepartmentFieldCascade() {
+                const departmentSelect = document.getElementById('department');
+                const fieldSelect = document.getElementById('field');
+                if (!departmentSelect || !fieldSelect) return;
+
+                departmentSelect.addEventListener('change', async function () {
+                    const departmentId = this.value.trim();
+                    fieldSelect.disabled = true;
+                    fieldSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
+
+                    if (!departmentId) {
+                        fieldSelect.innerHTML = '<option value="">-- Chọn lĩnh vực (nếu có) --</option>';
+                        return;
+                    }
+
+                    try {
+                        const fields = await fetchJsonArray(`${ctx}api/questions/fields/${departmentId}`);
+                        fieldSelect.disabled = false;
+                        fieldSelect.innerHTML = '<option value="">-- Chọn lĩnh vực (tùy chọn) --</option>';
+                        fields.forEach(f => {
+                            const opt = new Option(f.fieldName, f.fieldID);
+                            fieldSelect.add(opt);
+                        });
+                    } catch (e) {
+                        console.error('Error loading fields (modal):', e);
+                        fieldSelect.innerHTML = '<option value="">-- Lỗi khi tải --</option>';
                     }
                 });
-
-                if (response.status === 401) {
-                    if (typeof window.showToast === 'function') {
-                        window.showToast('warning', 'Chưa đăng nhập', 'Vui lòng đăng nhập để thích câu hỏi.');
-                    }
-                    return;
-                }
-
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-                const data = await response.json();
-
-                if (data.success) {
-                    const icon = button.querySelector('i');
-                    const countSpan = button.querySelector('.like-count');
-
-                    if (data.liked) {
-                        icon.classList.remove('far');
-                        icon.classList.add('fas', 'text-danger');
-                        button.classList.add('active');
-                    } else {
-                        icon.classList.remove('fas', 'text-danger');
-                        icon.classList.add('far');
-                        button.classList.remove('active');
-                    }
-
-                    // Cập nhật số lượng like (nếu có endpoint trả về)
-                    countSpan.textContent = data.likeCount || '0';
-                }
-            } catch (error) {
-                console.error('Error handling like:', error);
-                if (typeof window.showToast === 'function') {
-                    window.showToast('error', 'Lỗi!', 'Không thể thực hiện thao tác. Vui lòng thử lại.');
-                }
             }
-        }
 
-        function handleToggleCommentsClick() {
-            const targetId = this.dataset.target;
-            const target = document.getElementById(targetId);
-            const questionId = this.dataset.questionViewId;
-            // Lấy trạng thái đã tăng view chưa từ chính nút bấm
-            const viewIncremented = this.hasAttribute('data-view-incremented');
+            function initFilterDepartmentFieldCascade() {
+                const departmentFilter = document.getElementById('departmentFilter');
+                const fieldFilter = document.getElementById('fieldFilter');
+                if (!departmentFilter || !fieldFilter) return;
 
-            console.log(`Toggle clicked for ${questionId}. Target: ${targetId}. View Incremented: ${viewIncremented}`);
-
-            if (target) {
-                const isCurrentlyHidden = target.style.display === 'none' || !target.style.display;
-                target.style.display = isCurrentlyHidden ? 'block' : 'none';
-
-                // Chỉ gọi API và cập nhật UI nếu MỞ comment VÀ chưa từng tăng view cho lần mở này
-                if (isCurrentlyHidden && questionId && !viewIncremented) {
-                    console.log(`Action: Opening comments for ${questionId}. Triggering view increment.`);
-                    handleQuestionView(questionId, this); // Truyền cả nút bấm vào hàm
-                } else if (isCurrentlyHidden) {
-                    console.log(`Action: Opening comments for ${questionId}, but view already incremented for this session.`);
-                } else {
-                    console.log(`Action: Closing comments for ${questionId}. No view increment needed.`);
-                }
-            } else {
-                console.warn(`Target element ${targetId} not found.`);
-            }
-        }
-
-        // Sửa hàm handleQuestionView để nhận thêm nút bấm và set cờ
-        async function handleQuestionView(questionId, buttonElement) {
-            console.log(`Executing handleQuestionView for ${questionId}`);
-            // Đánh dấu ngay là đang xử lý để tránh gọi lại nếu user click nhanh
-            if (buttonElement.hasAttribute('data-view-processing')) {
-                console.log(`View increment already processing for ${questionId}. Skipping.`);
-                return;
-            }
-            buttonElement.setAttribute('data-view-processing', 'true');
-
-            try {
-                const response = await fetch(`${ctx}api/questions/${questionId}/view`, { method: 'POST' });
-                console.log(`Fetch completed for view increment ${questionId}. Status: ${response.status}`);
-
-                if (response.ok) {
-                    // Đánh dấu là đã tăng view thành công trên nút bấm
-                    buttonElement.setAttribute('data-view-incremented', 'true');
-                    console.log(`Successfully incremented view for ${questionId}. Marked button.`);
-
-                    // Cập nhật giao diện
-                    const questionCard = document.querySelector(`.question-card[data-question-id="${questionId}"]`);
-                    if (questionCard) {
-                        const viewCountContainer = questionCard.querySelector('.d-flex.justify-content-between.align-items-center .text-muted.small');
-                        if (viewCountContainer) {
-                            const viewCountSpan = viewCountContainer.querySelector('i.fa-eye + span');
-                            if (viewCountSpan) {
-                                let currentViews = parseInt(viewCountSpan.textContent.trim(), 10);
-                                if (!isNaN(currentViews)) {
-                                    viewCountSpan.textContent = currentViews + 1;
-                                    console.log(`UI Updated: View count for ${questionId} is now ${currentViews + 1}`);
-                                } else { console.warn(`Could not parse current view count: "${viewCountSpan.textContent}"`); }
-                            } else { console.warn(`View count span not found in card ${questionId}`); }
-                        } else { console.warn(`View count container not found in card ${questionId}`); }
-                    } else { console.warn(`Question card not found for UI update: ${questionId}`); }
-                } else {
-                    console.error(`Failed API call to record view for ${questionId}. Status: ${response.status}`);
-                    // Không đặt cờ data-view-incremented nếu API lỗi, cho phép thử lại lần sau
-                }
-            } catch (error) {
-                console.error(`Error recording view for question ${questionId}:`, error);
-                // Không đặt cờ data-view-incremented nếu có lỗi mạng, cho phép thử lại lần sau
-            } finally {
-                // Xóa cờ đang xử lý sau khi hoàn tất (dù thành công hay lỗi)
-                buttonElement.removeAttribute('data-view-processing');
-                console.log(`Finished processing view increment for ${questionId}.`);
-            }
-        }
-
-        async function fetchJsonArray(url) {
-            const res = await fetch(url);
-            if (!res.ok) throw new Error(`HTTP ${res.status} @ ${url}`);
-            const data = await res.json();
-            if (!Array.isArray(data)) throw new TypeError('Expected JSON array');
-            return data;
-        }
-
-        function initDepartmentFieldCascade() {
-            const departmentSelect = document.getElementById('department');
-            const fieldSelect = document.getElementById('field');
-            if (!departmentSelect || !fieldSelect) return;
-
-            departmentSelect.addEventListener('change', async function () {
-                const departmentId = this.value.trim();
-                fieldSelect.disabled = true;
-                fieldSelect.innerHTML = '<option value="">-- Đang tải... --</option>';
-
-                if (!departmentId) {
-                    fieldSelect.innerHTML = '<option value="">-- Chọn lĩnh vực (nếu có) --</option>';
-                    return;
-                }
-
-                try {
-                    const fields = await fetchJsonArray(`${ctx}api/questions/fields/${departmentId}`);
-                    fieldSelect.disabled = false;
-                    fieldSelect.innerHTML = '<option value="">-- Chọn lĩnh vực (tùy chọn) --</option>';
-                    fields.forEach(f => {
-                        const opt = new Option(f.fieldName, f.fieldID);
-                        fieldSelect.add(opt);
-                    });
-                } catch (e) {
-                    console.error('Error loading fields (modal):', e);
-                    fieldSelect.innerHTML = '<option value="">-- Lỗi khi tải --</option>';
-                }
-            });
-        }
-
-        function initFilterDepartmentFieldCascade() {
-            const departmentFilter = document.getElementById('departmentFilter');
-            const fieldFilter = document.getElementById('fieldFilter');
-            if (!departmentFilter || !fieldFilter) return;
-
-            departmentFilter.addEventListener('change', async function () {
-                const departmentId = this.value.trim();
-                fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>';
-                const url = departmentId ? `${ctx}api/questions/fields/${departmentId}` : `${ctx}api/questions/fields/all`;
-
-                try {
-                    const fields = await fetchJsonArray(url);
-                    fields.forEach(f => {
-                        const opt = new Option(f.fieldName, f.fieldID);
-                        fieldFilter.add(opt);
-                    });
-                } catch (e) {
-                    console.error('Error loading fields (filter):', e);
-                }
-            });
-        }
-
-        function loadInitialFieldsForFilter() {
-            const selectedDeptId = /*[[${selectedDepartmentId}]]*/ null;
-            const selectedFieldId = /*[[${selectedFieldId}]]*/ null;
-            const fieldFilter = document.getElementById('fieldFilter');
-            if (!fieldFilter) return;
-
-            const url = selectedDeptId ? `${ctx}api/questions/fields/${selectedDeptId}` : `${ctx}api/questions/fields/all`;
-
-            fetchJsonArray(url)
-                .then(fields => {
+                departmentFilter.addEventListener('change', async function () {
+                    const departmentId = this.value.trim();
                     fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>';
-                    fields.forEach(f => {
-                        const opt = new Option(f.fieldName, f.fieldID);
-                        if (selectedFieldId != null && f.fieldID.toString() === selectedFieldId.toString()) {
-                            opt.selected = true;
-                        }
-                        fieldFilter.add(opt);
-                    });
-                })
-                .catch(e => console.error('Error loading initial fields:', e));
-        }
-        function resetForms() {
-            const contentWrapper = document.getElementById(mainContentWrapperId);
-            if (!contentWrapper) return;
+                    const url = departmentId ? `${ctx}api/questions/fields/${departmentId}` : `${ctx}api/questions/fields/all`;
 
-            const searchInput = contentWrapper.querySelector('#searchInput');
-            const sortSelect = contentWrapper.querySelector('#sortSelect');
-            const departmentFilter = contentWrapper.querySelector('#departmentFilter');
-            const fieldFilter = contentWrapper.querySelector('#fieldFilter');
+                    try {
+                        const fields = await fetchJsonArray(url);
+                        fields.forEach(f => {
+                            const opt = new Option(f.fieldName, f.fieldID);
+                            fieldFilter.add(opt);
+                        });
+                    } catch (e) {
+                        console.error('Error loading fields (filter):', e);
+                    }
+                });
+            }
 
-            if (searchInput) {
-                searchInput.value = ''; // Clear keyword
-            }
-            if (sortSelect) {
-                sortSelect.value = 'latest'; // Reset sort to 'Mới nhất'
-            }
-            if (departmentFilter) {
-                departmentFilter.value = ''; // Reset department to 'Tất cả Khoa/Ban'
-            }
-            if (fieldFilter) {
-                fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>'; // Clear fields
-                fieldFilter.value = ''; // Reset field to 'Tất cả lĩnh vực'
-                loadInitialFieldsForFilter();
-            }
-            console.log("Forms reset to default values.");
-        }
-    })();
-</script>
-</body>
+            function loadInitialFieldsForFilter() {
+                const selectedDeptId = /*[[${selectedDepartmentId}]]*/ null;
+                const selectedFieldId = /*[[${selectedFieldId}]]*/ null;
+                const fieldFilter = document.getElementById('fieldFilter');
+                if (!fieldFilter) return;
 
+                const url = selectedDeptId ? `${ctx}api/questions/fields/${selectedDeptId}` : `${ctx}api/questions/fields/all`;
+
+                fetchJsonArray(url)
+                    .then(fields => {
+                        fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>';
+                        fields.forEach(f => {
+                            const opt = new Option(f.fieldName, f.fieldID);
+                            if (selectedFieldId != null && f.fieldID.toString() === selectedFieldId.toString()) {
+                                opt.selected = true;
+                            }
+                            fieldFilter.add(opt);
+                        });
+                    })
+                    .catch(e => console.error('Error loading initial fields:', e));
+            }
+            function resetForms() {
+                const contentWrapper = document.getElementById(mainContentWrapperId);
+                if (!contentWrapper) return;
+
+                const searchInput = contentWrapper.querySelector('#searchInput');
+                const sortSelect = contentWrapper.querySelector('#sortSelect');
+                const departmentFilter = contentWrapper.querySelector('#departmentFilter');
+                const fieldFilter = contentWrapper.querySelector('#fieldFilter');
+
+                if (searchInput) {
+                    searchInput.value = ''; // Clear keyword
+                }
+                if (sortSelect) {
+                    sortSelect.value = 'latest'; // Reset sort to 'Mới nhất'
+                }
+                if (departmentFilter) {
+                    departmentFilter.value = ''; // Reset department to 'Tất cả Khoa/Ban'
+                }
+                if (fieldFilter) {
+                    fieldFilter.innerHTML = '<option value="">Tất cả lĩnh vực</option>'; // Clear fields
+                    fieldFilter.value = ''; // Reset field to 'Tất cả lĩnh vực'
+                    loadInitialFieldsForFilter();
+                }
+                console.log("Forms reset to default values.");
+            }
+        })();
+    </script>
+</th:block>
 </html>
