@@ -10,7 +10,7 @@
 **QAUTE** là một nền tảng web được xây dựng nhằm mục đích kết nối sinh viên với các tư vấn viên chuyên nghiệp và tạo ra một cộng đồng hỗ trợ lẫn nhau trong học tập và phát triển cá nhân. Dự án được phát triển bằng **Spring Boot** cho backend và **Thymeleaf** kết hợp **Bootstrap** cho frontend.
 
 **Link Website**
-https://moses-unsophistical-unmusically.ngrok-free.dev/qaute
+https://moses-unsophistical-unmusically.ngrok-free.dev/qaute/auth/login
 
 
 ## Mục Lục
