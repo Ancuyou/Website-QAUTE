@@ -296,10 +296,35 @@ public class AccountServiceImplement implements AccountService {
     @Override
     public void deleteAccount(Integer id) {
         try {
-            accountRepository.deleteById(id);
+            cloneAccountData(id);
         } catch (AppException e) {
             throw new AppException(ErrorCode.ERROR_DELETED);
         }
+    }
+    @Transactional
+    public void cloneAccountData(int accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        String cloneName = "clone_" + account.getAccountID() + "_" + System.currentTimeMillis();
+
+        account.setUsername(cloneName);
+        account.setEmail("deleted_" + account.getAccountID() + "@example.com");
+        account.setPassword(passwordEncoder.encode(UUID.randomUUID().toString())); // random không thể đăng nhập
+        account.setBlock(true);
+        account.setSecurityLevel(0);
+        account.setLockUntil(new Date());
+        account.setLevelEventAt(null);
+
+        Profiles p = account.getProfile();
+        if (p != null) {
+            p.setFullName("Deleted User");
+            p.setAvatar(null);
+            p.setPhone(null);
+            p.setOnlineAt(null);
+        }
+
+        accountRepository.save(account);
     }
 
     @Override

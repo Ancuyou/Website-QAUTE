@@ -26,7 +26,7 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
 
-                    <div class="card border-0 shadow-sm mb-4">
+                    <!-- <div class="card border-0 shadow-sm mb-4">
                         <div class="card-header bg-light">
                             <h5 class="mb-0 fw-semibold">
                                 <i class="fas fa-paste text-primary me-2"></i>Dán nội dung sự kiện vào đây (Tùy chọn)
@@ -42,7 +42,7 @@
                             </div>
                             <small class="text-muted d-block mt-2">AI sẽ cố gắng trích xuất Tiêu đề, Mô tả, Thời gian, Địa điểm, Hình thức, Khoa và Lĩnh vực.</small>
                         </div>
-                    </div>
+                    </div> -->
 
                     <form th:action="@{/consultant/events/create}" method="post" enctype="multipart/form-data" th:object="${event}" novalidate>
                         <div class="row">
@@ -50,7 +50,8 @@
                                 <div class="card border-0 shadow-sm mb-4">
                                     <div class="card-header bg-white">
                                         <h5 class="mb-0 fw-semibold">
-                                            <i class="fas fa-info-circle text-primary me-2"></i>Thông tin cơ bản <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
+                                            <i class="fas fa-info-circle text-primary me-2"></i>Thông tin cơ bản
+                                             <!-- <span class="badge bg-light text-primary ms-2">AI Gợi ý</span> -->
                                         </h5>
                                     </div>
                                     <div class="card-body">
@@ -121,7 +122,8 @@
                                 <div class="card border-0 shadow-sm mb-4">
                                     <div class="card-header bg-white">
                                         <h5 class="mb-0 fw-semibold">
-                                            <i class="fas fa-calendar-alt text-primary me-2"></i>Thời gian & Địa điểm <span class="badge bg-light text-primary ms-2">AI Gợi ý</span>
+                                            <i class="fas fa-calendar-alt text-primary me-2"></i>Thời gian & Địa điểm
+                                             <!-- <span class="badge bg-light text-primary ms-2">AI Gợi ý</span> -->
                                         </h5>
                                     </div>
                                     <div class="card-body">

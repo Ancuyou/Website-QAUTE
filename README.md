@@ -60,7 +60,6 @@ QAUTE giải quyết nhu cầu tìm kiếm thông tin và tư vấn của sinh v
     * **Feedback cho tin nhắn AI**.
 * **Quản lý Sự Kiện & Workshop:**
     * Consultant tạo sự kiện (Tiêu đề, mô tả, loại, hình thức, thời gian, địa điểm/link, số lượng, banner, khoa/lĩnh vực).
-    * **Gợi ý AI:** Tự động điền form tạo sự kiện từ text mô tả.
     * Manager duyệt/từ chối sự kiện.
     * User xem danh sách, chi tiết và đăng ký tham gia sự kiện.
     * User quản lý các sự kiện đã đăng ký, hủy đăng ký (trước hạn).
@@ -256,9 +255,11 @@ Hiện tại, dự án chưa mở cho đóng góp từ cộng đồng. Tuy nhiê
 Nếu có bất kỳ câu hỏi hoặc góp ý nào, vui lòng liên hệ:
 
 * **Thành viên:**
-    * [Tên thành viên 1] - [Email thành viên 1]
-    * [Tên thành viên 2] - [Email thành viên 2]
-    * ...
+    * Nguyễn Ngọc Thái Bảo - 23110180 - Email: 23110180@student.hcmute.edu.vn
+    * Đăng Ngọc Nhân - 23110279 - Email: 23110279@student.hcmute.edu.vn
+    * Huỳnh Duy Nguyễn - 23110274 - Email: 23110274@student.hcmute.edu.vn
+    * Trần Hồng Quang Lê - 23110251 - Email: 23110251@student.hcmute.edu.vn
 
-*(Vui lòng thay thế thông tin liên hệ thực tế của nhóm)*
+
+
 
