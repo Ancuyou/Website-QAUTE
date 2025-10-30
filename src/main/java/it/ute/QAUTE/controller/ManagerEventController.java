@@ -188,14 +188,14 @@ public class ManagerEventController {
             HttpServletResponse response) {
         try {
             Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj, request, response));
+            Account account = authenticationService.getCurrentAccount();
 
-            eventService.approveEvent(id, managerId);
+            eventService.approveEvent(id, account.getAccountID());
 
             ra.addFlashAttribute("success", true);
             ra.addFlashAttribute("successMessage", "Đã phê duyệt sự kiện thành công!");
 
-        } catch (AppException | ParseException | JOSEException e) {
+        } catch (AppException e) {
             ra.addFlashAttribute("error", true);
             ra.addFlashAttribute("errorMessage", "Phê duyệt thất bại: " + e.getMessage());
         }
@@ -213,18 +213,18 @@ public class ManagerEventController {
             HttpServletResponse response) {
         try {
             Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-            int managerId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj, request, response));
+            Account account = authenticationService.getCurrentAccount();
 
             if (reason == null || reason.trim().isEmpty()) {
                 throw new AppException(ErrorCode.INVALID_REQUEST);
             }
 
-            eventService.rejectEvent(id, managerId, reason);
+            eventService.rejectEvent(id, account.getAccountID(), reason);
 
             ra.addFlashAttribute("success", true);
             ra.addFlashAttribute("successMessage", "Đã từ chối sự kiện!");
 
-        } catch (AppException | ParseException | JOSEException e) {
+        } catch (AppException e) {
             ra.addFlashAttribute("error", true);
             ra.addFlashAttribute("errorMessage", "Từ chối thất bại: " + e.getMessage());
         }

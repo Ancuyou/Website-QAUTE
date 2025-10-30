@@ -29,9 +29,8 @@ public class NotificationController {
     public String getNotificationsByAccount(HttpSession session, Model model, HttpServletRequest request, HttpServletResponse response)
             throws ParseException, JOSEException {
         Object tokenObj = session.getAttribute("ACCESS_TOKEN");
-        int accountId = Math.toIntExact(authenticationService.getCurrentUserId(tokenObj,request,response));
-        Account account=accountService.findById(accountId);
-        List<NotificationReceiver> notifications = notificationService.findNotificationByAccountId(accountId);
+        Account account = authenticationService.getCurrentAccount();
+        List<NotificationReceiver> notifications = notificationService.findNotificationByAccountId(account.getAccountID());
         long unreadCount = notifications.stream()
                 .filter(n -> !n.isRead())
                 .count();
@@ -39,8 +38,8 @@ public class NotificationController {
         System.out.println("account.getRole(): " + account.getRole());
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
-        model.addAttribute("accountId", accountId);
-        System.out.println("accountId: "+accountId);
+        model.addAttribute("accountId", account.getAccountID());
+        System.out.println("accountId: "+account.getAccountID());
         return "fragments/userDropDown :: notificationItems";
     }
     @GetMapping("/detail")

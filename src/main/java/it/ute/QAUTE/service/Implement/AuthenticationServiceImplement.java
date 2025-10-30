@@ -406,6 +406,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
 
             }
         }
+        System.out.println("heetss hạn access");
         String refresh = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -427,6 +428,7 @@ public class AuthenticationServiceImplement implements AuthenticationService {
             String newAccess = generateToken(acc, null, false);
             HttpSession session = request.getSession(true);
             session.setAttribute("ACCESS_TOKEN", newAccess);
+            System.out.println("tạo mới access");
             return acc.getAccountID();
         } catch (Exception e) {
             ResponseCookie delete = ResponseCookie.from("REFRESH_TOKEN","")
